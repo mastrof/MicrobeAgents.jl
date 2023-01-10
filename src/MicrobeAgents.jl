@@ -1,5 +1,14 @@
 module MicrobeAgents
 
-# Write your package code here.
+using Agents
+using Distributions
+using LinearAlgebra
+using Random
+using Rotations
+using StaticArrays
+
+include("utils.jl")
+include("distributions.jl")
+include("motility.jl")
 
 end
