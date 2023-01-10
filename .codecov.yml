@@ -1,0 +1,7 @@
+coverage:
+  status:
+    project:
+      default:
+        # only require PRs to not decrease coverage
+        target: 0%    # the required coverage value
+        threshold: 20%  # the leniency in hitting the target
