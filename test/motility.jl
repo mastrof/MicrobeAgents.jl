@@ -90,7 +90,7 @@ using LinearAlgebra: norm
         @test rr.state == Backward
     end
 
-    @testset "Random velocities" begin
+    @testset "Random velocities and angles" begin
         rt = RunTumble()
         @test rand_speed(rt) == 30.0
         rt = RunTumble(speed = Normal(50,5))
@@ -125,5 +125,28 @@ using LinearAlgebra: norm
             u = rand(Uniform(30,40))
             @test norm(v) ≈ u
         end
+
+        rt = RunTumble(speed=[25], polar=[0.1], azimuthal=[0.2])
+        U, θ, ϕ = rand(rt)
+        @test U==25 && θ==0.1 && ϕ==0.2
+        rt = RunTumble()
+        rng = Random.seed!(Xoshiro(1), 27)
+        U, θ, ϕ = rand(rng, rt)
+        rng = Random.seed!(Xoshiro(1), 27)
+        U′, θ′, ϕ′ = rand(rng,(30.0,)), rand(rng,Uniform(-π,π)), rand(rng,Arccos())
+        @test U==U′ && θ==θ′ && ϕ==ϕ′
+
+        rr = RunReverseFlick() # initialized to Forward
+        rng = Random.seed!(Xoshiro(1), 42)
+        U, θ, ϕ = rand(rng, rr)
+        rng = Random.seed!(Xoshiro(1), 42)
+        U′, θ′, ϕ′ = rand(rng,(30.0,)), rand(rng,(π,)), rand(rng,Arccos())
+        @test U==U′ && θ==θ′ && ϕ==ϕ′
+        switch!(rr) # now Backward
+        rng = Random.seed!(Xoshiro(1), 23)
+        U, θ, ϕ = rand(rng, rr)
+        rng = Random.seed!(Xoshiro(1), 23)
+        U′, θ′, ϕ′ = rand(rng,(30.0,)), rand(rng,(-π/2,π/2)), rand(rng,Arccos())
+        @test U==U′ && θ==θ′ && ϕ==ϕ′
     end
 end
