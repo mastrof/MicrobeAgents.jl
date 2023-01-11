@@ -24,8 +24,8 @@ using LinearAlgebra: norm
     end
     # keyword tests
     motility = RunReverse(speed_forward=[42.0], speed_backward=[60.1])
-    m = Microbe{3}(id=1, radius=0.5; motility)
-    @test m.id == 1 && m.radius == 0.5
+    m = Microbe{2}(1, (2,9,0), radius=0.5; motility) # id and pos don't require keyword
+    @test m.id == 1 && m.pos == (2.0,9.0,0.0) && m.radius == 0.5
     @test m.motility isa RunReverse
     @test m.motility.speed_forward == [42.0]
     @test m.motility.speed_backward == [60.1]
