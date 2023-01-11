@@ -34,7 +34,7 @@ function normalvector(w::SVector{3})
     u = setindex(u, -w[n], m)
 end
 
-function turn!(microbe::AbstractMicrobe{D}, model) where D
+function turn!(microbe::AbstractMicrobe, model)
     v = microbe.vel
     # store current speed
     U₀ = sqrt(dot(v,v))
