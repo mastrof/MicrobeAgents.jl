@@ -10,8 +10,7 @@ using LinearAlgebra: norm
         # correct fields for all Ds
         @test fieldnames(Microbe{D}) == (
             :id, :pos, :motility, :vel, :turn_rate,
-            :translational_diffusivity, :rotational_diffusivity,
-            :radius, :state
+            :rotational_diffusivity, :radius, :state
         )
         # pos and vel sizes match D
         @test m.pos isa NTuple{D,Float64}
@@ -19,7 +18,7 @@ using LinearAlgebra: norm
         # default values
         @test m.motility isa RunTumble
         @test m.turn_rate == 1.0
-        for key in fieldnames(Microbe{D})[end:-1:end-3]
+        for key in fieldnames(Microbe{D})[end:-1:end-2]
             @test getfield(m, key) == 0.0
         end
     end
