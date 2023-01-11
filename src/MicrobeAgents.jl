@@ -32,6 +32,9 @@ abstract type AbstractMicrobe{D} <: AbstractAgent where D end
 include("utils.jl")
 include("distributions.jl")
 include("motility.jl")
-include("microbes.jl")
 include("rotations.jl")
+
+include("microbes.jl")
+include("microbe_step.jl")
+
 end
