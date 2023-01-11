@@ -32,5 +32,6 @@ function Base.show(io::IO, ::MIME"text/plain", f::ChainedFunction)
     s = join(funlist(f), " → ")
     print(io, "ChainedFunction: $s")
 end
+funlist(f::ChainedFunction{<:ChainedFunction,<:ChainedFunction}) = (funlist(f.head)..., funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
