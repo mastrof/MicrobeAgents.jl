@@ -34,9 +34,3 @@ function Base.show(io::IO, ::MIME"text/plain", f::ChainedFunction)
 end
 funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
-
-"""
-    tick!(model::ABM)
-Increase time count `model.t` by 1.
-"""
-tick!(model::ABM) = model.t += 1
