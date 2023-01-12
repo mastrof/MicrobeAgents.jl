@@ -42,6 +42,30 @@ function Agents.AgentBasedModel(microbe::AbstractMicrobe, args...; kwargs...)
     return ABM(typeof(agent), args...; kwargs...)
 end
 
+# Microbe constructor generates a random velocity in non-reproducible way.
+# When microbes are created internally these velocity must be generated
+# reproducibly using the model rng, if a vel keyword is not specified.
+# In this case, we want to initialize the microbe with a zero velocity
+# and only then extract a random velocity with the correct rng.
+# It is sufficient to extend this single method because it is
+# to the lowest level method to which all the others fall back.
+function Agents.add_agent!(
+    pos::Agents.ValidPos,
+    A::Type{<:AbstractMicrobe{D}},
+    model::ABM,
+    properties...;
+    vel = nothing,
+    kwargs...
+) where D
+    id = nextid(model)
+    # if vel is specified in kwargs it overrides ntuple(zero,D)
+    microbe = A(id, pos, properties...; vel=ntuple(zero,D), kwargs...)
+    if isnothing(vel) # if not specified, extract one with model.rng
+        microbe.vel = rand_vel(model.rng, D, microbe.motility)
+    end
+    add_agent_pos!(microbe, model)
+end
+
 function Agents.run!(model::ABM{S,A,F,P,R}, n = 1;
     when = true,
     when_model = when,
