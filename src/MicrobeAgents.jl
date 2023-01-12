@@ -38,4 +38,7 @@ include("microbes.jl")
 include("microbe_step.jl")
 include("model.jl")
 
+# implementations of chemotactic models
+include("chemotaxis/brown-berg.jl")
+
 end
