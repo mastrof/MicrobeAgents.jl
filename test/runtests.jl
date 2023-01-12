@@ -6,4 +6,5 @@ using Test
     include("distributions.jl")
     include("motility.jl")
     include("microbe-creation.jl")
+    include("model.jl")
 end
