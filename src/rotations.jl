@@ -1,3 +1,35 @@
+function turn!(microbe::AbstractMicrobe, model)
+    v = microbe.vel
+    # store current speed
+    U₀ = sqrt(dot(v,v))
+    # extract new speed and rotation angles
+    U₁, θ, ϕ = rand(model.rng, microbe.motility)
+    # reorient
+    v_new = Tuple(rotate(v, θ, ϕ))
+    # update speed
+    microbe.vel = v_new .* (U₁/U₀)
+    # switch motile state (does nothing if motility is one-step)
+    switch!(microbe.motility)
+end
+
+"""
+    rotational_diffusion!(microbe, model)
+Reorient `microbe` due to brownian rotational diffusion.
+In 1-dimensional models, this functions does nothing.
+"""
+rotational_diffusion!(microbe::AbstractMicrobe{1}, model) = nothing
+function rotational_diffusion!(microbe::AbstractMicrobe, model)
+    dt = model.timestep
+    D_rot = microbe.rotational_diffusivity
+    σ = sqrt(2*D_rot*dt)
+    θ = rand(model.rng, Normal(0,σ))
+    ϕ = rand(model.rng, Arccos())
+    microbe.vel = Tuple(rotate(microbe.vel, θ, ϕ))
+    nothing
+end
+
+rotate(w::Tuple, θ, ϕ) = rotate(SVector(w), θ, ϕ)
+
 """
     rotate(w::SVector{D}, θ, ϕ) where D
 Rotate `D`-dimensional vector `w` by angles `θ` and `ϕ`.
@@ -32,34 +64,4 @@ function normalvector(w::SVector{3})
     u = SVector(0., 0., 0.)
     u = setindex(u, w[m], n)
     u = setindex(u, -w[n], m)
-end
-
-function turn!(microbe::AbstractMicrobe, model)
-    v = microbe.vel
-    # store current speed
-    U₀ = sqrt(dot(v,v))
-    # extract new speed and rotation angles
-    U₁, θ, ϕ = rand(model.rng, microbe.motility)
-    # reorient
-    v_new = Tuple(rotate(v, θ, ϕ))
-    # update speed
-    microbe.vel = v_new .* (U₁/U₀)
-    # switch motile state (does nothing if motility is one-step)
-    switch!(microbe.motility)
-end
-
-"""
-    rotational_diffusion!(microbe, model)
-Reorient `microbe` due to brownian rotational diffusion.
-In 1-dimensional models, this functions does nothing.
-"""
-rotational_diffusion!(microbe::AbstractMicrobe{1}, model) = nothing
-function rotational_diffusion!(microbe::AbstractMicrobe, model)
-    dt = model.timestep
-    D_rot = microbe.rotational_diffusivity
-    σ = sqrt(2*D_rot*dt)
-    θ = rand(model.rng, Normal(0,σ))
-    ϕ = rand(model.rng, Arccos())
-    microbe.vel = Tuple(rotate(microbe.vel, θ, ϕ))
-    nothing
 end
