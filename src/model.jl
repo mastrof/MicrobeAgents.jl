@@ -58,10 +58,11 @@ function Agents.add_agent!(
     kwargs...
 ) where D
     id = nextid(model)
-    # if vel is specified in kwargs it overrides ntuple(zero,D)
-    microbe = A(id, pos, properties...; vel=ntuple(zero,D), kwargs...)
     if isnothing(vel) # if not specified, extract one with model.rng
+        microbe = A(id, pos, properties...; vel=ntuple(zero,D), kwargs...)
         microbe.vel = rand_vel(model.rng, D, microbe.motility)
+    else
+        microbe = A(id, pos, properties...; vel, kwargs...)
     end
     add_agent_pos!(microbe, model)
 end
