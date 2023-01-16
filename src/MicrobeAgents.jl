@@ -42,4 +42,10 @@ include("model.jl")
 include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
 
+# analysis routines
+include("analysis/postprocess.jl")
+include("analysis/msd.jl")
+include("analysis/correlation_functions.jl")
+include("analysis/drift.jl")
+
 end
