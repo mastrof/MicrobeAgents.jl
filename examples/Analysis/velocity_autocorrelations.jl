@@ -10,7 +10,7 @@ extent = (L,L,L)
 
 model = ABM(Microbe{3}, extent, Δt)
 n = 200
-for n in 1:200
+for i in 1:n
     add_agent!(model; turn_rate, motility=RunTumble(speed=[U]))
     add_agent!(model; turn_rate, motility=RunReverse(speed_forward=[U]))
     add_agent!(model; turn_rate, motility=RunReverseFlick(speed_forward=[U]))
@@ -25,7 +25,8 @@ adf_runrev = filter(:id => id -> model.agents[id].motility isa RunReverse, adf; 
 adf_runrevflick = filter(:id => id -> model.agents[id].motility isa RunReverseFlick, adf; view=true)
 adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
 
-Φ = hcat([autocorrelation(a,:vel) for a in adfs]...)
+lags = unique(round.(Int, range(0, findfirst(t.>6), length=30)))
+@time Φ = hcat([acf(a,:vel,lags) for a in adfs]...)
 
 t = range(0, (nsteps-1)*Δt; step=Δt)
 Φ_theoretical = hcat([
@@ -40,5 +41,5 @@ plot(
     ylab="velocity autocorrelation",
 )
 plot!(t, Φ_theoretical, lw=2, lc=[1 2 3], label=["Run-Tumble" "Run-Reverse" "Run-Reverse-Flick"])
-scatter!(t[1:15:end], Φ[1:15:end,:] ./ U^2, m=:x, mc=[1 2 3], label=false)
+scatter!(t[lags.+1], Φ ./ U^2, m=:x, mc=[1 2 3], label=false)
 hline!([0.0], lw=0.8, ls=:dash, lc=:black, lab=false)

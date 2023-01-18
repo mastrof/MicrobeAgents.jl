@@ -23,7 +23,8 @@ nsteps = round(Int, 100τ / dt)
 adata = [:pos]
 adfs = [run!(model, nsteps; adata)[1] for model in models]
 
-MSD = hcat(msd.(adfs; L)...)
+lags = unique(round.(Int, exp10.(range(0,3,length=20))))
+MSD = hcat([msd(adf, lags; L) for adf in adfs]...)
 
 begin  
     t = (1:nsteps).*dt
@@ -31,7 +32,6 @@ begin
     s = t ./ T
     D = @. U^2*T/3
     MSD_theoretical = @. 6D*T * (s - 1 + exp(-s))
-    logslice = round.(Int, exp10.(range(0,3,length=10)))
     plot(
         xlab = "Δt / τ",
         ylab = "MSD / (Uτ)²",
@@ -40,7 +40,7 @@ begin
         yticks = exp10.(-2:2:2),
         xticks = exp10.(-2:2)
     )
-    scatter!(t[logslice,:]./τ, MSD[logslice,:]./(U*τ)^2,
+    scatter!(t[lags,:]./τ, MSD./(U*τ)^2,
         m=:x, ms=6, msw=2, lab=false, lc=axes(α,1)'
     )
     plot!(t./τ, MSD_theoretical./(U*τ)^2,

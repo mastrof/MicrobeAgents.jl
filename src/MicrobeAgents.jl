@@ -7,6 +7,8 @@ using Random
 using Rotations
 using StaticArrays
 
+using DSP, AxisArrays, OffsetArrays # for acf and msd
+
 
 export AbstractMicrobe
 """
