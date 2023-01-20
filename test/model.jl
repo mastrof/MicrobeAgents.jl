@@ -23,11 +23,13 @@ using LinearAlgebra: norm
             add_agent!(model)
             rng = MersenneTwister(1234)
             pos = Tuple(rand(rng,D) .* extent)
-            vel = rand_vel(rng, D, RunTumble())
+            vel = rand_vel(rng, D)
+            speed = rand_speed(rng, RunTumble())
             @test Set(keys(model.agents)) == Set((1,))
             @test model[1] isa Microbe{D}
             @test model[1].pos == pos
             @test model[1].vel == vel
+            @test model[1].speed == speed
             @test model[1].motility isa RunTumble
             m₀ = Microbe{D}()
             for key in setdiff(fieldnames(Microbe{D}), (:id,:pos,:vel,:motility))
@@ -40,10 +42,13 @@ using LinearAlgebra: norm
             add_agent!(model; turn_rate=0.55, motility)
             @test model[1].turn_rate == 0.55
             @test model[1].motility isa RunReverse
-            @test norm(model[1].vel) ≈ 24.0
-            vel = rand_vel(D, RunTumble())
+            @test norm(model[1].vel) ≈ 1.0
+            @test model[1].speed ≈ 24.0
+            vel = rand_vel(D)
+            speed = rand_speed(RunTumble())
             add_agent!(model; vel)
             @test model[2].vel == vel
+            @test model[2].speed == speed
 
             # add agent to given position
             model = ABM(Microbe{D}, extent, timestep)
@@ -69,14 +74,16 @@ using LinearAlgebra: norm
             extent = ntuple(_ -> 300, D)
             model = ABM(Microbe{D}, extent, dt)
             pos = extent ./ 2
-            vel1 = rand_vel(D, RunTumble())
-            add_agent!(pos, model; vel=vel1, turn_rate=0)
-            vel2 = rand_vel(D, RunReverse())
-            add_agent!(pos, model; vel=vel2, turn_rate=Inf, motility=RunReverse())
+            vel1 = rand_vel(D)
+            speed1 = rand_speed(RunTumble())
+            add_agent!(pos, model; vel=vel1, speed=speed1, turn_rate=0)
+            vel2 = rand_vel(D)
+            speed2 = rand_speed(RunReverse())
+            add_agent!(pos, model; vel=vel2, speed=speed2, turn_rate=Inf, motility=RunReverse())
             run!(model) # performs 1 microbe_step! and 1 model.update! step
             # x₁ = x₀ + vΔt
-            @test all(model[1].pos .≈ pos .+ vel1.*dt)
-            @test all(model[2].pos .≈ pos .+ vel2.*dt)
+            @test all(model[1].pos .≈ pos .+ vel1.*speed1.*dt)
+            @test all(model[2].pos .≈ pos .+ vel2.*speed2.*dt)
             # v is the same for the agent with zero turn rate
             @test all(model[1].vel .≈ vel1)
             # v is changed for the other agent

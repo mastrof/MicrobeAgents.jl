@@ -10,7 +10,7 @@ using LinearAlgebra: norm
         pos = ntuple(zero, D)
         U = 1
         motility = RunTumble(speed=[U])
-        vel = ntuple(_ -> U/√D, D)
+        vel = ntuple(_ -> 1/√D, D)
         turn_rate = 0
         model = ABM(Microbe{D}, extent, dt)
         add_agent!(pos, model; vel, motility, turn_rate)
@@ -20,7 +20,7 @@ using LinearAlgebra: norm
         traj = vectorize_adf_measurement(adf, :pos)
         @test traj isa AbstractMatrix{<:Tuple}
         @test size(traj) == (nsteps+1, 1)
-        real_traj = [pos .+ vel.*(n*dt) for n in 0:nsteps, _ in 1:1]
+        real_traj = [pos .+ vel.*(U*n*dt) for n in 0:nsteps, _ in 1:1]
         Δ = norm.([traj[i] .- real_traj[i] for i in eachindex(traj)])
         for i in eachindex(Δ)
             @test Δ[i] ≈ 0 atol=1e-12
@@ -31,7 +31,8 @@ using LinearAlgebra: norm
         for D in 1:3
             dt = 0.1
             nsteps = 100
-            adata = [:vel]
+            v(microbe) = microbe.speed .* microbe.vel
+            adata = [v]
             L = 100; extent = ntuple(_ -> L, D)
             rng = Xoshiro(35)
             model_periodic = ABM(Microbe{D}, extent, dt; rng)
@@ -42,12 +43,12 @@ using LinearAlgebra: norm
             add_agent!(model_closed)
             adf_closed, = run!(model_closed, nsteps; adata)
             # boundary conditions don't affect vacf
-            vacf_periodic = acf(adf_periodic, :vel)
-            vacf_closed = acf(adf_closed, :vel)
+            vacf_periodic = acf(adf_periodic, :v)
+            vacf_closed = acf(adf_closed, :v)
             @test vacf_periodic ≈ vacf_closed
             @test length(vacf_periodic) == nsteps+1
             # lag-0 value corresponds to speed squared
-            @test vacf_periodic[1] .≈ norm(model_periodic[1].vel)^2
+            @test vacf_periodic[1] .≈ (model_periodic[1].speed)^2
             # no value can be larger than the value at lag 0
             @test maximum(vacf_periodic) == vacf_periodic[1]
         end

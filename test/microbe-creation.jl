@@ -9,12 +9,13 @@ using LinearAlgebra: norm
         @test m isa AbstractMicrobe{D}
         # correct fields for all Ds
         @test fieldnames(Microbe{D}) == (
-            :id, :pos, :motility, :vel, :turn_rate,
+            :id, :pos, :motility, :vel, :speed, :turn_rate,
             :rotational_diffusivity, :radius, :state
         )
         # pos and vel sizes match D
         @test m.pos isa NTuple{D,Float64}
         @test m.vel isa NTuple{D,Float64}
+        @test m.speed == 30.0
         # default values
         @test m.motility isa RunTumble
         @test m.turn_rate == 1.0
@@ -31,10 +32,12 @@ using LinearAlgebra: norm
     @test m.motility.speed_backward == [60.1]
     # the initial speed should be sampled from the appropriate speed distribution
     # by default it is Forward
-    @test norm(m.vel) ≈ 42.0
+    @test norm(m.vel) ≈ 1.0
+    @test m.speed ≈ 42.0
     # now initialize from Backward
     motility = RunReverse(speed_forward=[42.0], speed_backward=[60.1],
         motile_state=MotileState(Backward))
     m = Microbe{3}(;motility)
-    @test norm(m.vel) ≈ 60.1
+    @test norm(m.vel) ≈ 1
+    @test m.speed ≈ 60.1
 end
