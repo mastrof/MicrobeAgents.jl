@@ -12,7 +12,7 @@ Perform an integration step for `microbe`. In order:
 function microbe_step!(microbe::AbstractMicrobe, model)
     dt = model.timestep # integration timestep
     # update microbe position
-    move_agent!(microbe, model, dt)
+    move_agent!(microbe, model, microbe.speed*dt)
     # reorient through rotational diffusion
     rotational_diffusion!(microbe, model)
     # update microbe state

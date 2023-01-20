@@ -22,6 +22,7 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
     pos::NTuple{D,Float64}
     motility::AbstractMotility
     vel::NTuple{D,Float64}
+    speed::Float64
     turn_rate::Float64
     rotational_diffusivity::Float64
     radius::Float64
@@ -35,7 +36,8 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
         id::Int = rand(1:typemax(Int32)),
         pos::NTuple{D,<:Real} = ntuple(zero, D),
         motility = RunReverseFlick(speed_forward = [46.5]),
-        vel::NTuple{D,<:Real} = rand_vel(D, motility),
+        vel::NTuple{D,<:Real} = rand_vel(D),
+        speed::Real = rand_speed(motility),
         turn_rate::Real = 1/0.45,
         state::Real = 0.0,
         rotational_diffusivity::Real = 0.035,
@@ -45,7 +47,7 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
         motor_gain::Real = 50.0,
         chemotactic_precision::Real = 6.0,
     ) where {D} = new{D}(
-        id, Float64.(pos), motility, Float64.(vel), Float64(turn_rate),
+        id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
         Float64(state), Float64(rotational_diffusivity), Float64(radius),
         Float64(adaptation_time), Float64(receptor_gain),
         Float64(motor_gain), Float64(chemotactic_precision)
@@ -65,7 +67,7 @@ function affect!(microbe::Brumley, model)
     ∇u = model.concentration_gradient(microbe.pos, model)
     ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
     # gradient measurement
-    μ = dot(microbe.vel, ∇u) + ∂ₜu # mean
+    μ = dot(microbe.vel, ∇u)*microbe.speed + ∂ₜu # mean
     σ = Π * 0.04075 * sqrt(3*u / (π*a*Dc*Δt^3)) # noise
     M = rand(Normal(μ,σ)) # measurement
     # update internal state

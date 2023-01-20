@@ -48,22 +48,20 @@ end
 # In this case, we want to initialize the microbe with a zero velocity
 # and only then extract a random velocity with the correct rng.
 # It is sufficient to extend this single method because it is
-# to the lowest level method to which all the others fall back.
+# the lowest level method to which all the others fall back.
 function Agents.add_agent!(
     pos::Agents.ValidPos,
     A::Type{<:AbstractMicrobe{D}},
     model::ABM,
     properties...;
     vel = nothing,
+    speed = nothing,
     kwargs...
 ) where D
     id = nextid(model)
-    if isnothing(vel) # if not specified, extract one with model.rng
-        microbe = A(id, pos, properties...; vel=ntuple(zero,D), kwargs...)
-        microbe.vel = rand_vel(model.rng, D, microbe.motility)
-    else
-        microbe = A(id, pos, properties...; vel, kwargs...)
-    end
+    microbe = A(id, pos, properties...; vel=ntuple(zero,D), speed=0, kwargs...)
+    microbe.vel = isnothing(vel) ? rand_vel(model.rng, D) : vel
+    microbe.speed = isnothing(speed) ? rand_speed(model.rng, microbe.motility) : speed
     add_agent_pos!(microbe, model)
 end
 

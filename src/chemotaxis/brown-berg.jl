@@ -19,6 +19,7 @@ mutable struct BrownBerg{D} <: AbstractMicrobe{D}
     pos::NTuple{D,Float64}
     motility::AbstractMotility 
     vel::NTuple{D,Float64}
+    speed::Float64
     turn_rate::Float64
     rotational_diffusivity::Float64
     radius::Float64
@@ -31,7 +32,8 @@ mutable struct BrownBerg{D} <: AbstractMicrobe{D}
         id::Int = rand(1:typemax(Int32)),
         pos::NTuple{D,<:Real} = ntuple(zero, D);
         motility::AbstractMotility = RunTumble(),
-        vel::NTuple{D,<:Real} = rand_vel(D, motility),
+        vel::NTuple{D,<:Real} = rand_vel(D),
+        speed::Real = rand_speed(motility),
         turn_rate::Real = 1/0.67,
         rotational_diffusivity::Real = 0.035,
         radius::Real = 0.5,
@@ -40,7 +42,7 @@ mutable struct BrownBerg{D} <: AbstractMicrobe{D}
         receptor_binding_constant::Real = 100.0,
         adaptation_time::Real = 1.0,
     ) where {D} = new{D}(
-        id, Float64.(pos), motility, Float64.(vel), Float64(turn_rate),
+        id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
         Float64(rotational_diffusivity), Float64(radius), Float64(state),
         Float64(motor_gain), Float64(receptor_binding_constant),
         Float64(adaptation_time)
@@ -56,7 +58,7 @@ function affect!(microbe::BrownBerg, model)
     u = model.concentration_field(microbe.pos, model)
     ∇u = model.concentration_gradient(microbe.pos, model)
     ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
-    du_dt = dot(microbe.vel, ∇u) + ∂ₜu
+    du_dt = dot(microbe.vel, ∇u)*microbe.speed + ∂ₜu
     M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement
     microbe.state = β*M + S*exp(-β) # new weighted dPb/dt
     return nothing

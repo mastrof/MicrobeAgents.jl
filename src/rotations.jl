@@ -1,13 +1,10 @@
 function turn!(microbe::AbstractMicrobe, model)
     v = microbe.vel
-    # store current speed
-    U₀ = sqrt(dot(v,v))
     # extract new speed and rotation angles
     U₁, θ, ϕ = rand(model.rng, microbe.motility)
-    # reorient
-    v_new = Tuple(rotate(v, θ, ϕ))
-    # update speed
-    microbe.vel = v_new .* (U₁/U₀)
+    # reorient and update speed
+    microbe.vel = Tuple(rotate(v, θ, ϕ))
+    microbe.speed = U₁
     # switch motile state (does nothing if motility is one-step)
     switch!(microbe.motility)
 end
