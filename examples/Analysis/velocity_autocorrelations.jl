@@ -25,10 +25,10 @@ adf_runrev = filter(:id => id -> model.agents[id].motility isa RunReverse, adf; 
 adf_runrevflick = filter(:id => id -> model.agents[id].motility isa RunReverseFlick, adf; view=true)
 adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
 
+t = range(0, (nsteps-1)*Δt; step=Δt)
 lags = unique(round.(Int, range(0, findfirst(t.>6), length=30)))
 @time Φ = hcat([acf(a,:vel,lags) for a in adfs]...)
 
-t = range(0, (nsteps-1)*Δt; step=Δt)
 Φ_theoretical = hcat([
     exp.(-t ./ τ_run),
     exp.(-t ./ (τ_run / 2)),
@@ -41,5 +41,5 @@ plot(
     ylab="velocity autocorrelation",
 )
 plot!(t, Φ_theoretical, lw=2, lc=[1 2 3], label=["Run-Tumble" "Run-Reverse" "Run-Reverse-Flick"])
-scatter!(t[lags.+1], Φ ./ U^2, m=:x, mc=[1 2 3], label=false)
+scatter!(t[lags.+1], Φ, m=:x, mc=[1 2 3], label=false)
 hline!([0.0], lw=0.8, ls=:dash, lc=:black, lab=false)
