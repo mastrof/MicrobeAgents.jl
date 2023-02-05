@@ -29,7 +29,7 @@ Default parameters:
 - `chemotactic_precision = 0.0`
 - `radius = 0.5` μm
 """
-mutable struct Xie{D}
+mutable struct Xie{D} <: AbstractMicrobe{D}
     id::Int
     pos::NTuple{D,Float64}
     motility::AbstractMotility
