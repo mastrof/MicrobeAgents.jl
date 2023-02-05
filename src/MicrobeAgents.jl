@@ -43,6 +43,7 @@ include("model.jl")
 # implementations of chemotactic models
 include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
+include("chemotaxis/xie.jl")
 
 # analysis routines
 include("analysis/postprocess.jl")
