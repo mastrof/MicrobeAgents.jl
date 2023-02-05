@@ -91,7 +91,7 @@ end
 
 # Xie requires its own turnrate functions
 # since it has different parameters for fw and bw states
-function turnrate(microbe::Xie, model)
+function _turnrate(microbe::Xie, model)
     if microbe.motility isa AbstractMotilityTwoStep
         return turnrate_twostep(microbe, model)
     else
@@ -116,7 +116,7 @@ function turnrate_onestep(microbe::Xie, model)
     return ν₀*(1 + β*S)
 end
 
-function affect!(microbe::Xie, model; ε=1e-16)
+function _affect!(microbe::Xie, model; ε=1e-16)
     Δt = model.timestep
     Dc = model.compound_diffusivity
     c = model.concentration_field(microbe.pos, model)
