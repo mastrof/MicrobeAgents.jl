@@ -34,7 +34,7 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
 
     Brumley{D}(
         id::Int = rand(1:typemax(Int32)),
-        pos::NTuple{D,<:Real} = ntuple(zero, D),
+        pos::NTuple{D,<:Real} = ntuple(zero, D);
         motility = RunReverseFlick(speed_forward = [46.5]),
         vel::NTuple{D,<:Real} = rand_vel(D),
         speed::Real = rand_speed(motility),
