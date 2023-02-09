@@ -40,4 +40,25 @@ using LinearAlgebra: norm
     m = Microbe{3}(;motility)
     @test norm(m.vel) ≈ 1
     @test m.speed ≈ 60.1
+
+    @testset "Xie" begin
+        for D in 1:3
+            m = Xie{D}()
+            @test typeof(m) == Xie{D}
+            @test m isa AbstractMicrobe{D}
+            @test fieldnames(Xie{D}) == (
+                :id, :pos, :motility, :vel, :speed,
+                :turn_rate_forward, :turn_rate_backward,
+                :rotational_diffusivity, :radius,
+                :state, :state_m, :state_z,
+                :adaptation_time_m, :adaptation_time_z,
+                :gain_forward, :gain_backward,
+                :binding_affinity, :chemotactic_precision
+            )
+            @test m.pos isa NTuple{D,Float64}
+            @test m.vel isa NTuple{D,Float64}
+            @test m.speed == 46.5
+            @test m.motility isa RunReverseFlick
+        end
+    end
 end
