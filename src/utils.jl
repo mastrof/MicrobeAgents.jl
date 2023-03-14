@@ -1,4 +1,4 @@
-export rand_vel, ChainedFunction, →
+export rand_vel, ChainedFunction, →, distance
 
 """
     rand_vel([rng,] N)
