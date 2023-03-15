@@ -8,6 +8,10 @@ using LinearAlgebra: norm
             timestep = 1
             extent = ntuple(_ -> 300, D)
             model = ABM(Microbe{D}, extent, timestep)
+            model2 = MBM(Microbe{D}, extent, timestep)
+            #both ABM and MBM generate UnremovableABM
+            @test model isa MBM 
+            @test model2 isa MBM
             @test Set(keys(model.properties)) == Set((
                 :t, :timestep,
                 :concentration_field,
@@ -49,6 +53,8 @@ using LinearAlgebra: norm
             add_agent!(model; vel)
             @test model[2].vel == vel
             @test model[2].speed == speed
+            # agents cannot have arbitrary IDs
+            @test_throws ErrorException add_agent!(Microbe{D}(37), model)
 
             # add agent to given position
             model = ABM(Microbe{D}, extent, timestep)
@@ -57,14 +63,14 @@ using LinearAlgebra: norm
             @test model[1] isa Microbe{D}
             @test model[1].pos == pos
             pos = extent ./ 3
-            microbe = Microbe{D}(25) # id=25
+            microbe = Microbe{D}(2) # id=2
             add_agent!(microbe, pos, model)
-            @test model[25].pos == pos
+            @test model[2].pos == pos
             # conserve agent's own position
             pos = extent ./ 6
-            microbe = Microbe{D}(2, pos)
+            microbe = Microbe{D}(3, pos)
             add_agent_pos!(microbe, model)
-            @test model[2].pos == pos
+            @test model[3].pos == pos
         end
     end
 
