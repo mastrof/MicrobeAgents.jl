@@ -48,6 +48,8 @@ include("chemotaxis/xie.jl")
 # bodies (for obstacles, encounters...)
 using GeometryBasics: HyperSphere, Point
 include("bodies/spheres.jl")
+using Agents.Pathfinding
+include("pathfinder.jl")
 
 # analysis routines
 include("analysis/postprocess.jl")
