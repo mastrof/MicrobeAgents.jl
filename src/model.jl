@@ -1,15 +1,17 @@
-export ABM, add_agent!, add_agent_pos!, run!
+export ABM, MBM, add_agent!, add_agent_pos!, run!
+
+const MBM = UnremovableABM
 
 """
-    tick!(model::ABM)
+    tick!(model::MBM)
 Increase time count `model.t` by 1.
 """
-tick!(model::ABM) = (model.t += 1)
+tick!(model::MBM) = (model.t += 1)
 # extend function chaining
-→(model::ABM, f, g...) = (model.update! = →(model.update! → f, g...))
-→(model::ABM, f) = (model.update! = model.update! → f)
+→(model::MBM, f, g...) = (model.update! = →(model.update! → f, g...))
+→(model::MBM, f) = (model.update! = model.update! → f)
 
-default_ABM_properties = Dict(
+default_MBM_properties = Dict(
     :t => 0, # counter for timekeeping
     :concentration_field => (pos,model) -> 0.0,
     :concentration_gradient => (pos,model) -> zero.(pos),
@@ -20,7 +22,10 @@ default_ABM_properties = Dict(
     :update! => tick!
 )
 
-function Agents.AgentBasedModel(
+function Agents.ABM(T::Type{A}, args...; kwargs...) where A<:AbstractMicrobe
+    UnremovableABM(T, args...; kwargs...)
+end
+function Agents.UnremovableABM(
     T::Type{A},
     extent::NTuple{D,<:Real}, timestep::Real;
     periodic = true,
@@ -31,15 +36,15 @@ function Agents.AgentBasedModel(
 ) where {D,A<:AbstractMicrobe{D},F,P,R<:AbstractRNG}
     space = ContinuousSpace(extent; periodic)
     properties = Dict(
-        default_ABM_properties...,
+        default_MBM_properties...,
         properties...,
         :timestep => timestep
     )
-    ABM(T, space; scheduler, properties, rng, warn)
+    MBM(T, space; scheduler, properties, rng, warn)
 end
 
-function Agents.AgentBasedModel(microbe::AbstractMicrobe, args...; kwargs...)
-    return ABM(typeof(agent), args...; kwargs...)
+function Agents.UnremovableABM(microbe::AbstractMicrobe, args...; kwargs...)
+    return MBM(typeof(agent), args...; kwargs...)
 end
 
 # Microbe constructor generates a random velocity in non-reproducible way.
@@ -52,7 +57,7 @@ end
 function Agents.add_agent!(
     pos::Agents.ValidPos,
     A::Type{<:AbstractMicrobe{D}},
-    model::ABM,
+    model::MBM,
     properties...;
     vel = nothing,
     speed = nothing,
@@ -65,7 +70,7 @@ function Agents.add_agent!(
     add_agent_pos!(microbe, model)
 end
 
-function Agents.run!(model::ABM{S,A,F,P,R}, n = 1;
+function Agents.run!(model::MBM{S,A,F,P,R}, n = 1;
     when = true,
     when_model = when,
     adata = nothing,
