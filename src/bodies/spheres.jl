@@ -13,6 +13,10 @@ contact(a::HyperSphere{D}, b::AbstractMicrobe{D}, model) where D = distance(a,b,
 contact(a::AbstractMicrobe{D}, b::HyperSphere{D}, model) where D = distance(a,b,model) ≤ a.radius+b.r
 contact(a::HyperSphere{D}, b::HyperSphere{D}, model) where D = distance(a,b,model) ≤ a.r+b.r
 
+"""
+    is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
+Check if an encounter is occurring between `microbe` and `sphere`.
+"""
 function is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
     # if microbe and sphere are in contact, return true immediately
     if contact(microbe, sphere, model)
@@ -22,6 +26,10 @@ function is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model
     end
 end
 
+"""
+    line_sphere_intersection(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
+Check whether `microbe` will intersect `sphere` during its next step.
+"""
 function line_sphere_intersection(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
     c = sphere.center
     x1 = @. microbe.pos - c
@@ -29,6 +37,11 @@ function line_sphere_intersection(microbe::AbstractMicrobe{D}, sphere::HyperSphe
     R = microbe.radius + sphere.r
     line_sphere_intersection(x1,x2,R)
 end
+"""
+    line_sphere_intersection(x1, x2, R)
+Check whether a segment between points `x1` and `x2` intersects a sphere
+of radius `R` centered at the origin.
+"""
 function line_sphere_intersection(x1, x2, R)
     dx = x2.-x1
     a = dot(dx,dx)
