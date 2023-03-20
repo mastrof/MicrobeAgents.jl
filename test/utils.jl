@@ -28,4 +28,45 @@ using Random
     a = [0,1]
     f₁!(a)
     @test a == [7,9]
+
+    @testset "Distances" begin
+        L = 20.0
+        dt = 1.0
+        for D in 1:3
+            extent = ntuple(_ -> L, D)
+
+            # periodic
+            model = ABM(Microbe{D}, extent, dt)
+            x₁ = ntuple(i -> i==1 ? 1.0 : 0.0, D)
+            x₂ = ntuple(i -> i==1 ? L-1 : 0.0, D)
+            add_agent!(x₁, model)
+            add_agent!(x₂, model)
+            p₁ = ntuple(i -> i==1 ? 2.0 : 0.0, D)
+            p₂ = ntuple(i -> i==1 ? L-2 : 0.0, D)
+            # microbe-microbe
+            @test distance(model[1], model[2], model) ≈ 2
+            # microbe-point
+            @test distance(model[1], p₁, model) ≈ 1
+            @test distance(model[1], p₂, model) ≈ 3
+            # point-point
+            @test distance(p₁, p₂, model) ≈ 4
+
+            # closed box
+            # periodic
+            model = ABM(Microbe{D}, extent, dt; periodic=false)
+            x₁ = ntuple(i -> i==1 ? 1.0 : 0.0, D)
+            x₂ = ntuple(i -> i==1 ? L-1 : 0.0, D)
+            add_agent!(x₁, model)
+            add_agent!(x₂, model)
+            p₁ = ntuple(i -> i==1 ? 2.0 : 0.0, D)
+            p₂ = ntuple(i -> i==1 ? L-2 : 0.0, D)
+            # microbe-microbe
+            @test distance(model[1], model[2], model) ≈ L-2
+            # microbe-point
+            @test distance(model[1], p₁, model) ≈ 1
+            @test distance(model[1], p₂, model) ≈ L-3
+            # point-point
+            @test distance(p₁, p₂, model) ≈ L-4
+        end
+    end
 end

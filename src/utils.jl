@@ -1,4 +1,4 @@
-export rand_vel, ChainedFunction, →
+export rand_vel, ChainedFunction, →, distance
 
 """
     rand_vel([rng,] N)
@@ -35,3 +35,9 @@ end
 funlist(f::ChainedFunction{<:ChainedFunction,<:ChainedFunction}) = (funlist(f.head)..., funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
+
+
+distance(a::AbstractMicrobe, b::AbstractMicrobe, model) = euclidean_distance(a, b, model)
+distance(a::AbstractMicrobe{D}, b::NTuple{D}, model) where D = euclidean_distance(a.pos, b, model)
+distance(a::NTuple{D}, b::AbstractMicrobe{D}, model) where D = euclidean_distance(a, b.pos, model)
+distance(a::NTuple{D}, b::NTuple{D}, model) where D = euclidean_distance(a, b, model)
