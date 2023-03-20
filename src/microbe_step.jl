@@ -1,4 +1,4 @@
-export microbe_step!, turnrate, affect!
+export microbe_step!, microbe_pathfinder_step!, turnrate, affect!
 
 """
     microbe_step!(microbe, model)
@@ -13,6 +13,27 @@ function microbe_step!(microbe::AbstractMicrobe, model)
     dt = model.timestep # integration timestep
     # update microbe position
     move_agent!(microbe, model, microbe.speed*dt)
+    # reorient through rotational diffusion
+    rotational_diffusion!(microbe, model)
+    # update microbe state
+    affect!(microbe, model)
+    # evaluate instantaneous turn rate
+    ω = turnrate(microbe, model)
+    if rand(model.rng) < ω*dt # if true reorient microbe
+        turn!(microbe, model)
+    end
+    nothing
+end
+
+"""
+    microbe_pathfinder_step!(microbe, model)
+Identical to `microbe_step!` except that motion is constrained by the pathfinder
+(`model.pathfinder`) which defines inaccessible regions of space.
+"""
+function microbe_pathfinder_step!(microbe::AbstractMicrobe, model)
+    dt = model.timestep # integration timestep
+    # update microbe position
+    pathfinder_step!(microbe, model, dt)
     # reorient through rotational diffusion
     rotational_diffusion!(microbe, model)
     # update microbe state
