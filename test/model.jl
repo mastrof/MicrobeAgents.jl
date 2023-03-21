@@ -20,6 +20,11 @@ using LinearAlgebra: norm
                 :compound_diffusivity,
                 :update!
             ))
+            # by default spacing = minimum(extent)/20
+            @test model.space.spacing == minimum(extent)/20
+            # spacing can also be specified by user
+            model = ABM(Microbe{D}, extent, timestep; spacing=5)
+            @test model.space.spacing == 5
 
             # add agents with default constructor, random pos and vel
             rng = MersenneTwister(1234)

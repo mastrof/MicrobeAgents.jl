@@ -33,8 +33,9 @@ function Agents.UnremovableABM(
     properties::P = Dict(),
     rng::R = Random.default_rng(),
     warn = true,
+    spacing = minimum(extent)/20
 ) where {D,A<:AbstractMicrobe{D},F,P,R<:AbstractRNG}
-    space = ContinuousSpace(extent; periodic)
+    space = ContinuousSpace(extent; spacing, periodic)
     properties = Dict(
         default_MBM_properties...,
         properties...,
