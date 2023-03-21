@@ -20,15 +20,22 @@ end # function
 Unfold spatial configuration `cnf₁` with respect to `cnf₀` in a domain of
 periodicity `L` and store to `unfolded`.
 """
-function unfold!(unfolded, cnf₁, cnf₀, L)
+function unfold!(unfolded, cnf₁, cnf₀, L::Real)
     dim = length(first(cnf₁))
     nmicrobes, = size(cnf₁)
     for i in 1:nmicrobes
-        l = typeof(L) <: AbstractArray ? L[μ] : L
-        newx = ntuple(μ -> unfold_coord(cnf₀[i][μ], cnf₁[i][μ], l), dim)
+        newx = ntuple(μ -> unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L), dim)
         unfolded[i] = newx
     end # for
 end # function
+function unfold!(unfolded, cnf₁, cnf₀, L::NTuple)
+    dim = length(first(cnf₁))
+    nmicrobes, = size(cnf₁)
+    for i in 1:nmicrobes
+        newx = ntuple(μ -> unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L[μ]), dim)
+        unfolded[i] = newx
+    end 
+end
 
 """
     unfold(trajectory::T, L) where {S<:Tuple, T<:AbstractArray{S,2}}
@@ -56,7 +63,7 @@ set `L=Inf` (default) if boundaries are not periodic.
 """
 function msd(adf, lags=1:last(adf.step)-1; L=Inf)
     trajectory = vectorize_adf_measurement(adf, :pos)
-    if isinf(L)
+    if L isa Real && isinf(L)
         return msd(trajectory, lags)
     else
         trajectory_unfolded = unfold(trajectory, L)

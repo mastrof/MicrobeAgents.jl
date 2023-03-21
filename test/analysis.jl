@@ -69,6 +69,21 @@ using LinearAlgebra: norm
             @test length(Δ²) == nsteps-1
             @test Δ² ≈ real_msd
 
+            # previous should be identical in a rectangular domain
+            if D > 1 # skip trivial D=1 case
+                L₀ = 100; L₁ = 40
+                extent = ntuple(i -> i==1 ? L₀ : L₁, D)
+                turn_rate = 0 # ballistic motion
+                model = ABM(Microbe{D}, extent, dt)
+                add_agent!(model; turn_rate)
+                nsteps = 50
+                adata = [:pos]
+                adf, = run!(model, nsteps; adata)
+                real_msd = @. (30 * (1:nsteps-1)*dt)^2 # 30 is default speed
+                Δ² = msd(adf; L=extent) # unfold periodic boundaries
+                @test Δ² ≈ real_msd
+            end
+
             motility = RunReverse()
             turn_rate = Inf # reversal at each step
             model = ABM(Microbe{D}, extent, dt)
