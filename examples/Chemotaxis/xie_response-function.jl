@@ -34,7 +34,7 @@ add_agent!(model; turn_rate_backward=0, motility=RunReverseFlick(motile_state=Mo
 
 nsteps = round(Int, T/timestep)
 β(a) = a.motility.state == Forward ? a.gain_forward : a.gain_backward
-state(a::AbstractXie) = max(1 + β(a)*a.state, 0)
+state(a::Xie) = max(1 + β(a)*a.state, 0)
 adata = [state, :state_m, :state_z]
 adf, = run!(model, nsteps; adata)
 
