@@ -49,7 +49,7 @@ mutable struct BrownBerg{D} <: AbstractMicrobe{D}
     )
 end # struct
 
-function affect!(microbe::BrownBerg, model)
+function _affect!(microbe::BrownBerg, model)
     Δt = model.timestep
     τₘ = microbe.adaptation_time
     β = Δt / τₘ # memory loss factor
