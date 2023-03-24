@@ -55,7 +55,7 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
 
 end # struct
 
-function affect!(microbe::Brumley, model)
+function _affect!(microbe::Brumley, model)
     Δt = model.timestep
     Dc = model.compound_diffusivity
     τₘ = microbe.adaptation_time
