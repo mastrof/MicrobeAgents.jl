@@ -41,6 +41,24 @@ using LinearAlgebra: norm
     @test norm(m.vel) ≈ 1
     @test m.speed ≈ 60.1
 
+    @testset "Celani" begin
+        for D in 1:3
+            m = Celani{D}()
+            @test typeof(m) == Celani{D}
+            @test m isa AbstractMicrobe{D}
+            @test fieldnames(Celani{D}) == (
+                :id, :pos, :motility, :vel, :speed,
+                :turn_rate, :state, :rotational_diffusivity,
+                :gain, :memory, :radius, :chemotactic_precision
+            )
+            @test m.pos isa NTuple{D,Float64}
+            @test m.vel isa NTuple{D,Float64}
+            @test m.speed == 30.0
+            @test m.motility isa RunTumble
+            # can use arbitrary 2nd argument since model is not called
+            @test turnrate(m,0) == m.turn_rate*m.state[4]
+        end
+    end
     @testset "Xie" begin
         for D in 1:3
             m = Xie{D}()
