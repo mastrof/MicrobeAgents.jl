@@ -55,8 +55,14 @@ using LinearAlgebra: norm
             @test m.vel isa NTuple{D,Float64}
             @test m.speed == 30.0
             @test m.motility isa RunTumble
-            # can use arbitrary 2nd argument since model is not called
-            @test turnrate(m,0) == m.turn_rate*m.state[4]
+            
+            model = ABM(Celani{D}, ntuple(_->100,D), 0.1)
+            add_agent!(model)
+            m = model[1]
+            @test turnrate(m,model) == m.turn_rate*m.state[4]
+            affect!(m, model)
+            # concentration_field is null, so state should be unchanged
+            @test m.state == [0.0, 0.0, 0.0, 1.0]
         end
     end
     @testset "Xie" begin
