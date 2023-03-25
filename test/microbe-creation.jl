@@ -41,6 +41,30 @@ using LinearAlgebra: norm
     @test norm(m.vel) ≈ 1
     @test m.speed ≈ 60.1
 
+    @testset "Celani" begin
+        for D in 1:3
+            m = Celani{D}()
+            @test typeof(m) == Celani{D}
+            @test m isa AbstractMicrobe{D}
+            @test fieldnames(Celani{D}) == (
+                :id, :pos, :motility, :vel, :speed,
+                :turn_rate, :state, :rotational_diffusivity,
+                :gain, :memory, :radius, :chemotactic_precision
+            )
+            @test m.pos isa NTuple{D,Float64}
+            @test m.vel isa NTuple{D,Float64}
+            @test m.speed == 30.0
+            @test m.motility isa RunTumble
+            
+            model = ABM(Celani{D}, ntuple(_->100,D), 0.1)
+            add_agent!(model)
+            m = model[1]
+            @test turnrate(m,model) == m.turn_rate*m.state[4]
+            affect!(m, model)
+            # concentration_field is null, so state should be unchanged
+            @test m.state == [0.0, 0.0, 0.0, 1.0]
+        end
+    end
     @testset "Xie" begin
         for D in 1:3
             m = Xie{D}()
