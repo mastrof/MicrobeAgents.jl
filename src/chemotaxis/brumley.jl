@@ -76,7 +76,7 @@ function _affect!(microbe::Brumley, model)
     return nothing
 end # function
 
-function turnrate(microbe::Brumley, model)
+function _turnrate(microbe::Brumley, model)
     ν₀ = microbe.turn_rate # unbiased
     Γ = microbe.motor_gain
     S = microbe.state
