@@ -64,7 +64,7 @@ function _affect!(microbe::BrownBerg, model)
     return nothing
 end # function
 
-function turnrate(microbe::BrownBerg, model)
+function _turnrate(microbe::BrownBerg, model)
     ν₀ = microbe.turn_rate # unbiased
     g = microbe.motor_gain
     S = microbe.state
