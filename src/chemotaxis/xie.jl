@@ -1,4 +1,4 @@
-export AbstractXie, Xie, XieNoisy
+export Xie
 
 """
     Xie{D} <: AbstractMicrobe{D}
