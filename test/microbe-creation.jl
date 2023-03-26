@@ -41,6 +41,53 @@ using LinearAlgebra: norm
     @test norm(m.vel) ≈ 1
     @test m.speed ≈ 60.1
 
+    @testset "BrownBerg" begin
+        for D in 1:3
+            m = BrownBerg{D}()
+            @test typeof(m) == BrownBerg{D}
+            @test m isa AbstractMicrobe{D}
+            @test fieldnames(BrownBerg{D}) == (
+                :id, :pos, :motility, :vel, :speed,
+                :turn_rate, :rotational_diffusivity,
+                :radius, :state, :motor_gain,
+                :receptor_binding_constant, :adaptation_time
+            )
+            @test m.pos isa NTuple{D,Float64}
+            @test m.vel isa NTuple{D,Float64}
+            @test m.speed == 30.0
+            @test m.motility isa RunTumble
+
+            model = ABM(BrownBerg{D}, ntuple(_->100,D), 0.1)
+            add_agent!(model)
+            m = model[1]
+            @test turnrate(m, model) == m.turn_rate*exp(-m.motor_gain*m.state)
+            @test m.state == 0
+        end
+    end
+    @testset "Brumley" begin
+        for D in 1:3
+            m = Brumley{D}()
+            @test typeof(m) == Brumley{D}
+            @test m isa AbstractMicrobe{D}
+            @test fieldnames(Brumley{D}) == (
+                :id, :pos, :motility, :vel, :speed,
+                :turn_rate, :rotational_diffusivity,
+                :radius, :state, :adaptation_time,
+                :receptor_gain, :motor_gain,
+                :chemotactic_precision
+            )
+            @test m.pos isa NTuple{D,Float64}
+            @test m.vel isa NTuple{D,Float64}
+            @test m.speed == 46.5
+            @test m.motility isa RunReverseFlick
+
+            model = ABM(Brumley{D}, ntuple(_->100,D), 0.1)
+            add_agent!(model)
+            m = model[1]
+            @test turnrate(m, model) == (1+exp(-m.motor_gain*m.state))*m.turn_rate/2
+            @test m.state == 0.0
+        end
+    end
     @testset "Celani" begin
         for D in 1:3
             m = Celani{D}()
