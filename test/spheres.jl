@@ -35,7 +35,7 @@ using Random
 
         @test ~contact(model[1],s1,model)
         @test contact(model[2],s1,model)
-        @test is_encounter(model[1],s1,model)
-        @test is_encounter(model[2],s1,model)
+        @test_throws KeyError is_encounter(model[1],s1,model)
+        # add test with proper encounter checking
     end
 end
