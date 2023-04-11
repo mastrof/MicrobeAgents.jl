@@ -3,37 +3,39 @@ export HyperSphere, contact, is_encounter
 # dispatch hides call to Point
 HyperSphere(center::NTuple{D}, radius::Real) where D = HyperSphere(Point(Float64.(center)), Float64(radius))
 
-distance(a::HyperSphere{D}, b::HyperSphere{D}, model) where D = distance(Tuple(a.center), Tuple(b.center), model)
-distance(a::AbstractMicrobe{D}, b::HyperSphere{D}, model) where D = distance(a.pos, Tuple(b.center), model)
-distance(a::HyperSphere{D}, b::AbstractMicrobe{D}, model) where D = distance(Tuple(a.center), b.pos, model)
-distance(a::NTuple{D}, b::HyperSphere{D}, model) where D = distance(a, Tuple(b.center), model)
-distance(a::HyperSphere{D}, b::NTuple{D}, model) where D = distance(Tuple(a.center), b, model)
+# define _pos to interface with distance functions
+@inline _pos(a::HyperSphere{D}) where D = Tuple(a.center)
 
-contact(a::HyperSphere{D}, b::AbstractMicrobe{D}, model) where D = distance(a,b,model) ≤ a.r+b.radius
-contact(a::AbstractMicrobe{D}, b::HyperSphere{D}, model) where D = distance(a,b,model) ≤ a.radius+b.r
-contact(a::HyperSphere{D}, b::HyperSphere{D}, model) where D = distance(a,b,model) ≤ a.r+b.r
+@inline _radius(a::AbstractMicrobe) = a.radius
+@inline _radius(a::HyperSphere{D}) where D = a.r
+@inline contact(a,b,model) = distance(a,b,model) ≤ _radius(a) + _radius(b)
 
 """
     is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
-Check if an encounter is occurring between `microbe` and `sphere`.
+Check if an encounter occurred between `microbe` and `sphere`.
 """
 function is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
+    d = distance(microbe, sphere, model)
+    R = microbe.radius + sphere.r
     # if microbe and sphere are in contact, return true immediately
-    if contact(microbe, sphere, model)
+    if d < R
         return true
-    else # check if an intersection will occur during the next step
+    # if they are not in contact but close, check if an intersection occurred
+    # during the last integration step
+    elseif d < R + 2*microbe.speed*model.timestep
         return line_sphere_intersection(microbe, sphere, model)
+    else
+        return false
     end
 end
 
 """
     line_sphere_intersection(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
-Check whether `microbe` will intersect `sphere` during its next step.
+Check if `microbe` has intersected `sphere` during the last integration step.
 """
 function line_sphere_intersection(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
-    c = sphere.center
-    x1 = @. microbe.pos - c
-    x2 = @. x1 + microbe.vel*microbe.speed*model.timestep
+    x1 = distancevector(model.old_positions[microbe.id], sphere, model)
+    x2 = distancevector(microbe, sphere, model)
     R = microbe.radius + sphere.r
     line_sphere_intersection(x1,x2,R)
 end
