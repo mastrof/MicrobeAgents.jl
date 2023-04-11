@@ -1,4 +1,4 @@
-export rand_vel, ChainedFunction, →, distance
+export rand_vel, ChainedFunction, →, distance, distancevector
 
 """
     rand_vel([rng,] N)
@@ -36,8 +36,25 @@ funlist(f::ChainedFunction{<:ChainedFunction,<:ChainedFunction}) = (funlist(f.he
 funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
 
-
-distance(a::AbstractMicrobe, b::AbstractMicrobe, model) = euclidean_distance(a, b, model)
-distance(a::AbstractMicrobe{D}, b::NTuple{D}, model) where D = euclidean_distance(a.pos, b, model)
-distance(a::NTuple{D}, b::AbstractMicrobe{D}, model) where D = euclidean_distance(a, b.pos, model)
-distance(a::NTuple{D}, b::NTuple{D}, model) where D = euclidean_distance(a, b, model)
+@inline _pos(a::AbstractMicrobe) = a.pos
+@inline _pos(a::NTuple{D}) where D = a
+"""
+    distance(a, b, model)
+Evaluate the euclidean distance between two objects `a` and `b` respecting
+`model` spatial properties.
+"""
+@inline distance(a, b, model) = euclidean_distance(_pos(a), _pos(b), model)
+"""
+    distancevector(a, b, model)
+Evaluate the distance vector between two objects `a` and `b` respecting
+`model` spatial properties.
+"""
+@inline distancevector(a, b, model) = distancevector(_pos(a), _pos(b), model)
+@inline function distancevector(a::NTuple{D}, b::NTuple{D}, model) where D
+    extent = spacesize(model)
+    ntuple(i -> wrapcoord(a[i], b[i], extent[i]), D)
+end
+function wrapcoord(x₁, x₂, d)
+    α = (x₂-x₁)/d
+    (α-round(α))*d
+end
