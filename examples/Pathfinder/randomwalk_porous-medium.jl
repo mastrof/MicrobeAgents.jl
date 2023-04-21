@@ -20,7 +20,7 @@ bodies = [
 ]
 wm = walkmap(bodies, extent, min_radius/25, 0)
 
-model = ABM(BrownBerg{2}, extent, dt; periodic=false)
+model = UnremovableABM(BrownBerg{2}, extent, dt; periodic=false)
 pathfinder!(model, wm)
 foreach(_ -> add_agent!(model), 1:nbacteria)
 adata = [:pos]

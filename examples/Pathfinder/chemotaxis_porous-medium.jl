@@ -43,7 +43,7 @@ properties = Dict(
     :C₂ => C₂,
 )
 
-model = ABM(BrownBerg{2}, extent, dt; periodic=false, properties)
+model = UnremovableABM(BrownBerg{2}, extent, dt; periodic=false, properties)
 pathfinder!(model, wm)
 foreach(_ -> add_agent!((0.0, rand()*extent[2]), model), 1:nbacteria)
 adata = [:pos]

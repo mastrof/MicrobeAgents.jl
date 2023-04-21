@@ -23,7 +23,7 @@ properties = Dict(
 )
 
 rng = MersenneTwister(12)
-model = ABM(Xie{2}, extent, timestep; rng, properties, periodic=false)
+model = UnremovableABM(Xie{2}, extent, timestep; rng, properties, periodic=false)
 foreach(_ -> add_agent!(model; chemotactic_precision=6.0), 1:300)
 
 nsteps = 5000
