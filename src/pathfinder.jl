@@ -23,7 +23,7 @@ function initialise_pathfinder(space::ContinuousSpace{D}, walkmap::BitArray{D}) 
 end
 
 """
-    pathfinder_step!(microbe::AbstractMicrobe, model::ABM, dt::Real)
+    pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedModel, dt::Real)
 Perform an integration step for `microbe` motion with pathfinding
 (`model.pathfinder`).
 """
