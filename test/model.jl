@@ -77,10 +77,10 @@ using LinearAlgebra: norm
     end
 
     @testset "Stepping" begin
-        for D in 1:3
+        for D in 1:3, ABM in (StandardABM, UnremovableABM)
             dt = 1
             extent = ntuple(_ -> 300, D)
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = ABM(Microbe{D}, extent, dt)
             pos = extent ./ 2
             vel1 = rand_vel(D)
             speed1 = rand_speed(RunTumble())
@@ -107,7 +107,7 @@ using LinearAlgebra: norm
             # customize microbe affect! function
             # decreases microbe state value by D at each step
             MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state-=D)
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = ABM(Microbe{D}, extent, dt)
             add_agent!(model)
             run!(model)
             @test model[1].state == -D
@@ -118,13 +118,13 @@ using LinearAlgebra: norm
             @test model[1].state == -D
 
             # customize model.update! function
-            model = StandardABM(Microbe{D}, extent, dt)
-            tick_more!(model::StandardABM) = (model.t += 3)
+            model = ABM(Microbe{D}, extent, dt)
+            tick_more!(model) = (model.t += 3)
             model → tick_more! # now model.t increases by 4 (+1 +3) at each step
             run!(model, 6)
             @test model.t == 6*4
-            decrease!(model::StandardABM) = (model.t -= 1)
-            model = StandardABM(Microbe{D}, extent, dt)
+            decrease!(model) = (model.t -= 1)
+            model = ABM(Microbe{D}, extent, dt)
             # chain arbitrary number of functions
             model → tick_more! → decrease! → decrease! → decrease!
             # now we should be back at only +1 per step
