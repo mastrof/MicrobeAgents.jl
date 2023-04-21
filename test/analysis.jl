@@ -12,7 +12,7 @@ using LinearAlgebra: norm
         motility = RunTumble(speed=[U])
         vel = ntuple(_ -> 1/√D, D)
         turn_rate = 0
-        model = ABM(Microbe{D}, extent, dt)
+        model = StandardABM(Microbe{D}, extent, dt)
         add_agent!(pos, model; vel, motility, turn_rate)
         nsteps = 10
         adata = [:pos]
@@ -35,11 +35,11 @@ using LinearAlgebra: norm
             adata = [v]
             L = 100; extent = ntuple(_ -> L, D)
             rng = Xoshiro(35)
-            model_periodic = ABM(Microbe{D}, extent, dt; rng)
+            model_periodic = StandardABM(Microbe{D}, extent, dt; rng)
             add_agent!(model_periodic)
             adf_periodic, = run!(model_periodic, nsteps; adata)
             rng = Xoshiro(35)
-            model_closed = ABM(Microbe{D}, extent, dt; periodic=false, rng)
+            model_closed = StandardABM(Microbe{D}, extent, dt; periodic=false, rng)
             add_agent!(model_closed)
             adf_closed, = run!(model_closed, nsteps; adata)
             # boundary conditions don't affect vacf
@@ -59,7 +59,7 @@ using LinearAlgebra: norm
             dt = 0.1
             L = 100; extent = ntuple(_ -> L, D)
             turn_rate = 0 # ballistic motion
-            model = ABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, extent, dt)
             add_agent!(model; turn_rate)
             nsteps = 50
             adata = [:pos]
@@ -74,7 +74,7 @@ using LinearAlgebra: norm
                 L₀ = 100; L₁ = 40
                 extent = ntuple(i -> i==1 ? L₀ : L₁, D)
                 turn_rate = 0 # ballistic motion
-                model = ABM(Microbe{D}, extent, dt)
+                model = StandardABM(Microbe{D}, extent, dt)
                 add_agent!(model; turn_rate)
                 nsteps = 50
                 adata = [:pos]
@@ -86,7 +86,7 @@ using LinearAlgebra: norm
 
             motility = RunReverse()
             turn_rate = Inf # reversal at each step
-            model = ABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, extent, dt)
             add_agent!(extent./2, model; motility, turn_rate)
             nsteps = 5
             adata = [:pos]

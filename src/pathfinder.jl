@@ -1,6 +1,6 @@
 export pathfinder!, initialise_pathfinder, pathfinder_step!
 
-function pathfinder!(model::ABM, walkmap::BitArray)
+function pathfinder!(model::AgentBasedModel, walkmap::BitArray)
     pathfinder = initialise_pathfinder(model.space, walkmap)
     model.properties[:pathfinder] = pathfinder
 end
@@ -27,7 +27,7 @@ end
 Perform an integration step for `microbe` motion with pathfinding
 (`model.pathfinder`).
 """
-function pathfinder_step!(microbe::AbstractMicrobe, model::ABM, dt::Real)
+function pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedModel, dt::Real)
     U = microbe.speed
     target_position = @. microbe.pos + U*microbe.vel*dt
     plan_route!(microbe, target_position, model.pathfinder)

@@ -57,7 +57,7 @@ using LinearAlgebra: norm
             @test m.speed == 30.0
             @test m.motility isa RunTumble
 
-            model = ABM(BrownBerg{D}, ntuple(_->100,D), 0.1)
+            model = StandardABM(BrownBerg{D}, ntuple(_->100,D), 0.1)
             add_agent!(model)
             m = model[1]
             @test turnrate(m, model) == m.turn_rate*exp(-m.motor_gain*m.state)
@@ -81,7 +81,7 @@ using LinearAlgebra: norm
             @test m.speed == 46.5
             @test m.motility isa RunReverseFlick
 
-            model = ABM(Brumley{D}, ntuple(_->100,D), 0.1)
+            model = StandardABM(Brumley{D}, ntuple(_->100,D), 0.1)
             add_agent!(model)
             m = model[1]
             @test turnrate(m, model) == (1+exp(-m.motor_gain*m.state))*m.turn_rate/2
@@ -103,7 +103,7 @@ using LinearAlgebra: norm
             @test m.speed == 30.0
             @test m.motility isa RunTumble
             
-            model = ABM(Celani{D}, ntuple(_->100,D), 0.1)
+            model = StandardABM(Celani{D}, ntuple(_->100,D), 0.1)
             add_agent!(model)
             m = model[1]
             @test turnrate(m,model) == m.turn_rate*m.state[4]

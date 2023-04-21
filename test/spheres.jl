@@ -6,7 +6,7 @@ using Random
     dt = 1.0
     for D in 1:3
         extent = ntuple(_ -> L, D)
-        model = ABM(Microbe{D}, extent, dt)
+        model = StandardABM(Microbe{D}, extent, dt)
 
         c1 = extent ./ 2
         r1 = 30.0

@@ -7,11 +7,10 @@ using LinearAlgebra: norm
         for D in 1:3
             timestep = 1
             extent = ntuple(_ -> 300, D)
-            model = ABM(Microbe{D}, extent, timestep)
-            model2 = MBM(Microbe{D}, extent, timestep)
-            #both ABM and MBM generate UnremovableABM
-            @test model isa MBM 
-            @test model2 isa MBM
+            model = UnremovableABM(Microbe{D}, extent, timestep)
+            model2 = StandardABM(Microbe{D}, extent, timestep)
+            @test model isa UnremovableABM
+            @test model2 isa StandardABM
             @test Set(keys(model.properties)) == Set((
                 :t, :timestep,
                 :concentration_field,
@@ -23,12 +22,12 @@ using LinearAlgebra: norm
             # by default spacing = minimum(extent)/20
             @test model.space.spacing == minimum(extent)/20
             # spacing can also be specified by user
-            model = ABM(Microbe{D}, extent, timestep; spacing=5)
+            model = StandardABM(Microbe{D}, extent, timestep; spacing=5)
             @test model.space.spacing == 5
 
             # add agents with default constructor, random pos and vel
             rng = MersenneTwister(1234)
-            model = ABM(Microbe{D}, extent, timestep; rng)
+            model = StandardABM(Microbe{D}, extent, timestep; rng)
             add_agent!(model)
             rng = MersenneTwister(1234)
             pos = Tuple(rand(rng,D) .* extent)
@@ -46,7 +45,7 @@ using LinearAlgebra: norm
             end
 
             # add agents with keyword arguments
-            model = ABM(Microbe{D}, extent, timestep)
+            model = StandardABM(Microbe{D}, extent, timestep)
             motility = RunReverse(speed_backward=[24.0], motile_state=MotileState(Backward))
             add_agent!(model; turn_rate=0.55, motility)
             @test model[1].turn_rate == 0.55
@@ -58,11 +57,9 @@ using LinearAlgebra: norm
             add_agent!(model; vel)
             @test model[2].vel == vel
             @test model[2].speed == speed
-            # agents cannot have arbitrary IDs
-            @test_throws ErrorException add_agent!(Microbe{D}(37), model)
 
             # add agent to given position
-            model = ABM(Microbe{D}, extent, timestep)
+            model = StandardABM(Microbe{D}, extent, timestep)
             pos = extent ./ 2
             add_agent!(pos, model)
             @test model[1] isa Microbe{D}
@@ -83,7 +80,7 @@ using LinearAlgebra: norm
         for D in 1:3
             dt = 1
             extent = ntuple(_ -> 300, D)
-            model = ABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, extent, dt)
             pos = extent ./ 2
             vel1 = rand_vel(D)
             speed1 = rand_speed(RunTumble())
@@ -110,7 +107,7 @@ using LinearAlgebra: norm
             # customize microbe affect! function
             # decreases microbe state value by D at each step
             MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state-=D)
-            model = ABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, extent, dt)
             add_agent!(model)
             run!(model)
             @test model[1].state == -D
@@ -121,13 +118,13 @@ using LinearAlgebra: norm
             @test model[1].state == -D
 
             # customize model.update! function
-            model = ABM(Microbe{D}, extent, dt)
-            tick_more!(model::ABM) = (model.t += 3)
+            model = StandardABM(Microbe{D}, extent, dt)
+            tick_more!(model::StandardABM) = (model.t += 3)
             model → tick_more! # now model.t increases by 4 (+1 +3) at each step
             run!(model, 6)
             @test model.t == 6*4
-            decrease!(model::ABM) = (model.t -= 1)
-            model = ABM(Microbe{D}, extent, dt)
+            decrease!(model::StandardABM) = (model.t -= 1)
+            model = StandardABM(Microbe{D}, extent, dt)
             # chain arbitrary number of functions
             model → tick_more! → decrease! → decrease! → decrease!
             # now we should be back at only +1 per step
