@@ -8,7 +8,7 @@ turn_rate = 1 / τ_run # 1/s
 L = 1e4 # μm
 extent = (L,L,L)
 
-model = ABM(Microbe{3}, extent, Δt)
+model = UnremovableABM(Microbe{3}, extent, Δt)
 n = 200
 for i in 1:n
     add_agent!(model; turn_rate, motility=RunTumble(speed=[U]))
