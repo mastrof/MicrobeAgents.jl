@@ -27,6 +27,38 @@ using LinearAlgebra: norm
         end
     end
 
+    @testset "Turn detection and run statistics" begin
+        dt = 0.1
+        L = 100
+        for D in 1:3
+            extent = ntuple(_ -> L, D)
+            model = StandardABM(Microbe{D}, extent, dt)
+            add_agent!(model; turn_rate=Inf) # turns every step
+            nsteps = 10
+            adf, _ = run!(model, nsteps; adata=[:vel])
+            @test mean_turnrate(adf,dt) ≈ 1/dt
+            @test mean_runduration(adf,dt) ≈ dt
+            @test detect_turns(adf) == BitMatrix(ones(nsteps,1))
+            @test rundurations(adf,dt) == [repeat([dt],nsteps)]
+
+            D == 1 && continue # only test rotational diffusion for D>1
+            model = StandardABM(Microbe{D}, extent, dt)
+            # never turns but makes small deviations due to brownian noise
+            Drot = 0.1
+            add_agent!(model; turn_rate=0.0, rotational_diffusivity=Drot)
+            nsteps = 10
+            adf, _ = run!(model, nsteps; adata=[:vel])
+            # detects turns at each step if threshold is not set
+            @test detect_turns(adf) == BitMatrix(ones(nsteps,1))
+            # set threshold at 4σ to ignore rotational diffusion
+            threshold_angle = 4 * sqrt(2*Drot*dt)
+            @test detect_turns(adf;threshold_angle) == BitMatrix(zeros(nsteps,1))
+            @test mean_turnrate(adf,dt;threshold_angle) == 0.0
+            @test mean_runduration(adf,dt;threshold_angle) == Inf
+            @test rundurations(adf,dt;threshold_angle) == [Float64[]]
+        end
+    end
+
     @testset "Autocorrelation function" begin
         for D in 1:3
             dt = 0.1
