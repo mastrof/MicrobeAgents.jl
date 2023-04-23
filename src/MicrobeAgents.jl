@@ -57,5 +57,6 @@ include("analysis/postprocess.jl")
 include("analysis/msd.jl")
 include("analysis/correlation_functions.jl")
 include("analysis/drift.jl")
+include("analysis/turn_detection.jl")
 
 end
