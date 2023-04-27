@@ -101,6 +101,11 @@ function Agents.add_agent!(
     add_agent_pos!(microbe, model)
 end
 
+"""
+    initialize_markovian_variables!(microbe::Celani, model)
+Initialize the internal markovian variables of `microbe` to be at steady state
+with respect to the `concentration_field` defined by `model`.
+"""
 function initialize_markovian_variables!(microbe::Celani, model)
     W = microbe.markovian_variables
     λ = 1/microbe.memory
