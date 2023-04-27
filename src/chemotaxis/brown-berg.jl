@@ -10,9 +10,9 @@ Default parameters:
 - `rotational_diffusivity = 0.035` rad²/s coefficient of brownian rotational diffusion
 - `radius = 0.5` μm equivalent spherical radius of the microbe
 - `state = 0.0` corresponds to 'weighted dPb/dt' in the paper
-- `motor_gain = 660` s
+- `gain = 660` s
 - `receptor_binding_constant = 100` μM
-- `adaptation_time = 1` s
+- `memory = 1` s
 """
 mutable struct BrownBerg{D} <: AbstractMicrobe{D}
     id::Int
@@ -24,9 +24,9 @@ mutable struct BrownBerg{D} <: AbstractMicrobe{D}
     rotational_diffusivity::Float64
     radius::Float64
     state::Float64
-    motor_gain::Float64
+    gain::Float64
     receptor_binding_constant::Float64
-    adaptation_time::Float64
+    memory::Float64
 
     BrownBerg{D}(
         id::Int = rand(1:typemax(Int32)),
@@ -38,20 +38,20 @@ mutable struct BrownBerg{D} <: AbstractMicrobe{D}
         rotational_diffusivity::Real = 0.035,
         radius::Real = 0.5,
         state::Real = 0.0,
-        motor_gain::Real = 660.0,
+        gain::Real = 660.0,
         receptor_binding_constant::Real = 100.0,
-        adaptation_time::Real = 1.0,
+        memory::Real = 1.0,
     ) where {D} = new{D}(
         id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
         Float64(rotational_diffusivity), Float64(radius), Float64(state),
-        Float64(motor_gain), Float64(receptor_binding_constant),
-        Float64(adaptation_time)
+        Float64(gain), Float64(receptor_binding_constant),
+        Float64(memory)
     )
 end # struct
 
 function _affect!(microbe::BrownBerg, model)
     Δt = model.timestep
-    τₘ = microbe.adaptation_time
+    τₘ = microbe.memory
     β = Δt / τₘ # memory loss factor
     KD = microbe.receptor_binding_constant
     S = microbe.state # weighted dPb/dt at previous step
@@ -66,7 +66,7 @@ end # function
 
 function _turnrate(microbe::BrownBerg, model)
     ν₀ = microbe.turn_rate # unbiased
-    g = microbe.motor_gain
+    g = microbe.gain
     S = microbe.state
     return ν₀*exp(-g*S) # modulated turn rate
 end # function

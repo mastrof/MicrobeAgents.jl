@@ -11,9 +11,9 @@ Default parameters:
 - `turn_rate = 2.22` Hz → '1/τ₀'
 - `state = 0.0` → 'S'
 - `rotational_diffusivity = 0.035` rad²/s
-- `adaptation_time = 1.3` s → 'τₘ'
-- `receptor_gain = 50.0` μM⁻¹ → 'κ'
-- `motor_gain = 50.0` → 'Γ'
+- `memory = 1.3` s → 'τₘ'
+- `gain_receptor = 50.0` μM⁻¹ → 'κ'
+- `gain = 50.0` → 'Γ'
 - `chemotactic_precision = 6.0` → 'Π'
 - `radius = 0.5` μm → 'a'
 """
@@ -27,9 +27,9 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
     rotational_diffusivity::Float64
     radius::Float64
     state::Float64
-    adaptation_time::Float64
-    receptor_gain::Float64
-    motor_gain::Float64
+    memory::Float64
+    gain_receptor::Float64
+    gain::Float64
     chemotactic_precision::Float64
 
     Brumley{D}(
@@ -42,15 +42,15 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
         rotational_diffusivity::Real = 0.035,
         radius::Real = 0.5,
         state::Real = 0.0,
-        adaptation_time::Real = 1.3,
-        receptor_gain::Real = 50.0,
-        motor_gain::Real = 50.0,
+        memory::Real = 1.3,
+        gain_receptor::Real = 50.0,
+        gain::Real = 50.0,
         chemotactic_precision::Real = 6.0,
     ) where {D} = new{D}(
         id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
         Float64(rotational_diffusivity), Float64(radius), Float64(state), 
-        Float64(adaptation_time), Float64(receptor_gain),
-        Float64(motor_gain), Float64(chemotactic_precision)
+        Float64(memory), Float64(gain_receptor),
+        Float64(gain), Float64(chemotactic_precision)
     )
 
 end # struct
@@ -58,11 +58,11 @@ end # struct
 function _affect!(microbe::Brumley, model)
     Δt = model.timestep
     Dc = model.compound_diffusivity
-    τₘ = microbe.adaptation_time
+    τₘ = microbe.memory
     α = exp(-Δt/τₘ) # memory persistence factor
     a = microbe.radius
     Π = microbe.chemotactic_precision
-    κ = microbe.receptor_gain
+    κ = microbe.gain_receptor
     u = model.concentration_field(microbe.pos, model)
     ∇u = model.concentration_gradient(microbe.pos, model)
     ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
@@ -78,7 +78,7 @@ end # function
 
 function _turnrate(microbe::Brumley, model)
     ν₀ = microbe.turn_rate # unbiased
-    Γ = microbe.motor_gain
+    Γ = microbe.gain
     S = microbe.state
     return (1 + exp(-Γ*S)) * ν₀/2 # modulated turn rate
 end # function
