@@ -49,8 +49,8 @@ using LinearAlgebra: norm
             @test fieldnames(BrownBerg{D}) == (
                 :id, :pos, :motility, :vel, :speed,
                 :turn_rate, :rotational_diffusivity,
-                :radius, :state, :motor_gain,
-                :receptor_binding_constant, :adaptation_time
+                :radius, :state, :gain,
+                :receptor_binding_constant, :memory
             )
             @test m.pos isa NTuple{D,Float64}
             @test m.vel isa NTuple{D,Float64}
@@ -60,7 +60,7 @@ using LinearAlgebra: norm
             model = StandardABM(BrownBerg{D}, ntuple(_->100,D), 0.1)
             add_agent!(model)
             m = model[1]
-            @test turnrate(m, model) == m.turn_rate*exp(-m.motor_gain*m.state)
+            @test turnrate(m, model) == m.turn_rate*exp(-m.gain*m.state)
             @test m.state == 0
         end
     end
@@ -72,8 +72,8 @@ using LinearAlgebra: norm
             @test fieldnames(Brumley{D}) == (
                 :id, :pos, :motility, :vel, :speed,
                 :turn_rate, :rotational_diffusivity,
-                :radius, :state, :adaptation_time,
-                :receptor_gain, :motor_gain,
+                :radius, :state, :memory,
+                :gain_receptor, :gain,
                 :chemotactic_precision
             )
             @test m.pos isa NTuple{D,Float64}
@@ -84,7 +84,7 @@ using LinearAlgebra: norm
             model = StandardABM(Brumley{D}, ntuple(_->100,D), 0.1)
             add_agent!(model)
             m = model[1]
-            @test turnrate(m, model) == (1+exp(-m.motor_gain*m.state))*m.turn_rate/2
+            @test turnrate(m, model) == (1+exp(-m.gain*m.state))*m.turn_rate/2
             @test m.state == 0.0
         end
     end
@@ -95,8 +95,9 @@ using LinearAlgebra: norm
             @test m isa AbstractMicrobe{D}
             @test fieldnames(Celani{D}) == (
                 :id, :pos, :motility, :vel, :speed,
-                :turn_rate, :state, :rotational_diffusivity,
-                :gain, :memory, :radius, :chemotactic_precision
+                :turn_rate, :markovian_variables, :state,
+                :rotational_diffusivity, :gain, :memory,
+                :radius, :chemotactic_precision
             )
             @test m.pos isa NTuple{D,Float64}
             @test m.vel isa NTuple{D,Float64}
@@ -106,10 +107,11 @@ using LinearAlgebra: norm
             model = StandardABM(Celani{D}, ntuple(_->100,D), 0.1)
             add_agent!(model)
             m = model[1]
-            @test turnrate(m,model) == m.turn_rate*m.state[4]
+            @test turnrate(m,model) == m.turn_rate*(1-m.gain*m.state)
             affect!(m, model)
             # concentration_field is null, so state should be unchanged
-            @test m.state == [0.0, 0.0, 0.0, 1.0]
+            @test m.markovian_variables == zeros(3)
+            @test m.state == 1.0
         end
     end
     @testset "Xie" begin
