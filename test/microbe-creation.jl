@@ -111,7 +111,21 @@ using LinearAlgebra: norm
             affect!(m, model)
             # concentration_field is null, so state should be unchanged
             @test m.markovian_variables == zeros(3)
-            @test m.state == 1.0
+            @test m.state == 0.0
+
+            # if the model has a non-zero concentration field
+            # markovian variables and internal state should be
+            # initialized from the appropriate steady state values
+            C = 2.0
+            concentration_field(pos, model) = C
+            properties = Dict(:concentration_field => concentration_field)
+            model = StandardABM(Celani{D}, ntuple(_->100,D), 0.1; properties)
+            add_agent!(model)
+            m = model[1]
+            p = m.pos
+            λ = 1/m.memory
+            @test m.state == 0.0
+            @test m.markovian_variables == [C/λ, C/λ^2, 2C/λ^3]
         end
     end
     @testset "Xie" begin
