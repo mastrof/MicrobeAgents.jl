@@ -52,7 +52,7 @@ end # struct
 function _affect!(microbe::BrownBerg, model)
     Δt = model.timestep
     τₘ = microbe.adaptation_time
-    β = Δt / τₘ # memory loss factor
+    β = exp(-Δt / τₘ) # memory loss factor
     KD = microbe.receptor_binding_constant
     S = microbe.state # weighted dPb/dt at previous step
     u = model.concentration_field(microbe.pos, model)
@@ -60,7 +60,7 @@ function _affect!(microbe::BrownBerg, model)
     ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
     du_dt = dot(microbe.vel, ∇u)*microbe.speed + ∂ₜu
     M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement
-    microbe.state = β*M + S*exp(-β) # new weighted dPb/dt
+    microbe.state = (1-β)*M + S*β # new weighted dPb/dt
     return nothing
 end # function
 
