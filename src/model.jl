@@ -20,6 +20,26 @@ default_ABM_properties = Dict(
     :update! => tick!
 )
 
+
+"""
+    UnremovableABM(MicrobeType, extent, timestep; kwargs...)
+Extension of the `Agents.UnremovableABM` method for microbe types.
+Implementation of `AgentBasedModel` where agents can only be added but not removed.
+See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
+
+**Arguments**
+- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
+- `extent`: a `NTuple{D,<:Real}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial extent of the simulation domain.
+- `timestep`: the integration timestep of the simulation.
+
+**Keywords**
+- `properties`: additional container of data to specify model-level properties. MicrobeAgents.jl includes a set of default properties (detailed at the end).
+- `periodic = true`: whether the space is periodic or not
+- `scheduler = Schedulers.fastest`
+- `rng = Random.default_rng()`
+- `spacing = minimum(extent)/20`
+- `warn = true`
+"""
 function Agents.UnremovableABM(
     T::Type{A},
     extent::NTuple{D,<:Real}, timestep::Real;
@@ -39,6 +59,27 @@ function Agents.UnremovableABM(
     UnremovableABM(T, space; scheduler, properties, rng, warn)
 end
 
+
+"""
+    StandardABM(MicrobeType, extent, timestep; kwargs...)
+Extension of the `Agents.StandardABM` method for microbe types.
+Implementation of `AgentBasedModel` where agents can be added and removed at any time.
+If agents removal is not required, it is recommended to use `UnremovableABM` for better performance.
+See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
+
+**Arguments**
+- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
+- `extent`: a `NTuple{D,<:Real}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial extent of the simulation domain.
+- `timestep`: the integration timestep of the simulation.
+
+**Keywords**
+- `properties`: additional container of data to specify model-level properties. MicrobeAgents.jl includes a set of default properties (detailed at the end).
+- `periodic = true`: whether the space is periodic or not
+- `scheduler = Schedulers.fastest`
+- `rng = Random.default_rng()`
+- `spacing = minimum(extent)/20`
+- `warn = true`
+"""
 function Agents.StandardABM(
     T::Type{A},
     extent::NTuple{D,<:Real}, timestep::Real;
@@ -66,6 +107,18 @@ end
 # and only then extract a random velocity with the correct rng.
 # It is sufficient to extend this single method because it is
 # the lowest level method to which all the others fall back.
+"""
+    add_agent!([pos,] [MicrobeType,] model; kwargs...)
+MicrobeAgents extension of `Agents.add_agent!`.
+Creates and adds a new microbe to `model`, using the constructor of the agent type
+of the model.
+If `model` accepts mixed agent types, then `MicrobeType` must be specified.
+If not specified, `pos` will be assigned randomly in the model domain.
+
+Keywords can be used to specify default values to pass to the microbe constructor,
+otherwise default values from the constructor will be used.
+If unspecified, the function also generates a random velocity vector.
+"""
 function Agents.add_agent!(
     pos::Agents.ValidPos,
     A::Type{<:AbstractMicrobe{D}},
@@ -82,6 +135,25 @@ function Agents.add_agent!(
     add_agent_pos!(microbe, model)
 end
 
+
+"""
+    run!(model, n=1; kwargs...)
+MicrobeAgents extension of `Agents.run!`, which assumes the `agent_step!` to be
+`microbe_step!`, and the `model_step!` to be `model.update!`.
+Runs the model for a number of steps specified by `n`. If `n` is not specified, only 1 step is performed.
+`n` can also be a function `n(model,s)::Bool` (where `s` is the current number of steps taken)
+in which case the simulations stops when `n` returns true.
+
+**Keywords**
+- `when = true`: at which steps to perform collection/processing of agent data.
+- `when_model = when`: at which steps to perform collection/processing of model data.
+- `adata::Vector`: agent data to collect
+- `mdata::Vector`: model data to collect
+- `obtainer = identity`
+- `agents_first = true`: whether agent stepping should be performed before model stepping
+- `showprogress = false`
+See `Agents.run!` and `Agents.step!` for detailed information.
+"""
 function Agents.run!(model::AgentBasedModel{S,A}, n = 1;
     when = true,
     when_model = when,
