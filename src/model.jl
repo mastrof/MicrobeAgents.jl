@@ -39,6 +39,26 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 - `rng = Random.default_rng()`
 - `spacing = minimum(extent)/20`
 - `warn = true`
+
+**Default `properties`**
+When a model is created, a default set of properties is included in the model
+(`MicrobeAgents.default_ABM_properties`):
+```
+default_ABM_properties = Dict(
+    :t => 0, # counter for timekeeping
+    :concentration_field => (pos,model) -> 0.0,
+    :concentration_gradient => (pos,model) -> zero.(pos),
+    :concentration_time_derivative => (pos,model) -> 0.0,
+    # required by models of chemotaxis, default value is glutamate diffusivity
+    :compound_diffusivity => 608.0,
+    # model stepper, by default only keeps time
+    :update! => tick!
+)
+```
+By including these default properties, we make sure that all the chemotaxis models
+will work even without extra user intervention.
+All these properties can be overwritten by simply passing an equivalent key
+to the `properties` dictionary when creating the model.
 """
 function Agents.UnremovableABM(
     T::Type{A},
@@ -79,6 +99,26 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 - `rng = Random.default_rng()`
 - `spacing = minimum(extent)/20`
 - `warn = true`
+
+**Default `properties`**
+When a model is created, a default set of properties is included in the model
+(`MicrobeAgents.default_ABM_properties`):
+```
+default_ABM_properties = Dict(
+    :t => 0, # counter for timekeeping
+    :concentration_field => (pos,model) -> 0.0,
+    :concentration_gradient => (pos,model) -> zero.(pos),
+    :concentration_time_derivative => (pos,model) -> 0.0,
+    # required by models of chemotaxis, default value is glutamate diffusivity
+    :compound_diffusivity => 608.0,
+    # model stepper, by default only keeps time
+    :update! => tick!
+)
+```
+By including these default properties, we make sure that all the chemotaxis models
+will work even without extra user intervention.
+All these properties can be overwritten by simply passing an equivalent key
+to the `properties` dictionary when creating the model.
 """
 function Agents.StandardABM(
     T::Type{A},
