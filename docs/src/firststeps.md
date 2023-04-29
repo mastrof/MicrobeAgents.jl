@@ -113,4 +113,5 @@ RunReverseFlick()
 The default values provided by the constructors always consider a constant
 swimming speed of 30 (micron/s) and "ideal" turn-angle distributions.
 For more accurate simulation where the reorientation statistics of the microbes
-is important, appropriate distributions should be specified.
+is important, appropriate distributions should be specified;
+the constructors will accept any object that can be sampled via `rand()`.
