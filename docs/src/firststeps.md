@@ -89,3 +89,28 @@ x = first.(adf.pos)
 y = last.(adf.pos)
 plot(x, y)
 ```
+
+## Motility patterns
+In MicrobeAgents.jl, motility patterns are represented as instances of
+`AbstractMotility`.
+In particular, currently available patterns are distinguished into two further
+categories: `AbstractMotilityOneStep` or `AbstractMotilityTwoStep`.
+```@docs
+AbstractMotilityOneStep
+AbstractMotilityTwoStep
+```
+One-step motility pattern are characterized by a single swimming stage. Two-step
+motility patterns instead have two stages which can have distinct properties;
+these two stages are referred to as "forward" and "backward" but can really
+represent anything.
+
+MicrobeAgents.jl defines three standard motility patterns:
+```@docs
+RunTumble()
+RunReverse()
+RunReverseFlick()
+```
+The default values provided by the constructors always consider a constant
+swimming speed of 30 (micron/s) and "ideal" turn-angle distributions.
+For more accurate simulation where the reorientation statistics of the microbes
+is important, appropriate distributions should be specified.
