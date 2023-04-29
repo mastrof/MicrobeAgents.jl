@@ -41,6 +41,7 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 - `warn = true`
 
 **Default `properties`**
+
 When a model is created, a default set of properties is included in the model
 (`MicrobeAgents.default_ABM_properties`):
 ```
@@ -101,6 +102,7 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 - `warn = true`
 
 **Default `properties`**
+
 When a model is created, a default set of properties is included in the model
 (`MicrobeAgents.default_ABM_properties`):
 ```
