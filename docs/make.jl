@@ -6,7 +6,7 @@ makedocs(
     modules = [MicrobeAgents],
     pages = [
         "Home" => "index.md",
-        "Tutorial" => ["firststeps.md", "randomwalks.md"],
+        "Tutorial" => ["firststeps.md", "randomwalks.md", "chemotaxis.md"],
         "Validation" => "validation.md"
     ],
     format = Documenter.HTML(
