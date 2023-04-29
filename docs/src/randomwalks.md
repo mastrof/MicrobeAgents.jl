@@ -1,0 +1,76 @@
+# Random walks
+
+Generating random walks with MicrobeAgents.jl is super-easy, and the walk properties
+can be fine-tuned to match all sorts of needs.
+
+By default, MicrobeAgents.jl produces (discrete approximations of) Continuous Time Random Walks,
+i.e. random walks where the waiting times between reorientations are i.i.d. random variables.
+In the absence of chemotaxis (or other behavioral responses that affect microbe motility),
+the generated random walks will display an exponential distribution of waiting times.
+
+## Simple Random Walk in D=1
+```
+using MicrobeAgents
+
+L = 1000
+extent = (L,)
+dt = 0.1
+n = 10
+nsteps = 600
+
+model = UnremovableABM(Microbe{1}, extent, dt)
+foreach(_ -> add_agent!((0,), model), 1:n)
+```
+By default, `UnremovableABM` will create a periodic domain; this will allow us to mimic an "infinite" system.
+All the microbes have been initialized from position 0, without specifying any further property, so they will be initialized with a random velocity (either `(+1,)` or `(-1,)` in this 1D scenario), `speed=30.0`, and `turn_rate=1.0`. The motility is set by default to `RunTumble(speed=[30.0])` but any other motile pattern in 1D would produce the same result; only speed is relevant here.
+
+To run the simulation while collecting the bacterial positions at each step we will then run
+```
+adata = [:pos]
+adf, _ = run!(model, nsteps; adata)
+```
+The dataframe `adf` can now be turned into a matrix of positions, with each row representing a different timepoint, and each column a different microbe. And since we used periodic boundary conditions, the trajectories can be unfolded
+```
+trajectories = MicrobeAgents.unfold(vectorize_adf_measurement(adf, :pos), L)
+```
+`trajectories` is now a `Matrix{Tuple{Float64}}`.
+To obtain the `x` positions for plotting we can call
+```
+x = first.(trajectories)
+t = axes(x,1) .* dt
+plot(t,x,lab=false,xlab="time",ylab="displacement")
+```
+
+## Random walks with different motile patterns in D=2
+The procedure to generate a random walk in higher dimensions is exactly the same, we just need to specify the appropriate number of dimensions when defining the space `extent` and when calling `Microbe{D}`.
+We will now see how different motility patterns can be introduced.
+The setup is identical
+```
+L = 500
+extent = (L,L)
+dt = 0.1
+nsteps = 600
+
+model = UnremovableABM(Microbe{2}, extent, dt)
+```
+But we now add bacteria with different properties (1 per type)
+```
+add_agent!(model; motility=RunReverse(speed_forward=[55]), rotational_diffusivity=0.2)
+add_agent!(model; motility=RunTumble(speed=Normal(30,6)), turn_rate=0.5)
+add_agent!(model; motility=RunReverseFlick(speed_backward=[6]), rotational_diffusivity=0.1)
+```
+and then we run and visualize as before
+```
+adata = [:pos]
+adf, _ = run!(model, nsteps; adata)
+
+postprocessing
+traj = MicrobeAgents.unfold(vectorize_adf_measurement(adf,:pos), L)
+x = first.(traj)
+y = last.(traj)
+t = axes(x,1) .* dt
+plot(x, y, xlab="x", ylab="y", ratio=1,
+    lab=["RunReverse" "RunTumble" "RunReverseFlick"]
+)
+```
+![Two-dimensional random walks with different motility patterns](rw2d.svg)
