@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Chemotaxis · MicrobeAgents.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MicrobeAgents.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Tutorial</span><ul><li><a class="tocitem" href="../firststeps/">First steps</a></li><li><a class="tocitem" href="../randomwalks/">Random walks</a></li><li class="is-active"><a class="tocitem" href>Chemotaxis</a><ul class="internal"><li><a class="tocitem" href="#Linear-concentration-ramp"><span>Linear concentration ramp</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../validation/">Validation</a></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorial</a></li><li class="is-active"><a href>Chemotaxis</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Chemotaxis</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/mastrof/MicrobeAgents.jl/blob/main/docs/src/chemotaxis.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Chemotaxis"><a class="docs-heading-anchor" href="#Chemotaxis">Chemotaxis</a><a id="Chemotaxis-1"></a><a class="docs-heading-anchor-permalink" href="#Chemotaxis" title="Permalink"></a></h1><h2 id="Linear-concentration-ramp"><a class="docs-heading-anchor" href="#Linear-concentration-ramp">Linear concentration ramp</a><a id="Linear-concentration-ramp-1"></a><a class="docs-heading-anchor-permalink" href="#Linear-concentration-ramp" title="Permalink"></a></h2><p>As a first step into the world of chemotaxis, we will reproduce an in-silico version of a classical laboratory assay: a linear concentration ramp in a rectangular channel. We will use the <code>BrownBerg</code> model.</p><p>To define concentration profiles, MicrobeAgents.jl expects three functions: <code>concentration_field</code>, <code>concentration_gradient</code> and <code>concentration_time_derivative</code>, all of which must have a method with signature <code>(pos,model)</code>, i.e. they take as input a microbe position and the ABM object. In this example the field is static, so we won&#39;t define a time derivative.</p><pre><code class="nohighlight hljs">using MicrobeAgents
+
+@inline function concentration_field(pos, model)
+    C₀ = model.C₀
+    C₁ = model.C₁
+    Lx = first(model.space.extent)
+    concentration_field(pos,Lx,C₀,C₁)
+end
+@inline concentration_field(pos,Lx,C₀,C₁) = C₀ + (C₁-C₀)*pos[1]/Lx
+
+@inline function concentration_gradient(pos, model)
+    C₀ = model.C₀
+    C₁ = model.C₁
+    Lx = first(model.space.extent)
+    concentration_gradient(pos,Lx,C₀,C₁)
+end
+@inline concentration_gradient(pos,Lx,C₀,C₁) = ntuple(i-&gt;i==1 ? (C₁-C₀)/Lx : 0.0, length(pos))</code></pre><p>The quantities <code>C₀</code> and <code>C₁</code> represent the concentration values at left (<code>x=0</code>) and right (<code>x=L</code>) edges of the channel. Notice that <code>concentration_gradient</code> returns a <code>Tuple</code> with the same size as <code>pos</code>, not just a <code>Number</code>. This is required since the gradient is a vector quantity.</p><p>We can set up the ABM as usual, but we will need to supply <code>:concentration_field</code> and <code>:concentration_gradient</code> to the <code>properties</code> container, as well as <code>:C₀</code> and <code>:C₁</code>. Then we can run the simulation and make a nice plot.</p><pre><code class="nohighlight hljs">Lx, Ly = 3000, 1500
+extent = (Lx, Ly)
+Δt = 0.1 # timestep (s)
+T = 120 # simulation time (s)
+nsteps = round(Int, T/Δt)
+n = 100
+
+periodic = false
+C₀, C₁ = 0.0, 20.0 # μM
+properties = Dict(
+    :C₀ =&gt; C₀,
+    :C₁ =&gt; C₁,
+    :concentration_field =&gt; concentration_field,
+    :concentration_gradient =&gt; concentration_gradient
+)
+model = UnremovableABM(BrownBerg{2}, extent, Δt; periodic, properties)
+for i in 1:n
+    add_agent!(model)
+end
+
+adata = [:pos]
+adf, mdf = run!(model, nsteps; adata)
+
+traj = vectorize_adf_measurement(adf, :pos)
+x = first.(traj)
+y = last.(traj)
+
+ts = unique(adf.step) .* Δt
+lw = eachindex(ts) ./ length(ts) .* 3
+xmesh = range(0,Lx,length=100)
+ymesh = range(0,Ly,length=100)
+xn = @view x[:,1:10]
+yn = @view y[:,1:10]
+c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
+heatmap(xmesh, ymesh, c&#39;, cbar=false, ratio=1, axis=false, c=:bone)
+plot!(xn, yn, lab=false, lw=lw, lc=(1:n)&#39;)
+scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)</code></pre><p><img src="../linear-ramp.svg" alt="Drift of chemotactic bacteria in a linear concentration ramp"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../randomwalks/">« Random walks</a><a class="docs-footer-nextpage" href="../validation/">Validation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 2 May 2023 21:20">Tuesday 2 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
