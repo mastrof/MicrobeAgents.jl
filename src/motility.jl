@@ -102,9 +102,11 @@ Subtypes have the following fields:
 For 2-dimensional microbe types, only `polar` defines reorientations and `azimuthal` is ignored.
 
 New one-step motility patterns can be created as
-    MicrobeAgents.@motility NewMotilityType MotilityOneStep AbstractMotilityOneStep begin
-        # some extra fields if needed
-    end
+```
+MicrobeAgents.@motility NewMotilityType MotilityOneStep AbstractMotilityOneStep begin
+    # some extra fields if needed
+end
+```
 The necessary fields and subtyping will be added automatically, only new extra fields
 need to be specified in the definition.
 If default values have to be specified, a constructor needs to be defined explicitly.
@@ -118,6 +120,14 @@ struct MotilityOneStep
 end
 
 @motility RunTumble MotilityOneStep AbstractMotilityOneStep begin; end
+"""
+    RunTumble(; speed=(30.0,), polar=Uniform(-π,π), azimuthal=Arccos())
+Run-tumble motility.
+The kwargs `speed`, `polar` and `azimuthal` must be sampleable objects
+(ranges, arrays, tuples, distributions...), _not scalars_.
+
+With default values, the reorientations are uniform on the sphere.
+"""
 RunTumble(; speed=(30.0,), polar=Uniform(-π,π), azimuthal=Arccos()) = RunTumble(speed, polar, azimuthal)
 
 
@@ -137,9 +147,11 @@ For 2-dimensional microbe types, only polar distributions define reorientations
 while azimuthal ones are ignored.
 
 New two-step motility patterns can be created as
-    MicrobeAgents.@motility NewMotilityType MotilityTwoStep AbstractMotilityTwoStep begin
-        # some extra fields if needed
-    end
+```
+MicrobeAgents.@motility NewMotilityType MotilityTwoStep AbstractMotilityTwoStep begin
+    # some extra fields if needed
+end
+```
 The necessary fields and subtyping will be added automatically, only new extra fields
 need to be specified in the definition.
 If default values have to be specified, a constructor needs to be defined explicitly.
@@ -157,6 +169,23 @@ struct MotilityTwoStep
 end
 
 @motility RunReverse MotilityTwoStep AbstractMotilityTwoStep begin; end
+"""
+    RunReverse(;
+        speed_forward = (30.0,),
+        polar_forward = (π,),
+        azimuthal_forward = Arccos(),
+        speed_backward = speed_forward,
+        polar_backward = polar_forward,
+        azimuthal_backward = azimuthal_forward
+    )
+Run-reverse motility, with possibility to have different properties between
+the forward (run) and backward (reverse) stages.
+All the fields must be sampleable objects (ranges, arrays, tuples, distributions...),
+_not scalars_.
+
+With default values, reorientations are always perfect reversals
+and the speed is identical between forward and backward runs.
+"""
 RunReverse(;
     speed_forward = (30.0,),
     polar_forward = (π,),
@@ -172,6 +201,24 @@ RunReverse(;
 
 
 @motility RunReverseFlick MotilityTwoStep AbstractMotilityTwoStep begin; end
+"""
+    RunReverseFlick(;
+        speed_forward = (30.0,),
+        polar_forward = (π,),
+        azimuthal_forward = Arccos(),
+        speed_backward = speed_forward,
+        polar_backward = (-π/2, π/2),
+        azimuthal_backward = azimuthal_forward
+    )
+Run-reverse-flick motility, with possibility to have different properties between
+the forward (run) and backward (reverse) stages.
+All the fields must be sampleable objects (ranges, arrays, tuples, distributions...),
+_not scalars_.
+
+With default values, reorientations after forward runs are perfect reversals,
+while reorientations after backward runs are uniformly distributed on the circle
+normal to the run direction; speed is identical between forward and backward runs.
+"""
 RunReverseFlick(;
     speed_forward = (30.0,),
     polar_forward = (π,),

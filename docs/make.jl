@@ -6,8 +6,9 @@ makedocs(
     modules = [MicrobeAgents],
     pages = [
         "Home" => "index.md",
-        "Tutorial" => "tutorial.md",
-        "Validation" => "validation.md"
+        "Tutorial" => ["firststeps.md", "randomwalks.md", "chemotaxis.md"],
+        "Validation" => "validation.md",
+        "API" => "api.md"
     ],
     format = Documenter.HTML(
         prettyurls = get(ENV, "CI", nothing) == "true"
