@@ -5,8 +5,14 @@ export neighborlist!, update_neighborlist!
 
 Initialise a neighbor list of the microbes in `model` with neighbor radius `cutoff` and
 add it to the `model` properties with name `key`.
+
+*Neighbor lists are not supported in 1-dimensional models.*
 """
 function neighborlist!(model::ABM, cutoff::Real, key::Symbol)
+    D = length(spacesize(model))
+    if D == 1
+        throw(ArgumentError("Neighbor lists are not supported in 1-dimensional models."))
+    end
     abmproperties(model)[key] = neighborlist(model, cutoff)
 end
 
@@ -15,8 +21,14 @@ end
 
 Initialise a neighbor list between the microbes in `model` and the objects `y`
 with neighbor radius `cutoff` and add it to the `model` properties with name `key`.
+
+*Neighbor lists are not supported in 1-dimensional models.*
 """
 function neighborlist!(model::ABM, y, cutoff, key)
+    D = length(spacesize(model))
+    if D == 1
+        throw(ArgumentError("Neighbor lists are not supported in 1-dimensional models."))
+    end
     abmproperties(model)[key] = neighborlist(model, y, cutoff)
 end
 

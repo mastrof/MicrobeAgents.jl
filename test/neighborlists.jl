@@ -5,7 +5,7 @@ using StaticArrays
 
 @testset "Neighbor Lists" begin
     @testset "StandardABM" begin
-        for D in 2:3
+        for D in 1:3
             L = 100
             extent = ntuple(_->L, D)
             dt = 1
@@ -14,6 +14,10 @@ using StaticArrays
             foreach(_ -> add_agent!(model), 1:n)
             listkey = :neighbors
             cutoff = 10.0
+            if D == 1
+                @test_throws ArgumentError neighborlist!(model, cutoff, listkey)
+                continue
+            end
             neighborlist!(model, cutoff, listkey)
             # check that the key is correctly added to the model
             @test haskey(abmproperties(model), listkey)
@@ -37,7 +41,7 @@ using StaticArrays
     end
 
     @testset "UnremovableABM" begin
-        for D in 2:3
+        for D in 1:3
             L = 100
             extent = ntuple(_->L, D)
             dt = 1
@@ -46,6 +50,10 @@ using StaticArrays
             foreach(_ -> add_agent!(model), 1:n)
             listkey = :neighbors
             cutoff = 10.0
+            if D == 1
+                @test_throws ArgumentError neighborlist!(model, cutoff, listkey)
+                continue
+            end
             neighborlist!(model, cutoff, listkey)
             # check that the key is correctly added to the model
             @test haskey(abmproperties(model), listkey)
