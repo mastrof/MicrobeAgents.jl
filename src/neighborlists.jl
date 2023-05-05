@@ -1,28 +1,36 @@
 export neighborlist!, update_neighborlist!
 
 """
-    neighborlist!(model::ABM, x::AbstractVector, cutoff::Real, key::Symbol)
+    neighborlist!(model::ABM, cutoff::Real, key::Symbol)
 
-Initialise a neighbor list between objects `x` with neighbor radius `cutoff` and
+Initialise a neighbor list of the microbes in `model` with neighbor radius `cutoff` and
 add it to the `model` properties with name `key`.
 """
-function neighborlist!(model::ABM, x::AbstractVector, cutoff::Real, key::Symbol)
-    model.properties[key] = neighborlist(x, model.space, cutoff)
-end
-"""
-    neighborlist!(model::ABM, x::AbstractVector, y::AbstractVector, cutoff::Real, key::Symbol)
-
-Initialise a neighbor list between objects `x` and `y` with neighbor radius `cutoff` and
-add it to the `model` properties with name `key`.
-"""
-function neighborlist!(model::ABM, x::AbstractVector, y::AbstractVector, cutoff::Real, key::Symbol)
-    model.properties[key] = neighborlist(x, y, model.space, cutoff)
+function neighborlist!(model::ABM, cutoff::Real, key::Symbol)
+    abmproperties(model)[key] = neighborlist(model, cutoff)
 end
 
-neighborlist(x::AbstractVector, model::ABM, cutoff::Real) =
-    neighborlist(x, model.space, cutoff)
-neighborlist(x::AbstractVector, y::AbstractVector, model::ABM, cutoff::Real) =
-    neighborlist(x, y, model.space, cutoff)
+"""
+    neighborlist!(model::ABM, y, cutoff::Real, key::Symbol)
+
+Initialise a neighbor list between the microbes in `model` and the objects `y`
+with neighbor radius `cutoff` and add it to the `model` properties with name `key`.
+"""
+function neighborlist!(model::ABM, y, cutoff, key)
+    model.properties[key] = neighborlist(model, y, cutoff)
+end
+
+
+function neighborlist(model::ABM, cutoff)
+    microbes = make_position_vector(model)
+    neighborlist(microbes, model.space, cutoff)
+end
+function neighborlist(model::ABM, y, cutoff)
+    microbes = make_position_vector(model)
+    neighborlist(microbes, make_position_vector(y), cutoff)
+end
+
+
 """
     function neighborlist(x::AbstractVector, space::ContinuousSpace, cutoff::Real)
 
@@ -32,9 +40,8 @@ using a neighbor radius `cutoff`.
 function neighborlist(
     x::AbstractVector, space::ContinuousSpace{D,P}, cutoff::Real
 ) where {D,P}
-    pos_x = [SVector{length(xᵢ)}(xᵢ) for xᵢ in _pos.(x)]
     PeriodicSystem(
-        xpositions = pos_x,
+        xpositions = x,
         # if space is not periodic the unitcell size must be extended by cutoff
         unitcell = SVector(spacesize(space) .+ (P ? 0.0 : cutoff)),
         cutoff = cutoff,
@@ -51,11 +58,9 @@ function neighborlist(
     x::AbstractVector, y::AbstractVector,
     space::ContinuousSpace{D,P}, cutoff::Real
 ) where {D,P}
-    pos_x = [SVector{length(xᵢ)}(xᵢ) for xᵢ in _pos.(x)]
-    pos_y = [SVector{length(yᵢ)}(yᵢ) for yᵢ in _pos.(y)]
     PeriodicSystem(
-        xpositions = pos_x,
-        ypositions = pos_y,
+        xpositions = x,
+        ypositions = y,
         # if space is not periodic the unitcell size must be extended by cutoff
         unitcell = SVector(spacesize(space) .+ (P ? 0.0 : cutoff)),
         cutoff = cutoff,
@@ -79,4 +84,19 @@ end
 function update_neighborlist!(microbe::AbstractMicrobe, model, listkey)
     neighbor_list = model.properties[listkey]
     neighbor_list.xpositions[microbe.id] = SVector(microbe.pos)
+end
+
+@inline function make_position_vector(model::UnremovableABM)
+    [SVector(_pos(a)) for a in allagents(model)]
+end
+@inline function make_position_vector(model::StandardABM)
+    ids = sort(collect(allids(model)))
+    [SVector(_pos(model[i])) for i in ids]
+end
+@inline function make_position_vector(x::AbstractVector)
+    [SVector{length(xᵢ)}(_pos(xᵢ)) for xᵢ in x]
+end
+@inline function make_position_vector(x::Dict)
+    indices = sort(collect(keys(x)))
+    [SVector{length(x[i])}(_pos(x[i])) for i in indices]
 end
