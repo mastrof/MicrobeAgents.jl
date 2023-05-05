@@ -17,7 +17,7 @@ Initialise a neighbor list between the microbes in `model` and the objects `y`
 with neighbor radius `cutoff` and add it to the `model` properties with name `key`.
 """
 function neighborlist!(model::ABM, y, cutoff, key)
-    model.properties[key] = neighborlist(model, y, cutoff)
+    abmproperties(model)[key] = neighborlist(model, y, cutoff)
 end
 
 
@@ -82,9 +82,10 @@ function update_neighborlist!(model, listkey)
     end
 end
 function update_neighborlist!(microbe::AbstractMicrobe, model, listkey)
-    neighbor_list = model.properties[listkey]
+    neighbor_list = abmproperties(model)[listkey]
     neighbor_list.xpositions[microbe.id] = SVector(microbe.pos)
 end
+
 
 @inline function make_position_vector(model::UnremovableABM)
     [SVector(_pos(a)) for a in allagents(model)]
