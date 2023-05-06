@@ -1,6 +1,7 @@
 module MicrobeAgents
 
 using Agents
+using CellListMap.PeriodicSystems
 using Distributions
 using LinearAlgebra
 using Random
@@ -35,6 +36,7 @@ include("utils.jl")
 include("distributions.jl")
 include("motility.jl")
 include("rotations.jl")
+include("neighborlists.jl")
 
 include("microbes.jl")
 include("microbe_step.jl")
