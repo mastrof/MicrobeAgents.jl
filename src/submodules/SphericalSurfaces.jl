@@ -10,13 +10,17 @@ using Rotations
 using GeometryBasics: HyperSphere, Point
 
 export HyperSphere, contact
-export init_surface_interactions!, microbe_surface_step!
+export surface_interactions!, microbe_surface_step!
 export stick!, slide!, stickyslide!
 export is_encounter
 
 
 #== Utility functions ==#
 # dispatch hides call to Point
+"""
+    HyperSphere(center::NTuple{D,<:Real}, radius::Real) where D
+Create a `D`-dimensional sphere with radius `radius` and origin at `center`.
+"""
 HyperSphere(center::NTuple{D}, radius::Real) where D = HyperSphere(Point(Float64.(center)), Float64(radius))
 
 # define _pos to interface with distance functions
@@ -26,6 +30,12 @@ using MicrobeAgents: _pos
 @inline _radius(a::NTuple{D,<:Real}) where D = 0.0
 @inline _radius(a::AbstractMicrobe) = a.radius
 @inline _radius(a::HyperSphere{D}) where D = a.r
+"""
+    contact(a, b, model)
+Check whether `a` and `b` are at contact, given the spatial properties of model.
+`a` and `b` can be any mix of `AbstractMicrobe`s, `HyperSphere`s and `NTuple`s.
+For `NTuple`s, it is assumed that the points have radius 0.
+"""
 @inline contact(a,b,model) = distance(a,b,model) ≲ _radius(a) + _radius(b)
 
 @inline safe_acos(x::T) where T = x ≈ 1 ? zero(x) : x ≈ -1 ? T(π) : acos(x)
@@ -33,13 +43,19 @@ using MicrobeAgents: _pos
 
 
 #== Surface Interactions ==#
-function init_surface_interactions!(
-    model::ABM, spheres::AbstractVector, cutoff::Real;
-    key_list = :neighborlist_spheres, interaction = (_,_,_) -> nothing,
+"""
+    surface_interactions!(model, spheres, interaction=stickyslide!)
+Setup `model` to evaluate surface interactions between its microbes and `spheres`.
+
+Three types of surface interactions are available out-of-the-box:
+`stick!`, `slide!` and `stickyslide!`.
+The `interaction` defaults to `stickyslide!`
+"""
+function surface_interactions!(
+    model::ABM, spheres::AbstractVector, interaction=stickyslide!
 )
     abmproperties(model)[:spheres] = spheres
     abmproperties(model)[:surface!] = interaction
-    neighborlist!(model, cutoff, key_list) # currently not used
     #== used only for stickyslide! ==#
     abmproperties(model)[:is_stuck] = fill(false, nagents(model))
     abmproperties(model)[:slidingdirection] = fill(+1, nagents(model))
