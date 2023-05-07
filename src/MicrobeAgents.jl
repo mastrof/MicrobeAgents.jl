@@ -48,9 +48,6 @@ include("chemotaxis/brumley.jl")
 include("chemotaxis/celani.jl")
 include("chemotaxis/xie.jl")
 
-# obstacles, encounters, pathfinding...
-using GeometryBasics: HyperSphere, Point
-include("bodies/spheres.jl")
 using Agents.Pathfinding
 include("pathfinder.jl")
 
@@ -60,5 +57,8 @@ include("analysis/msd.jl")
 include("analysis/correlation_functions.jl")
 include("analysis/drift.jl")
 include("analysis/turn_detection.jl")
+
+# submodules
+include("submodules/SphericalSurfaces.jl")
 
 end
