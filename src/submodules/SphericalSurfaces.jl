@@ -4,9 +4,11 @@ module SphericalSurfaces
 
 using MicrobeAgents
 using Agents
+using StaticArrays
 using CellListMap.PeriodicSystems
 using LinearAlgebra: dot, norm
 using Rotations
+using CoordinateTransformations
 using GeometryBasics: HyperSphere, Point
 
 export HyperSphere, contact
@@ -59,22 +61,9 @@ function surface_interactions!(
     #== used only for stickyslide! ==#
     abmproperties(model)[:is_stuck] = fill(false, nagents(model))
     abmproperties(model)[:slidingdirection] = fill(+1, nagents(model))
+    # used only in 3d
+    abmproperties(model)[:angularcoords] = fill((0.0, 0.0), nagents(model))
 end
-
-
-#== these are not used at the moment
-function surface_interaction!(model::ABM, listkey::Symbol)
-    map_pairwise!(
-        (x, y, i, j, d², f) -> surface_interaction!(x, y, i, j, d², f, model),
-        abmproperties(model)[listkey]
-    )
-end
-function surface_interaction!(x, y, i, j, d², f, model)
-    microbe = model[i]
-    sphere = abmproperties(model)[:spheres][j]
-    model.surface_affect!(microbe, sphere, model)
-end
-==#
 
 
 """
@@ -179,43 +168,56 @@ end
 function stickyslide!(microbe::AbstractMicrobe{3}, sphere::HyperSphere{3}, model)
     if ~model.is_stuck[microbe.id]
         stick!(microbe, sphere, model)
-        model.is_stuck[microbe.id] = true
-        model.slidingdirection[microbe.id] = slidedirection(microbe, sphere, model)
-        return microbe # type stability
-    else
-        s = if ~haskey(abmproperties(model), :slidemode)
-            model.slidingdirection[microbe.id]
-        elseif uppercase(model.slidemode) == "CCW"
-            +1
-        elseif uppercase(model.slidemode) == "CW"
-            -1
+        model.is_stuck[microbe.id] = contact(microbe, sphere, model)
+        if model.is_stuck[microbe.id]
+            model.slidingdirection[microbe.id] = slidedirection(microbe, sphere, model)
+            R = _radius(microbe) + _radius(sphere)
+            d = distancevector(microbe, sphere, model)
+            sfc = SphericalFromCartesian()(SVector(d))
+            θ = sfc.θ
+            ϕ = sfc.ϕ - π
+            model.angularcoords[microbe.id] = (θ,ϕ)
         end
-        Δt = model.timestep
-        R = _radius(microbe) + _radius(sphere)
-        ω = s * microbe.speed / sphere.r # angular velocity
-        d = distancevector(sphere, microbe, model)
-        x, y, z = d
-        θ = safe_acos(z/R) + ω*Δt
-        ϕ = sign(y)*safe_acos(x / (x^2+y^2)) + ω*Δt
-        δ = (sin(θ)*cos(ϕ), sin(θ)*sin(ϕ), cos(θ))
-        new_pos = _pos(sphere) .+ R.*δ
-        move_agent!(microbe, new_pos, model)
+        return microbe # type stability
     end
-    nothing
+    s = if ~haskey(abmproperties(model), :slidemode)
+        model.slidingdirection[microbe.id]
+    elseif uppercase(model.slidemode) == "CCW"
+        +1
+    elseif uppercase(model.slidemode) == "CW"
+        -1
+    end
+    Δt = model.timestep
+    R = _radius(microbe) + _radius(sphere)
+    ω = s * microbe.speed / sphere.r # angular velocity
+    θ, ϕ = model.angularcoords[microbe.id]
+    sfc = Spherical(R, θ, ϕ+ω*Δt)
+    new_pos = _pos(sphere) .+ Tuple(CartesianFromSpherical()(sfc))
+    model.angularcoords[microbe.id] = (sfc.θ, sfc.ϕ)
+    move_agent!(microbe, new_pos, model)
 end
 
 function slidedirection(microbe::AbstractMicrobe{2}, sphere::HyperSphere{2}, model)
     # rotation_between only works with 3d vectors
     d = [distancevector(sphere, microbe, model)..., 0.0]
-    M = rotation_between(d, [1, 0, 0])
+    M = rotation_between(d, [1,0, 0])
     Vy = M[2,1]*microbe.vel[1] + M[2,2]*microbe.vel[2] # y component of rotated vel
     Vy ≥ 0 ? +1 : -1
+end
+function slidedirection(microbe::AbstractMicrobe{3}, sphere::HyperSphere{3}, model)
+    d = SVector(distancevector(sphere, microbe, model))
+    M = rotation_between(d, [1,0,0])
+    Vy = dot(view(M,2,:), microbe.vel)
+    Vz = dot(view(M,3,:), microbe.vel)
+    sy = Vy ≥ 0 ? +1 : -1
+    sz = Vz ≥ 0 ? +1 : -1
+    sy*sz
 end
 
 
 #== Encounters ==#
 """
-    is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D                 end # module
+    is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
 Check if an encounter occurred between `microbe` and `sphere`.
 """
 function is_encounter(microbe::AbstractMicrobe{D}, sphere::HyperSphere{D}, model)::Bool where D
