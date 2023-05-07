@@ -26,9 +26,10 @@ using MicrobeAgents: _pos
 @inline _radius(a::NTuple{D,<:Real}) where D = 0.0
 @inline _radius(a::AbstractMicrobe) = a.radius
 @inline _radius(a::HyperSphere{D}) where D = a.r
-@inline contact(a,b,model) = distance(a,b,model) ≤ _radius(a) + _radius(b)
+@inline contact(a,b,model) = distance(a,b,model) ≲ _radius(a) + _radius(b)
 
 @inline safe_acos(x::T) where T = x ≈ 1 ? zero(x) : x ≈ -1 ? T(π) : acos(x)
+@inline ≲(x, y) = x ≤ y || isapprox(x, y; atol=1e-10) # \lesssim
 
 
 #== Surface Interactions ==#
@@ -138,9 +139,7 @@ end
 """
 function stickyslide!(microbe::AbstractMicrobe{2}, sphere::HyperSphere{2}, model)
     if ~model.is_stuck[microbe.id]
-        println("I'm not stuck")
         stick!(microbe, sphere, model)
-        println(distance(microbe, sphere, model) - _radius(sphere))
         model.is_stuck[microbe.id] = contact(microbe, sphere, model)
         model.slidingdirection[microbe.id] = slidedirection(microbe, sphere, model)
         return microbe # type stability
