@@ -34,9 +34,10 @@ using Random
         dt = 1.0
         for D in 1:3
             extent = ntuple(_ -> L, D)
+            space = ContinuousSpace(extent)
 
             # periodic
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, space, dt)
             x₁ = ntuple(i -> i==1 ? 1.0 : 0.0, D)
             x₂ = ntuple(i -> i==1 ? L-1 : 0.0, D)
             add_agent!(x₁, model)
@@ -53,7 +54,8 @@ using Random
 
             # closed box
             # periodic
-            model = StandardABM(Microbe{D}, extent, dt; periodic=false)
+            space = ContinuousSpace(extent; periodic=false)
+            model = StandardABM(Microbe{D}, space, dt)
             x₁ = ntuple(i -> i==1 ? 1.0 : 0.0, D)
             x₂ = ntuple(i -> i==1 ? L-1 : 0.0, D)
             add_agent!(x₁, model)

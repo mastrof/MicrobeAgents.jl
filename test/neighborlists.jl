@@ -8,8 +8,9 @@ using StaticArrays
         for D in 1:3
             L = 100
             extent = ntuple(_->L, D)
+            space = ContinuousSpace(extent)
             dt = 1
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, space, dt)
             n = 10
             foreach(_ -> add_agent!(model), 1:n)
             listkey = :neighbors
@@ -44,8 +45,9 @@ using StaticArrays
         for D in 1:3
             L = 100
             extent = ntuple(_->L, D)
+            space = ContinuousSpace(extent)
             dt = 1
-            model = UnremovableABM(Microbe{D}, extent, dt)
+            model = UnremovableABM(Microbe{D}, space, dt)
             n = 10
             foreach(_ -> add_agent!(model), 1:n)
             listkey = :neighbors
