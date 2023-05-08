@@ -40,14 +40,14 @@ funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
 @inline _pos(a::NTuple{D}) where D = a
 """
     distance(a, b, model)
-Evaluate the euclidean distance between two objects `a` and `b` respecting
-`model` spatial properties.
+Evaluate the euclidean distance between `a` and `b` respecting the spatial
+properties of `model`.
 """
 @inline distance(a, b, model) = euclidean_distance(_pos(a), _pos(b), model)
 """
     distancevector(a, b, model)
-Evaluate the distance vector between two objects `a` and `b` respecting
-`model` spatial properties.
+Evaluate the distance vector from `a` to `b` respecting the spatial
+properties of `model`.
 """
 @inline distancevector(a, b, model) = distancevector(_pos(a), _pos(b), model)
 @inline function distancevector(a::NTuple{D}, b::NTuple{D}, model) where D
