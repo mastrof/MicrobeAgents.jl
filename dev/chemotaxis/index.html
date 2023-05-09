@@ -17,12 +17,13 @@ end
 end
 @inline concentration_gradient(pos,Lx,C₀,C₁) = ntuple(i-&gt;i==1 ? (C₁-C₀)/Lx : 0.0, length(pos))</code></pre><p>The quantities <code>C₀</code> and <code>C₁</code> represent the concentration values at left (<code>x=0</code>) and right (<code>x=L</code>) edges of the channel. Notice that <code>concentration_gradient</code> returns a <code>Tuple</code> with the same size as <code>pos</code>, not just a <code>Number</code>. This is required since the gradient is a vector quantity.</p><p>We can set up the ABM as usual, but we will need to supply <code>:concentration_field</code> and <code>:concentration_gradient</code> to the <code>properties</code> container, as well as <code>:C₀</code> and <code>:C₁</code>. Then we can run the simulation and make a nice plot.</p><pre><code class="nohighlight hljs">Lx, Ly = 3000, 1500
 extent = (Lx, Ly)
+periodic = false
+space = ContinuousSpace(extent; periodic)
 Δt = 0.1 # timestep (s)
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
 n = 100
 
-periodic = false
 C₀, C₁ = 0.0, 20.0 # μM
 properties = Dict(
     :C₀ =&gt; C₀,
@@ -30,7 +31,7 @@ properties = Dict(
     :concentration_field =&gt; concentration_field,
     :concentration_gradient =&gt; concentration_gradient
 )
-model = UnremovableABM(BrownBerg{2}, extent, Δt; periodic, properties)
+model = UnremovableABM(BrownBerg{2}, space, Δt; periodic, properties)
 for i in 1:n
     add_agent!(model)
 end
@@ -51,4 +52,4 @@ yn = @view y[:,1:10]
 c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
 heatmap(xmesh, ymesh, c&#39;, cbar=false, ratio=1, axis=false, c=:bone)
 plot!(xn, yn, lab=false, lw=lw, lc=(1:n)&#39;)
-scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)</code></pre><p><img src="../linear-ramp.svg" alt="Drift of chemotactic bacteria in a linear concentration ramp"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../randomwalks/">« Random walks</a><a class="docs-footer-nextpage" href="../validation/">Validation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 9 May 2023 08:53">Tuesday 9 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)</code></pre><p><img src="../linear-ramp.svg" alt="Drift of chemotactic bacteria in a linear concentration ramp"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../randomwalks/">« Random walks</a><a class="docs-footer-nextpage" href="../validation/">Validation »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.24 on <span class="colophon-date" title="Tuesday 9 May 2023 08:54">Tuesday 9 May 2023</span>. Using Julia version 1.8.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
