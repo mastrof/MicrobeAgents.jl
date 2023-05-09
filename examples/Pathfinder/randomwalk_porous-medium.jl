@@ -5,8 +5,9 @@ using LinearAlgebra
 using Plots
 
 # Physical parameters
-dt = 0.1 # s 
+dt = 0.1 # s
 extent = (1000.0, 500.0) # μm
+space = ContinuousSpace(extent; periodic=false)
 periodic = false
 nbacteria = 10
 
@@ -20,7 +21,7 @@ bodies = [
 ]
 wm = walkmap(bodies, extent, min_radius/25, 0)
 
-model = UnremovableABM(BrownBerg{2}, extent, dt; periodic=false)
+model = UnremovableABM(BrownBerg{2}, space, dt)
 pathfinder!(model, wm)
 foreach(_ -> add_agent!(model), 1:nbacteria)
 adata = [:pos]
