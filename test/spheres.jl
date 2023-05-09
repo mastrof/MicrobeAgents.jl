@@ -6,7 +6,8 @@ using Random
     dt = 1.0
     for D in 1:3
         extent = ntuple(_ -> L, D)
-        model = StandardABM(Microbe{D}, extent, dt)
+        space = ContinuousSpace(extent)
+        model = StandardABM(Microbe{D}, space, dt)
 
         c1 = extent ./ 2
         r1 = 30.0
@@ -24,7 +25,7 @@ using Random
         @test distance(s1,s3,model) ≈ L/2-10
         @test distance(s2,s3,model) ≈ 0
         @test ~contact(s1,s2,model)
-        @test contact(s1,s3,model) 
+        @test contact(s1,s3,model)
         @test contact(s2,s3,model)
 
         x1 = c1 .+ ntuple(i -> i==D ? r1+1 : 0, D)

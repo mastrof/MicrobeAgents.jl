@@ -28,11 +28,12 @@ end
 
 function setupmodel(R, L, n; dt=0.1, rng=Xoshiro(1))
     extent = ntuple(_ -> L, 3)
+    space = ContinuousSpace(extent)
     properties = Dict(
         :sphere => HyperSphere(extent./2, R),
         :encounters => 0,
     )
-    model = UnremovableABM(Microbe{3}, extent, dt; properties, rng)
+    model = UnremovableABM(Microbe{3}, space, dt; properties, rng)
     foreach(_ -> add_agent!(model; turn_rate=2.0), 1:n)
     model → encounters!
     model.properties[:old_positions] = map(m -> m.pos, allagents(model))

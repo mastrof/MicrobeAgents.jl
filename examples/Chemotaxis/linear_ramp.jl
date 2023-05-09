@@ -20,8 +20,9 @@ end
 ##
 
 ## simulation parameters
-Lx, Ly = 3000, 1500
-extent = (Lx, Ly) # domain size (μm)
+Lx, Ly = 3000, 1500 # domain size (μm)
+periodic = false
+space = ContinuousSpace((Lx,Ly); periodic)
 Δt = 0.1 # timestep (s)
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
@@ -29,7 +30,6 @@ n = 100
 ##
 
 ## model setup
-periodic = false
 C₀, C₁ = 0.0, 20.0 # μM
 properties = Dict(
     :C₀ => C₀,
@@ -37,7 +37,7 @@ properties = Dict(
     :concentration_field => concentration_field,
     :concentration_gradient => concentration_gradient
 )
-model = UnremovableABM(BrownBerg{2}, extent, Δt; periodic, properties)
+model = UnremovableABM(BrownBerg{2}, space, Δt; properties)
 for i in 1:n
     add_agent!(model)
 end

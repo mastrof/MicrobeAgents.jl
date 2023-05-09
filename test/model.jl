@@ -7,8 +7,9 @@ using LinearAlgebra: norm
         for D in 1:3
             timestep = 1
             extent = ntuple(_ -> 300, D)
-            model = UnremovableABM(Microbe{D}, extent, timestep)
-            model2 = StandardABM(Microbe{D}, extent, timestep)
+            space = ContinuousSpace(extent)
+            model = UnremovableABM(Microbe{D}, space, timestep)
+            model2 = StandardABM(Microbe{D}, space, timestep)
             @test model isa UnremovableABM
             @test model2 isa StandardABM
             @test Set(keys(model.properties)) == Set((
@@ -19,15 +20,10 @@ using LinearAlgebra: norm
                 :compound_diffusivity,
                 :update!
             ))
-            # by default spacing = minimum(extent)/20
-            @test model.space.spacing == minimum(extent)/20
-            # spacing can also be specified by user
-            model = StandardABM(Microbe{D}, extent, timestep; spacing=5)
-            @test model.space.spacing == 5
 
             # add agents with default constructor, random pos and vel
             rng = MersenneTwister(1234)
-            model = StandardABM(Microbe{D}, extent, timestep; rng)
+            model = StandardABM(Microbe{D}, space, timestep; rng)
             add_agent!(model)
             rng = MersenneTwister(1234)
             pos = Tuple(rand(rng,D) .* extent)
@@ -45,7 +41,7 @@ using LinearAlgebra: norm
             end
 
             # add agents with keyword arguments
-            model = StandardABM(Microbe{D}, extent, timestep)
+            model = StandardABM(Microbe{D}, space, timestep)
             motility = RunReverse(speed_backward=[24.0], motile_state=MotileState(Backward))
             add_agent!(model; turn_rate=0.55, motility)
             @test model[1].turn_rate == 0.55
@@ -59,7 +55,7 @@ using LinearAlgebra: norm
             @test model[2].speed == speed
 
             # add agent to given position
-            model = StandardABM(Microbe{D}, extent, timestep)
+            model = StandardABM(Microbe{D}, space, timestep)
             pos = extent ./ 2
             add_agent!(pos, model)
             @test model[1] isa Microbe{D}
@@ -80,7 +76,8 @@ using LinearAlgebra: norm
         for D in 1:3, ABM in (StandardABM, UnremovableABM)
             dt = 1
             extent = ntuple(_ -> 300, D)
-            model = ABM(Microbe{D}, extent, dt)
+            space = ContinuousSpace(extent)
+            model = ABM(Microbe{D}, space, dt)
             pos = extent ./ 2
             vel1 = rand_vel(D)
             speed1 = rand_speed(RunTumble())
@@ -107,7 +104,7 @@ using LinearAlgebra: norm
             # customize microbe affect! function
             # decreases microbe state value by D at each step
             MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state-=D)
-            model = ABM(Microbe{D}, extent, dt)
+            model = ABM(Microbe{D}, space, dt)
             add_agent!(model)
             run!(model)
             @test model[1].state == -D
@@ -118,13 +115,13 @@ using LinearAlgebra: norm
             @test model[1].state == -D
 
             # customize model.update! function
-            model = ABM(Microbe{D}, extent, dt)
+            model = ABM(Microbe{D}, space, dt)
             tick_more!(model) = (model.t += 3)
             model → tick_more! # now model.t increases by 4 (+1 +3) at each step
             run!(model, 6)
             @test model.t == 6*4
             decrease!(model) = (model.t -= 1)
-            model = ABM(Microbe{D}, extent, dt)
+            model = ABM(Microbe{D}, space, dt)
             # chain arbitrary number of functions
             model → tick_more! → decrease! → decrease! → decrease!
             # now we should be back at only +1 per step

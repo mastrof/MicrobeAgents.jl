@@ -14,9 +14,9 @@ end
 concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
 
 timestep = 0.1 # s
-extent = ntuple(_ -> 500.0, 3) # μm
+space = ContinuousSpace(ntuple(_ -> 500.0, 3)) # μm
 C₀ = 0.01 # μM
-C₁ = 5.0-C₀ # μM 
+C₁ = 5.0-C₀ # μM
 T = 60.0 # s
 t₁ = 20.0 # s
 t₂ = 40.0 # s
@@ -28,7 +28,7 @@ properties = Dict(
     :t₂ => t₂,
 )
 
-model = UnremovableABM(Xie{3}, extent, timestep; properties)
+model = UnremovableABM(Xie{3}, space, timestep; properties)
 add_agent!(model; turn_rate_forward=0, motility=RunReverseFlick(motile_state=MotileState(Forward)))
 add_agent!(model; turn_rate_backward=0, motility=RunReverseFlick(motile_state=MotileState(Backward)))
 

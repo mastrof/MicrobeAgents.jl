@@ -4,13 +4,13 @@ using Plots
 
 ## model parameters
 L = 500
-extent = (L,L,L)
+space = ContinuousSpace((L,L,L))
 dt = 0.1
 nsteps = 600
 ##
 
 ## abm setup
-model = UnremovableABM(Microbe{3}, extent, dt)
+model = UnremovableABM(Microbe{3}, space, dt)
 # add bacteria with different motile properties
 add_agent!(model; motility=RunReverse(speed_forward=[55]), rotational_diffusivity=0.2)
 add_agent!(model; motility=RunTumble(speed=Normal(30,6)), turn_rate=0.5)

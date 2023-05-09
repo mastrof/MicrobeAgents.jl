@@ -22,6 +22,7 @@ end
 # Physical parameters
 dt = 0.1 # s 
 extent = (1000.0, 500.0) # μm
+space = ContinuousSpace(extent; periodic=false)
 periodic = false
 nbacteria = 10
 
@@ -43,7 +44,7 @@ properties = Dict(
     :C₂ => C₂,
 )
 
-model = UnremovableABM(BrownBerg{2}, extent, dt; periodic=false, properties)
+model = UnremovableABM(BrownBerg{2}, space, dt; properties)
 pathfinder!(model, wm)
 foreach(_ -> add_agent!((0.0, rand()*extent[2]), model), 1:nbacteria)
 adata = [:pos]

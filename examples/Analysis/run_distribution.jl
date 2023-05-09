@@ -3,10 +3,10 @@ using Distributions
 using Plots
 
 L = 1000
-extent = (L,L)
+space = ContinuousSpace((L,L))
 dt = 0.01
 
-model = UnremovableABM(Microbe{2}, extent, dt)
+model = UnremovableABM(Microbe{2}, space, dt)
 n = 500
 Drot = 0.1
 τ = 1.0
