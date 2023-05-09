@@ -30,19 +30,25 @@ end
 end
 @inline concentration_gradient(pos,Lx,C₀,C₁) = ntuple(i->i==1 ? (C₁-C₀)/Lx : 0.0, length(pos))
 ```
-The quantities `C₀` and `C₁` represent the concentration values at left (`x=0`) and right (`x=L`) edges of the channel.
-Notice that `concentration_gradient` returns a `Tuple` with the same size as `pos`, not just a `Number`. This is required since the gradient is a vector quantity.
+The quantities `C₀` and `C₁` represent the concentration values at left
+(`x=0`) and right (`x=L`) edges of the channel.
+Notice that `concentration_gradient` returns a `Tuple` with the same
+size as `pos`, not just a `Number`.
+This is required since the gradient is a vector quantity.
 
-We can set up the ABM as usual, but we will need to supply `:concentration_field` and `:concentration_gradient` to the `properties` container, as well as `:C₀` and `:C₁`. Then we can run the simulation and make a nice plot.
+We can set up the ABM as usual, but we will need to supply `:concentration_field`
+and `:concentration_gradient` to the `properties` container, as well as
+`:C₀` and `:C₁`. Then we can run the simulation and make a nice plot.
 ```
 Lx, Ly = 3000, 1500
 extent = (Lx, Ly)
+periodic = false
+space = ContinuousSpace(extent; periodic)
 Δt = 0.1 # timestep (s)
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
 n = 100
 
-periodic = false
 C₀, C₁ = 0.0, 20.0 # μM
 properties = Dict(
     :C₀ => C₀,
@@ -50,7 +56,7 @@ properties = Dict(
     :concentration_field => concentration_field,
     :concentration_gradient => concentration_gradient
 )
-model = UnremovableABM(BrownBerg{2}, extent, Δt; periodic, properties)
+model = UnremovableABM(BrownBerg{2}, space, Δt; periodic, properties)
 for i in 1:n
     add_agent!(model)
 end
