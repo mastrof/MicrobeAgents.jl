@@ -1,18 +1,19 @@
 using MicrobeAgents
 using Plots
 
-dt = 0.05 # s 
+dt = 0.05 # s
 L = 500.0 # μm
 extent = (L,L,L)
+space = ContinuousSpace(extent)
 
 θs = [π/6, π/4, π/3, π/2, π]
 α = cos.(θs)
 
-U = 30.0 # μm/s 
-τ = 1.0 # s 
+U = 30.0 # μm/s
+τ = 1.0 # s
 turn_rate = 1 / τ
 
-models = map(_ -> UnremovableABM(Microbe{3}, extent, dt), θs)
+models = map(_ -> UnremovableABM(Microbe{3}, space, dt), θs)
 nmicrobes = 100
 for (i,θ) in enumerate(θs)
     motility = RunTumble(speed=[U], polar=[θ,-θ])
@@ -26,7 +27,7 @@ adfs = [run!(model, nsteps; adata)[1] for model in models]
 lags = unique(round.(Int, exp10.(range(0,3,length=20))))
 MSD = hcat([msd(adf, lags; L) for adf in adfs]...)
 
-begin  
+begin
     t = (1:nsteps).*dt
     T = @. τ / (1-α')
     s = t ./ T

@@ -33,7 +33,8 @@ Microbe{3}(
 ```
 
 
-All the other subtypes of `AbstractMicrobe` work in a similar way, although they will have distinct default values and extra fields.
+All the other subtypes of `AbstractMicrobe` work in a similar way, although
+they will have distinct default values and extra fields.
 
 ```@docs
 BrownBerg
@@ -45,9 +46,12 @@ Xie
 
 ## Creating a model
 MicrobeAgents.jl exploits the `AgentBasedModel` interface from Agents.jl.
-While the standard Agents.jl syntax will always work, it is typically more convenient to use the method extensions provided by MicrobeAgents.jl, which also includes some default parameters required by the simulations.
+While the standard Agents.jl syntax will always work, it is typically more
+convenient to use the method extensions provided by MicrobeAgents.jl, which
+also includes some default parameters required by the simulations.
 Both `StandardABM` and `UnremovableABM` are supported.
-Whenever removal of microbes during the simulation is not needed, `UnremovableABM` is the recommended choice.
+Whenever removal of microbes during the simulation is not needed,
+`UnremovableABM` is the recommended choice.
 ```@docs
 UnremovableABM
 StandardABM
@@ -55,11 +59,18 @@ StandardABM
 
 To create a simple model, we just need to choose a microbe type, the size of
 the simulation domain and the integration timestep.
+The properties of the simulation domain are wrapped in the `ContinuousSpace`
+object (re-exported from Agents.jl).
 ```
 extent = (1000.0, 500.0) # size of 2D simulation domain
+space = ContinuousSpace(extent)
 dt = 0.1 # integration timestep
-model = UnremovableABM(Microbe{2}, extent, dt)
+model = UnremovableABM(Microbe{2}, space, dt)
 ```
+By default this creates a model with periodic boundary conditions.
+For hard wall boundary conditions we can instead specify
+`space=ContinuousSpace(extent; periodic=false)`.
+
 Now bacteria can be added with `add_agent!` function.
 ```@docs
 add_agent!

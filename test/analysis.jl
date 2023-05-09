@@ -7,12 +7,13 @@ using LinearAlgebra: norm
     L = 100
     for D in 1:3
         extent = ntuple(_ -> L, D)
+        space = ContinuousSpace(extent)
         pos = ntuple(zero, D)
         U = 1
         motility = RunTumble(speed=[U])
         vel = ntuple(_ -> 1/√D, D)
         turn_rate = 0
-        model = StandardABM(Microbe{D}, extent, dt)
+        model = StandardABM(Microbe{D}, space, dt)
         add_agent!(pos, model; vel, motility, turn_rate)
         nsteps = 10
         adata = [:pos]
@@ -32,7 +33,8 @@ using LinearAlgebra: norm
         L = 100
         for D in 1:3
             extent = ntuple(_ -> L, D)
-            model = StandardABM(Microbe{D}, extent, dt)
+            space = ContinuousSpace(extent)
+            model = StandardABM(Microbe{D}, space, dt)
             add_agent!(model; turn_rate=Inf) # turns every step
             nsteps = 10
             adf, _ = run!(model, nsteps; adata=[:vel])
@@ -42,7 +44,7 @@ using LinearAlgebra: norm
             @test rundurations(adf,dt) == [repeat([dt],nsteps)]
 
             D == 1 && continue # only test rotational diffusion for D>1
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, space, dt)
             # never turns but makes small deviations due to brownian noise
             Drot = 0.1
             add_agent!(model; turn_rate=0.0, rotational_diffusivity=Drot)
@@ -66,12 +68,14 @@ using LinearAlgebra: norm
             v(microbe) = microbe.speed .* microbe.vel
             adata = [v]
             L = 100; extent = ntuple(_ -> L, D)
+            space = ContinuousSpace(extent)
             rng = Xoshiro(35)
-            model_periodic = StandardABM(Microbe{D}, extent, dt; rng)
+            model_periodic = StandardABM(Microbe{D}, space, dt; rng)
             add_agent!(model_periodic)
             adf_periodic, = run!(model_periodic, nsteps; adata)
             rng = Xoshiro(35)
-            model_closed = StandardABM(Microbe{D}, extent, dt; periodic=false, rng)
+            space = ContinuousSpace(extent; periodic=false)
+            model_closed = StandardABM(Microbe{D}, space, dt; rng)
             add_agent!(model_closed)
             adf_closed, = run!(model_closed, nsteps; adata)
             # boundary conditions don't affect vacf
@@ -90,8 +94,9 @@ using LinearAlgebra: norm
         for D in 1:3
             dt = 0.1
             L = 100; extent = ntuple(_ -> L, D)
+            space = ContinuousSpace(extent)
             turn_rate = 0 # ballistic motion
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, space, dt)
             add_agent!(model; turn_rate)
             nsteps = 50
             adata = [:pos]
@@ -105,8 +110,9 @@ using LinearAlgebra: norm
             if D > 1 # skip trivial D=1 case
                 L₀ = 100; L₁ = 40
                 extent = ntuple(i -> i==1 ? L₀ : L₁, D)
+                space = ContinuousSpace(extent)
                 turn_rate = 0 # ballistic motion
-                model = StandardABM(Microbe{D}, extent, dt)
+                model = StandardABM(Microbe{D}, space, dt)
                 add_agent!(model; turn_rate)
                 nsteps = 50
                 adata = [:pos]
@@ -118,7 +124,7 @@ using LinearAlgebra: norm
 
             motility = RunReverse()
             turn_rate = Inf # reversal at each step
-            model = StandardABM(Microbe{D}, extent, dt)
+            model = StandardABM(Microbe{D}, space, dt)
             add_agent!(extent./2, model; motility, turn_rate)
             nsteps = 5
             adata = [:pos]

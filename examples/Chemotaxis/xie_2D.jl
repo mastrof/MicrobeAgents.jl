@@ -12,6 +12,7 @@ concentration_field(pos, p₀, C, σ) = C * exp(-sum(abs2.(pos.-p₀))/(2*σ^2))
 
 timestep = 0.1 # s
 extent = ntuple(_ -> 1000.0, 2) # μm
+space = ContinuousSpace(extent; periodic=false)
 p₀ = extent./2 # μm
 C = 500.0 # μM
 σ = 25.0 # μm
@@ -23,7 +24,7 @@ properties = Dict(
 )
 
 rng = MersenneTwister(12)
-model = UnremovableABM(Xie{2}, extent, timestep; rng, properties, periodic=false)
+model = UnremovableABM(Xie{2}, space, timestep; rng, properties)
 foreach(_ -> add_agent!(model; chemotactic_precision=6.0), 1:300)
 
 nsteps = 5000

@@ -3,14 +3,14 @@ using Plots
 
 ## model parameters
 L = 1000
-extent = (L,)
+space = ContinuousSpace((L,))
 dt = 0.1
 n = 10
 nsteps = 600
 ##
 
 ## abm setup
-model = UnremovableABM(Microbe{1}, extent, dt)
+model = UnremovableABM(Microbe{1}, space, dt)
 foreach(_ -> add_agent!((0,), model), 1:n)
 ##
 

@@ -57,7 +57,8 @@ using LinearAlgebra: norm
             @test m.speed == 30.0
             @test m.motility isa RunTumble
 
-            model = StandardABM(BrownBerg{D}, ntuple(_->100,D), 0.1)
+            space = ContinuousSpace(ntuple(_->100,D))
+            model = StandardABM(BrownBerg{D}, space, 0.1)
             add_agent!(model)
             m = model[1]
             @test turnrate(m, model) == m.turn_rate*exp(-m.gain*m.state)
@@ -81,7 +82,8 @@ using LinearAlgebra: norm
             @test m.speed == 46.5
             @test m.motility isa RunReverseFlick
 
-            model = StandardABM(Brumley{D}, ntuple(_->100,D), 0.1)
+            space = ContinuousSpace(ntuple(_->100,D))
+            model = StandardABM(Brumley{D}, space, 0.1)
             add_agent!(model)
             m = model[1]
             @test turnrate(m, model) == (1+exp(-m.gain*m.state))*m.turn_rate/2
@@ -103,8 +105,9 @@ using LinearAlgebra: norm
             @test m.vel isa NTuple{D,Float64}
             @test m.speed == 30.0
             @test m.motility isa RunTumble
-            
-            model = StandardABM(Celani{D}, ntuple(_->100,D), 0.1)
+
+            space = ContinuousSpace(ntuple(_->100,D))
+            model = StandardABM(Celani{D}, space, 0.1)
             add_agent!(model)
             m = model[1]
             @test turnrate(m,model) == m.turn_rate*(1-m.gain*m.state)
@@ -119,7 +122,8 @@ using LinearAlgebra: norm
             C = 2.0
             concentration_field(pos, model) = C
             properties = Dict(:concentration_field => concentration_field)
-            model = StandardABM(Celani{D}, ntuple(_->100,D), 0.1; properties)
+            space = ContinuousSpace(ntuple(_->100,D))
+            model = StandardABM(Celani{D}, space, 0.1; properties)
             add_agent!(model)
             m = model[1]
             p = m.pos

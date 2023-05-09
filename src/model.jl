@@ -1,40 +1,21 @@
-export StandardABM, UnremovableABM, add_agent!, add_agent_pos!, run!
+# extended from Agents.jl
+export StandardABM, UnremovableABM, add_agent!, run!
+# exported from Agents.jl without extensions
+export add_agent_pos!, ContinuousSpace
 
 """
-    tick!(model::AgentBasedModel)
-Increase time count `model.t` by 1.
-"""
-tick!(model::AgentBasedModel) = (model.t += 1)
-# extend function chaining
-→(model::AgentBasedModel, f, g...) = (model.update! = →(model.update! → f, g...))
-→(model::AgentBasedModel, f) = (model.update! = model.update! → f)
-
-default_ABM_properties = Dict(
-    :t => 0, # counter for timekeeping
-    :concentration_field => (pos,model) -> 0.0,
-    :concentration_gradient => (pos,model) -> zero.(pos),
-    :concentration_time_derivative => (pos,model) -> 0.0,
-    # required by models of chemotaxis, default value is glutamate diffusivity
-    :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
-)
-
-
-"""
-    UnremovableABM(MicrobeType, extent, timestep; kwargs...)
+    UnremovableABM(MicrobeType, space, timestep; kwargs...)
 Extension of the `Agents.UnremovableABM` method for microbe types.
 Implementation of `AgentBasedModel` where agents can only be added but not removed.
 See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 
 **Arguments**
 - `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
-- `extent`: a `NTuple{D,<:Real}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial extent of the simulation domain.
+- `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial properties of the simulation domain.
 - `timestep`: the integration timestep of the simulation.
 
 **Keywords**
 - `properties`: additional container of data to specify model-level properties. MicrobeAgents.jl includes a set of default properties (detailed at the end).
-- `periodic = true`: whether the space is periodic or not
 - `scheduler = Schedulers.fastest`
 - `rng = Random.default_rng()`
 - `spacing = minimum(extent)/20`
@@ -45,7 +26,7 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 When a model is created, a default set of properties is included in the model
 (`MicrobeAgents.default_ABM_properties`):
 ```
-default_ABM_properties = Dict(
+DEFAULT_ABM_PROPERTIES = Dict(
     :t => 0, # counter for timekeeping
     :concentration_field => (pos,model) -> 0.0,
     :concentration_gradient => (pos,model) -> zero.(pos),
@@ -62,18 +43,14 @@ All these properties can be overwritten by simply passing an equivalent key
 to the `properties` dictionary when creating the model.
 """
 function Agents.UnremovableABM(
-    T::Type{A},
-    extent::NTuple{D,<:Real}, timestep::Real;
-    periodic = true,
+    T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
-    warn = true,
-    spacing = minimum(extent)/20
+    warn = true
 ) where {D,A<:AbstractMicrobe{D}}
-    space = ContinuousSpace(extent; spacing, periodic)
     properties = Dict(
-        default_ABM_properties...,
+        DEFAULT_ABM_PROPERTIES...,
         properties...,
         :timestep => timestep
     )
@@ -82,7 +59,7 @@ end
 
 
 """
-    StandardABM(MicrobeType, extent, timestep; kwargs...)
+    StandardABM(MicrobeType, space, timestep; kwargs...)
 Extension of the `Agents.StandardABM` method for microbe types.
 Implementation of `AgentBasedModel` where agents can be added and removed at any time.
 If agents removal is not required, it is recommended to use `UnremovableABM` for better performance.
@@ -90,15 +67,13 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 
 **Arguments**
 - `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
-- `extent`: a `NTuple{D,<:Real}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial extent of the simulation domain.
+- `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial properties of the simulation domain.
 - `timestep`: the integration timestep of the simulation.
 
 **Keywords**
 - `properties`: additional container of data to specify model-level properties. MicrobeAgents.jl includes a set of default properties (detailed at the end).
-- `periodic = true`: whether the space is periodic or not
 - `scheduler = Schedulers.fastest`
 - `rng = Random.default_rng()`
-- `spacing = minimum(extent)/20`
 - `warn = true`
 
 **Default `properties`**
@@ -106,7 +81,7 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 When a model is created, a default set of properties is included in the model
 (`MicrobeAgents.default_ABM_properties`):
 ```
-default_ABM_properties = Dict(
+DEFAULT_ABM_PROPERTIES = Dict(
     :t => 0, # counter for timekeeping
     :concentration_field => (pos,model) -> 0.0,
     :concentration_gradient => (pos,model) -> zero.(pos),
@@ -123,18 +98,14 @@ All these properties can be overwritten by simply passing an equivalent key
 to the `properties` dictionary when creating the model.
 """
 function Agents.StandardABM(
-    T::Type{A},
-    extent::NTuple{D,<:Real}, timestep::Real;
-    periodic = true,
+    T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
     warn = true,
-    spacing = minimum(extent)/20
 ) where {D,A<:AbstractMicrobe{D}}
-    space = ContinuousSpace(extent; spacing, periodic)
     properties = Dict(
-        default_ABM_properties...,
+        DEFAULT_ABM_PROPERTIES...,
         properties...,
         :timestep => timestep
     )
@@ -211,3 +182,24 @@ function Agents.run!(model::AgentBasedModel{S,A}, n = 1;
         obtainer, agents_first, showprogress
     )
 end
+
+
+"""
+    tick!(model::AgentBasedModel)
+Increase time count `model.t` by 1.
+"""
+tick!(model::AgentBasedModel) = (model.t += 1)
+# extend function chaining
+→(model::AgentBasedModel, f, g...) = (model.update! = →(model.update! → f, g...))
+→(model::AgentBasedModel, f) = (model.update! = model.update! → f)
+
+DEFAULT_ABM_PROPERTIES = Dict(
+    :t => 0, # counter for timekeeping
+    :concentration_field => (pos,model) -> 0.0,
+    :concentration_gradient => (pos,model) -> zero.(pos),
+    :concentration_time_derivative => (pos,model) -> 0.0,
+    # required by models of chemotaxis, default value is glutamate diffusivity
+    :compound_diffusivity => 608.0,
+    # model stepper, by default only keeps time
+    :update! => tick!
+)

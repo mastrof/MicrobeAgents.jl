@@ -7,7 +7,8 @@ using Random
     dt = 1.0
     for D in 1:3
         extent = ntuple(_ -> L, D)
-        model = StandardABM(Microbe{D}, extent, dt)
+        space = ContinuousSpace(extent)
+        model = StandardABM(Microbe{D}, space, dt)
 
         c1 = extent ./ 2
         r1 = 30.0
@@ -39,11 +40,11 @@ using Random
         @test_throws KeyError is_encounter(model[1],s1,model)
         # add test with proper encounter checking
     end
-
     @testset "Interactions" begin
         for D in 1:3
             extent = ntuple(_ -> L, D)
-            model = StandardABM(Microbe{D}, extent, dt)
+            space = ContinuousSpace(extent)
+            model = StandardABM(Microbe{D}, space, dt)
             c = extent ./ 2
             R = L/4
             s = HyperSphere(c, R)
