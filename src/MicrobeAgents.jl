@@ -43,6 +43,11 @@ include("microbe_step.jl")
 include("model.jl")
 
 # implementations of chemotactic models
+"""
+Conversion factor (1/√(number of molecules) --> 1/√(moles)) used
+in the evaluation of chemotactic sensing noise.
+"""
+global const CONV_NOISE::Float64 = 0.04075
 include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
 include("chemotaxis/celani.jl")

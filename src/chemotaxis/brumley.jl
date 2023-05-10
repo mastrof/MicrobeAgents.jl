@@ -48,7 +48,7 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
         chemotactic_precision::Real = 6.0,
     ) where {D} = new{D}(
         id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
-        Float64(rotational_diffusivity), Float64(radius), Float64(state), 
+        Float64(rotational_diffusivity), Float64(radius), Float64(state),
         Float64(memory), Float64(gain_receptor),
         Float64(gain), Float64(chemotactic_precision)
     )
@@ -68,7 +68,7 @@ function _affect!(microbe::Brumley, model)
     ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
     # gradient measurement
     μ = dot(microbe.vel, ∇u)*microbe.speed + ∂ₜu # mean
-    σ = Π * 0.04075 * sqrt(3*u / (π*a*Dc*Δt^3)) # noise
+    σ = CONV_NOISE * Π * sqrt(3*u / (π*a*Dc*Δt^3)) # noise
     M = rand(Normal(μ,σ)) # measurement
     # update internal state
     S = microbe.state

@@ -63,7 +63,7 @@ function _affect!(microbe::Celani, model)
     c = model.concentration_field(microbe.pos, model)
     a = microbe.radius
     Π = microbe.chemotactic_precision
-    σ = Π * 0.04075 * sqrt(3*c / (5*π*Dc*a*Δt)) # noise (Berg-Purcell)
+    σ = CONV_NOISE * Π * sqrt(3*c / (5*π*Dc*a*Δt)) # noise (Berg-Purcell)
     M = rand(Normal(c,σ)) # measurement
     λ = 1/microbe.memory
     W = microbe.markovian_variables
