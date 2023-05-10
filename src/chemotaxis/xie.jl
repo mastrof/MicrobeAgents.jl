@@ -124,7 +124,7 @@ function _affect!(microbe::Xie, model; ε=1e-16)
     a = microbe.radius
     Π = microbe.chemotactic_precision
     # noisy concentration measurement with Berg-Purcell formula
-    σ = Π * 0.04075 * sqrt(3*c / (5*π*Dc*a*Δt))
+    σ = CONV_NOISE * Π * sqrt(3*c / (5*π*Dc*a*Δt))
     M = rand(Normal(c,σ))
     ϕ = log(1.0 + max(M/K, -1+ε))
     τ_m = microbe.adaptation_time_m
