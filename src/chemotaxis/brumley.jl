@@ -1,4 +1,4 @@
-export Brumley
+export Brumley, chemotaxis!
 
 """
     Brumley{D} <: AbstractMicrobe{D}
@@ -33,19 +33,19 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
     chemotactic_precision::Float64
 
     Brumley{D}(
-        id::Int = rand(1:typemax(Int32)),
-        pos::NTuple{D,<:Real} = ntuple(zero, D);
-        motility = RunReverseFlick(speed_forward = [46.5]),
-        vel::NTuple{D,<:Real} = rand_vel(D),
-        speed::Real = rand_speed(motility),
-        turn_rate::Real = 1/0.45,
-        rotational_diffusivity::Real = 0.035,
-        radius::Real = 0.5,
-        state::Real = 0.0,
-        memory::Real = 1.3,
-        gain_receptor::Real = 50.0,
-        gain::Real = 50.0,
-        chemotactic_precision::Real = 6.0,
+        id::Int=rand(1:typemax(Int32)),
+        pos::NTuple{D,<:Real}=ntuple(zero, D);
+        motility=RunReverseFlick(speed_forward=[46.5]),
+        vel::NTuple{D,<:Real}=rand_vel(D),
+        speed::Real=rand_speed(motility),
+        turn_rate::Real=1 / 0.45,
+        rotational_diffusivity::Real=0.035,
+        radius::Real=0.5,
+        state::Real=0.0,
+        memory::Real=1.3,
+        gain_receptor::Real=50.0,
+        gain::Real=50.0,
+        chemotactic_precision::Real=6.0
     ) where {D} = new{D}(
         id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
         Float64(rotational_diffusivity), Float64(radius), Float64(state),
@@ -55,11 +55,11 @@ mutable struct Brumley{D} <: AbstractMicrobe{D}
 
 end # struct
 
-function _affect!(microbe::Brumley, model)
+function chemotaxis!(microbe::Brumley, model)
     Δt = model.timestep
     Dc = model.compound_diffusivity
     τₘ = microbe.memory
-    α = exp(-Δt/τₘ) # memory persistence factor
+    α = exp(-Δt / τₘ) # memory persistence factor
     a = microbe.radius
     Π = microbe.chemotactic_precision
     κ = microbe.gain_receptor
@@ -67,18 +67,22 @@ function _affect!(microbe::Brumley, model)
     ∇u = model.concentration_gradient(microbe.pos, model)
     ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
     # gradient measurement
-    μ = dot(microbe.vel, ∇u)*microbe.speed + ∂ₜu # mean
-    σ = CONV_NOISE * Π * sqrt(3*u / (π*a*Dc*Δt^3)) # noise
-    M = rand(Normal(μ,σ)) # measurement
+    μ = dot(microbe.vel, ∇u) * microbe.speed + ∂ₜu # mean
+    σ = CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise
+    M = rand(Normal(μ, σ)) # measurement
     # update internal state
     S = microbe.state
-    microbe.state = α*S + (1-α)*κ*τₘ*M
+    microbe.state = α * S + (1 - α) * κ * τₘ * M
     return nothing
 end # function
 
-function _turnrate(microbe::Brumley, model)
+function affect!(microbe::Brumley, model)
+    chemotaxis!(microbe, model)
+end
+
+function turnrate(microbe::Brumley, model)
     ν₀ = microbe.turn_rate # unbiased
     Γ = microbe.gain
     S = microbe.state
-    return (1 + exp(-Γ*S)) * ν₀/2 # modulated turn rate
+    return (1 + exp(-Γ * S)) * ν₀ / 2 # modulated turn rate
 end # function

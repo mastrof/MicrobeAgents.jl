@@ -12,14 +12,14 @@ Perform an integration step for `microbe`. In order:
 function microbe_step!(microbe::AbstractMicrobe, model)
     dt = model.timestep # integration timestep
     # update microbe position
-    move_agent!(microbe, model, microbe.speed*dt)
+    move_agent!(microbe, model, microbe.speed * dt)
     # reorient through rotational diffusion
     rotational_diffusion!(microbe, model)
     # update microbe state
     affect!(microbe, model)
     # evaluate instantaneous turn rate
     ω = turnrate(microbe, model)
-    if rand(model.rng) < ω*dt # if true reorient microbe
+    if rand(model.rng) < ω * dt # if true reorient microbe
         turn!(microbe, model)
     end
     nothing
@@ -40,7 +40,7 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model)
     affect!(microbe, model)
     # evaluate instantaneous turn rate
     ω = turnrate(microbe, model)
-    if rand(model.rng) < ω*dt # if true reorient microbe
+    if rand(model.rng) < ω * dt # if true reorient microbe
         turn!(microbe, model)
     end
     nothing
@@ -51,12 +51,9 @@ end
     turnrate(microbe, model)
 Evaluate instantaneous turn rate of `microbe`.
 """
-turnrate(microbe::AbstractMicrobe, model) = _turnrate(microbe, model)
+turnrate(microbe::AbstractMicrobe, model) = microbe.turn_rate
 """
     affect!(microbe, model)
 Can be used to arbitrarily update `microbe` state.
 """
-affect!(microbe::AbstractMicrobe, model) = _affect!(microbe, model)
-# not exposed and can be used to restore default functionality
-_turnrate(microbe::AbstractMicrobe, model) = microbe.turn_rate
-_affect!(microbe::AbstractMicrobe, model) = nothing
+affect!(microbe::AbstractMicrobe, model) = nothing

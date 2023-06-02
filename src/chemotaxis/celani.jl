@@ -1,4 +1,4 @@
-export Celani
+export Celani, chemotaxis!
 
 """
     Celani{D} <: AbstractMicrobe{D}
@@ -35,19 +35,19 @@ mutable struct Celani{D} <: AbstractMicrobe{D}
     chemotactic_precision::Float64
 
     Celani{D}(
-        id::Int = rand(1:typemax(Int32)),
-        pos::NTuple{D,<:Real} = ntuple(zero, D);
-        motility = RunTumble(speed = [30.0]),
-        vel::NTuple{D,<:Real} = rand_vel(D),
-        speed::Real = rand_speed(motility),
-        turn_rate::Real = 1/0.67, # 1/s
-        markovian_variables::Vector{<:Real} = zeros(3),
-        state::Real = 0.0,
-        rotational_diffusivity::Real = 0.26, # rad²/s
-        gain::Real = 50.0, # 1
-        memory::Real = 1.0, # s
-        radius::Real = 0.5, # μm
-        chemotactic_precision::Real = 0.0,
+        id::Int=rand(1:typemax(Int32)),
+        pos::NTuple{D,<:Real}=ntuple(zero, D);
+        motility=RunTumble(speed=[30.0]),
+        vel::NTuple{D,<:Real}=rand_vel(D),
+        speed::Real=rand_speed(motility),
+        turn_rate::Real=1 / 0.67, # 1/s
+        markovian_variables::Vector{<:Real}=zeros(3),
+        state::Real=0.0,
+        rotational_diffusivity::Real=0.26, # rad²/s
+        gain::Real=50.0, # 1
+        memory::Real=1.0, # s
+        radius::Real=0.5, # μm
+        chemotactic_precision::Real=0.0
     ) where {D} = new{D}(
         id, Float64.(pos), motility, Float64.(vel), Float64(speed),
         Float64(turn_rate), Float64.(markovian_variables),
@@ -57,28 +57,32 @@ mutable struct Celani{D} <: AbstractMicrobe{D}
     )
 end # struct
 
-function _affect!(microbe::Celani, model)
+function chemotaxis!(microbe::Celani, model)
     Δt = model.timestep
     Dc = model.compound_diffusivity
     c = model.concentration_field(microbe.pos, model)
     a = microbe.radius
     Π = microbe.chemotactic_precision
-    σ = CONV_NOISE * Π * sqrt(3*c / (5*π*Dc*a*Δt)) # noise (Berg-Purcell)
-    M = rand(Normal(c,σ)) # measurement
-    λ = 1/microbe.memory
+    σ = CONV_NOISE * Π * sqrt(3 * c / (5 * π * Dc * a * Δt)) # noise (Berg-Purcell)
+    M = rand(Normal(c, σ)) # measurement
+    λ = 1 / microbe.memory
     W = microbe.markovian_variables
-    W[1] += (-λ*W[1] + M)*Δt
-    W[2] += (-λ*W[2] + W[1])*Δt
-    W[3] += (-λ*W[3] + 2*W[2])*Δt
-    microbe.state = λ^2*(W[2] - λ*W[3]/2)
+    W[1] += (-λ * W[1] + M) * Δt
+    W[2] += (-λ * W[2] + W[1]) * Δt
+    W[3] += (-λ * W[3] + 2 * W[2]) * Δt
+    microbe.state = λ^2 * (W[2] - λ * W[3] / 2)
     return nothing
 end # function
 
-function _turnrate(microbe::Celani, model)
+function affect!(microbe::Celani, model)
+    chemotaxis!(microbe, model)
+end
+
+function turnrate(microbe::Celani, model)
     ν₀ = microbe.turn_rate # unbiased
     β = microbe.gain
     S = microbe.state
-    return ν₀*(1-β*S) # modulated turn rate
+    return ν₀ * (1 - β * S) # modulated turn rate
 end # function
 
 # Celani requires a custom add_agent! method
@@ -89,12 +93,12 @@ function Agents.add_agent!(
     A::Type{Celani{D}},
     model::AgentBasedModel,
     properties...;
-    vel = nothing,
-    speed = nothing,
+    vel=nothing,
+    speed=nothing,
     kwargs...
-) where D
+) where {D}
     id = nextid(model)
-    microbe = A(id, pos, properties...; vel=ntuple(zero,D), speed=0, kwargs...)
+    microbe = A(id, pos, properties...; vel=ntuple(zero, D), speed=0, kwargs...)
     microbe.vel = isnothing(vel) ? rand_vel(model.rng, D) : vel
     microbe.speed = isnothing(speed) ? rand_speed(model.rng, microbe.motility) : speed
     initialize_markovian_variables!(microbe, model)
@@ -108,10 +112,10 @@ with respect to the `concentration_field` defined by `model`.
 """
 function initialize_markovian_variables!(microbe::Celani, model)
     W = microbe.markovian_variables
-    λ = 1/microbe.memory
+    λ = 1 / microbe.memory
     M = model.concentration_field(microbe.pos, model)
-    W[1] = M/λ
-    W[2] = W[1]/λ
-    W[3] = 2W[2]/λ
+    W[1] = M / λ
+    W[2] = W[1] / λ
+    W[3] = 2W[2] / λ
     nothing
 end
