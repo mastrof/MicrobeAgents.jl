@@ -1,6 +1,6 @@
 name = "MicrobeAgents"
 uuid = "b17a4bac-8667-4a2d-84f7-1883ae0b8dbb"
-authors = ["Riccardo Foffi <riccardo.foffi@protonmail.com> and contributors"]
+authors = ["Riccardo Foffi <rfoffi@ethz.ch> and contributors"]
 version = "0.1.0"
 
 [deps]
@@ -18,7 +18,12 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 Agents = "5"
+AxisArrays = "0.4"
+CellListMap = "0.8"
+DSP = "0.7"
 Distributions = "0.25"
+GeometryBasics = "0.4"
+OffsetArrays = "1"
 Rotations = "1"
 StaticArrays = "1"
 julia = "1"
