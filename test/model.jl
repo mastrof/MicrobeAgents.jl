@@ -26,7 +26,7 @@ using LinearAlgebra: norm
             model = StandardABM(Microbe{D}, space, timestep; rng)
             add_agent!(model)
             rng = MersenneTwister(1234)
-            pos = Tuple(rand(rng,D) .* extent)
+            pos = Tuple(rand(rng, D) .* extent)
             vel = rand_vel(rng, D)
             speed = rand_speed(rng, RunTumble())
             @test Set(keys(model.agents)) == Set((1,))
@@ -36,7 +36,7 @@ using LinearAlgebra: norm
             @test model[1].speed == speed
             @test model[1].motility isa RunTumble
             m₀ = Microbe{D}()
-            for key in setdiff(fieldnames(Microbe{D}), (:id,:pos,:vel,:motility))
+            for key in setdiff(fieldnames(Microbe{D}), (:id, :pos, :vel, :motility))
                 @test getfield(model[1], key) == getfield(m₀, key)
             end
 
@@ -87,8 +87,8 @@ using LinearAlgebra: norm
             add_agent!(pos, model; vel=vel2, speed=speed2, turn_rate=Inf, motility=RunReverse())
             run!(model) # performs 1 microbe_step! and 1 model.update! step
             # x₁ = x₀ + vΔt
-            @test all(model[1].pos .≈ pos .+ vel1.*speed1.*dt)
-            @test all(model[2].pos .≈ pos .+ vel2.*speed2.*dt)
+            @test all(model[1].pos .≈ pos .+ vel1 .* speed1 .* dt)
+            @test all(model[2].pos .≈ pos .+ vel2 .* speed2 .* dt)
             # v is the same for the agent with zero turn rate
             @test all(model[1].vel .≈ vel1)
             # v is changed for the other agent
@@ -103,13 +103,13 @@ using LinearAlgebra: norm
 
             # customize microbe affect! function
             # decreases microbe state value by D at each step
-            MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state-=D)
+            MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state -= D)
             model = ABM(Microbe{D}, space, dt)
             add_agent!(model)
             run!(model)
             @test model[1].state == -D
             # restore default affect! function
-            MicrobeAgents.affect!(microbe::Microbe{D}, model) = MicrobeAgents._affect!(microbe, model)
+            MicrobeAgents.affect!(microbe::Microbe{D}, model) = nothing
             run!(model)
             # now the state has not changed from previous step
             @test model[1].state == -D
@@ -119,7 +119,7 @@ using LinearAlgebra: norm
             tick_more!(model) = (model.t += 3)
             model → tick_more! # now model.t increases by 4 (+1 +3) at each step
             run!(model, 6)
-            @test model.t == 6*4
+            @test model.t == 6 * 4
             decrease!(model) = (model.t -= 1)
             model = ABM(Microbe{D}, space, dt)
             # chain arbitrary number of functions
