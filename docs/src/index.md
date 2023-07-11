@@ -1,7 +1,7 @@
 # MicrobeAgents.jl
 
 MicrobeAgents.jl is a Julia framework for agent-based simulations of bacterial
-behavior, built on the amazing [Agents.jl](https://github.com/JuliaDynamics/Agents.jl).
+motility and chemotaxis, built on the amazing [Agents.jl](https://github.com/JuliaDynamics/Agents.jl).
 
 ## Features
 - Runs in 1, 2 and 3 spatial dimensions.
