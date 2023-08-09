@@ -1,5 +1,41 @@
 # First steps
-## Creating a microbe
+
+## Structure
+An `AgentBasedModel` object embeds all the properties of the system to be simulated
+and maps unique IDs to microbe instances.
+During the simulation, the model is evolved in discrete time steps, with
+each microbe's "state" being updated according to specified rules.
+Standard rules for motion, reorientations and chemotaxis are available by default,
+but custom behaviors can be implemented via user-defined functions.
+
+The typical workflow to run a simulation in MicrobeAgents.jl goes as follows:
+1. Define the size and properties of the space in which the microbes will move.
+2. Choose an appropriate microbe type to represent the desired behavior, or define a new one.
+3. Initialize an `AgentBasedModel` object with the desired space, microbe type, integration time step, and any extra property needed for the simulation.
+4. Populated the ABM with microbe instances.
+5. Run the model (defining custom stepping functions if required) and collect data.
+
+MicrobeAgents.jl re-exports and extends various function from Agents.jl in order to work
+as a standalone, but it is generally recommended to use it in combination with
+Agents.jl for extra goodies.
+
+## Space
+MicrobAgents.jl only supports continuous spaces with dimensions 1, 2 or 3.
+Spaces can be created with the `ContinuousSpace` function (reexported from Agents.jl).
+The extent of the space must be given as a tuple, and periodicity is set with
+the `periodic` kwarg (defaults to true).
+```
+# one-dimensional periodic space
+extent = (1.0,)
+ContinuousSpace(extent)
+
+# two-dimensional non-periodic space
+extent = (1.0, 2.0)
+ContinuousSpace(extent; periodic=false)
+```
+
+
+## Microbes
 Microbes are represented by subtypes of the `AbstractMicrobe` type, which is in turn a subtype of `AbstractAgent` introduced by Agents.jl
 ```@docs
 AbstractMicrobe
@@ -14,7 +50,9 @@ Microbe
 
 The dimensionality of `Microbe` *must* always be specified on creation. All the fields are instead optional, and if not specified will be assigned default values.
 
-To create a `Microbe` living in a 1-dimensional space, with run-tumble motility and average turn rate ``\nu=1\;s^{-1}``, it is therefore sufficient to run
+To create a `Microbe` living in a 1-dimensional space, with default parameters
+(`RunTumble` motility, average turn rate ``\nu=1\;s^{-1}``, and no rotational diffusivity),
+it is therefore sufficient to run
 ```
 Microbe{1}()
 ```
@@ -35,6 +73,7 @@ Microbe{3}(
 
 All the other subtypes of `AbstractMicrobe` work in a similar way, although
 they will have distinct default values and extra fields.
+Default values are typically assigned following the original implementation in the literature.
 
 ```@docs
 BrownBerg
@@ -60,18 +99,15 @@ StandardABM
 To create a simple model, we just need to choose a microbe type, the size of
 the simulation domain and the integration timestep.
 The properties of the simulation domain are wrapped in the `ContinuousSpace`
-object (re-exported from Agents.jl).
+object.
 ```
 extent = (1000.0, 500.0) # size of 2D simulation domain
 space = ContinuousSpace(extent)
 dt = 0.1 # integration timestep
 model = UnremovableABM(Microbe{2}, space, dt)
 ```
-By default this creates a model with periodic boundary conditions.
-For hard wall boundary conditions we can instead specify
-`space=ContinuousSpace(extent; periodic=false)`.
 
-Now bacteria can be added with `add_agent!` function.
+Now bacteria can be added with the `add_agent!` function.
 ```@docs
 add_agent!
 ```
@@ -83,7 +119,10 @@ add_agent!(model)
 ```
 The microbe will be now accessible as `model[1]`.
 
-The ABM is now ready to run. We just need to specify how many steps we want
+## Running a model
+After the model has been created and populated with the desired number of microbes,
+we are ready to run the simulation.
+We just need to specify how many steps we want
 to simulate and what data to collect during the run:
 ```
 nsteps = 100
@@ -99,6 +138,19 @@ using Plots
 x = first.(adf.pos)
 y = last.(adf.pos)
 plot(x, y)
+```
+
+Notice that we did not specify at all how the timestepping is performed.
+MicrobAgents.jl implements a default timestepper which is applied to all
+`AbstractMicrobe` instances, which takes care of motion, rotational diffusion
+and reorientations.
+Each subtype is then equipped with its own `affect!` and `turnrate` functions
+(explained later) which determine extra behavioral features (such as chemotaxis).
+
+If different behavior is desired, the integration can be customized by
+passing custom timestepping functions to `run!`:
+```
+run!(model, my_agent_step!, my_model_step!, nsteps)
 ```
 
 ## Motility patterns
@@ -122,7 +174,8 @@ RunReverse()
 RunReverseFlick()
 ```
 The default values provided by the constructors always consider a constant
-swimming speed of 30 (micron/s) and "ideal" turn-angle distributions.
+swimming speed of 30 (micron/s) and "ideal" turn-angle distributions
+(isotropic for tumbles, perfect 180 and 90 degree reorientations for reverse and flicks).
 For more accurate simulation where the reorientation statistics of the microbes
 is important, appropriate distributions should be specified;
 the constructors will accept any object that can be sampled via `rand()`.

@@ -41,5 +41,5 @@ plot(
     ylab="velocity autocorrelation",
 )
 plot!(t, Φ_theoretical, lw=2, lc=[1 2 3], label=["Run-Tumble" "Run-Reverse" "Run-Reverse-Flick"])
-scatter!(t[lags.+1], Φ, m=:x, mc=[1 2 3], label=false)
+scatter!(t[lags.+1], Φ, m=:x, mc=[1 2 3], msw=2, label=false)
 hline!([0.0], lw=0.8, ls=:dash, lc=:black, lab=false)

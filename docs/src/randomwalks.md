@@ -3,12 +3,13 @@
 Generating random walks with MicrobeAgents.jl is super-easy, and the walk properties
 can be fine-tuned to match all sorts of needs.
 
-By default, MicrobeAgents.jl produces (discrete approximations of) Continuous Time Random Walks,
-i.e. random walks where the waiting times between reorientations are i.i.d. random variables.
+By default, MicrobeAgents.jl produces random walks composed of
+runs at constant speed and arbitrary reorientations where the waiting times
+between such reorientations are i.i.d. random variables.
 In the absence of chemotaxis (or other behavioral responses that affect microbe motility),
 the generated random walks will display an exponential distribution of waiting times.
 
-## Simple Random Walk in D=1
+## Random Walk in D=1
 ```
 using MicrobeAgents
 
@@ -54,11 +55,7 @@ plot(t,x,lab=false,xlab="time",ylab="displacement")
 
 ## Random walks with different motile patterns in D=2
 The procedure to generate a random walk in higher dimensions is
-exactly the same, we just need to specify the appropriate number
-of dimensions when defining the space `extent` and when calling `Microbe{D}`.
-space = ContinuousSpace(extent)
-We will now see how different motility patterns can be introduced.
-The setup is identical
+exactly the same
 ```
 L = 500
 space = ContinuousSpace((L,L))
@@ -67,8 +64,11 @@ nsteps = 600
 
 model = UnremovableABM(Microbe{2}, space, dt)
 ```
-But we now add bacteria with different properties (1 per type)
+But we can now add bacteria with different motility patterns
+(we import Distributions.jl to use a Normal distribution for the speed of
+one of our microbes)
 ```
+using Distributions
 add_agent!(model; motility=RunReverse(speed_forward=[55]), rotational_diffusivity=0.2)
 add_agent!(model; motility=RunTumble(speed=Normal(30,6)), turn_rate=0.5)
 add_agent!(model; motility=RunReverseFlick(speed_backward=[6]), rotational_diffusivity=0.1)
@@ -78,7 +78,7 @@ and then we run and visualize as before
 adata = [:pos]
 adf, _ = run!(model, nsteps; adata)
 
-postprocessing
+# postprocessing
 traj = MicrobeAgents.unfold(vectorize_adf_measurement(adf,:pos), L)
 x = first.(traj)
 y = last.(traj)
