@@ -3,8 +3,9 @@
 Generating random walks with MicrobeAgents.jl is super-easy, and the walk properties
 can be fine-tuned to match all sorts of needs.
 
-By default, MicrobeAgents.jl produces (discrete approximations of) Continuous Time Random Walks,
-i.e. random walks where the waiting times between reorientations are i.i.d. random variables.
+By default, MicrobeAgents.jl produces random walks composed of
+runs at constant speed and arbitrary reorientations where the waiting times
+between such reorientations are i.i.d. random variables.
 In the absence of chemotaxis (or other behavioral responses that affect microbe motility),
 the generated random walks will display an exponential distribution of waiting times.
 
