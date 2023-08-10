@@ -1,7 +1,8 @@
 using MicrobeAgents, Test
+using MicrobeAgents.SphericalSurfaces
 using Random
 
-@testset "Spheres" begin
+@testset "Spherical Surfaces" begin
     L = 100.0
     dt = 1.0
     for D in 1:3
@@ -38,5 +39,21 @@ using Random
         @test contact(model[2],s1,model)
         @test_throws KeyError is_encounter(model[1],s1,model)
         # add test with proper encounter checking
+    end
+    @testset "Interactions" begin
+        for D in 1:3
+            extent = ntuple(_ -> L, D)
+            space = ContinuousSpace(extent)
+            model = StandardABM(Microbe{D}, space, dt)
+            c = extent ./ 2
+            R = L/4
+            s = HyperSphere(c, R)
+            for interaction in [slide!, stick!, stickyslide!]
+                surface_interactions!(model, [s], interaction)
+                @test abmproperties(model)[:spheres] == [s]
+                @test abmproperties(model)[:surface!] == interaction
+            end
+        end
+        #== proper testset needed ==#
     end
 end
