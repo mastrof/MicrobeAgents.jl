@@ -99,8 +99,8 @@ function Agents.add_agent!(
 ) where {D}
     id = nextid(model)
     microbe = A(id, pos, properties...; vel=ntuple(zero, D), speed=0, kwargs...)
-    microbe.vel = isnothing(vel) ? rand_vel(model.rng, D) : vel
-    microbe.speed = isnothing(speed) ? rand_speed(model.rng, microbe.motility) : speed
+    microbe.vel = isnothing(vel) ? rand_vel(abmrng(model), D) : vel
+    microbe.speed = isnothing(speed) ? rand_speed(abmrng(model), microbe.motility) : speed
     initialize_markovian_variables!(microbe, model)
     add_agent_pos!(microbe, model)
 end

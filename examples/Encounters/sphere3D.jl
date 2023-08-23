@@ -20,8 +20,8 @@ end
 
 @everywhere function reinsert!(microbe, model)
     l = model.space.extent[1]/2
-    R = model.sphere.r + rand(model.rng)*(l-model.sphere.r)
-    pos = l .+ rand_vel(model.rng, 3) .* R
+    R = model.sphere.r + rand(abmrng(model))*(l-model.sphere.r)
+    pos = l .+ rand_vel(abmrng(model), 3) .* R
     move_agent!(microbe, pos, model)
     MicrobeAgents.turn!(microbe, model)
 end
