@@ -84,7 +84,7 @@ end
 """
     update_neighborlist!(model, listkey)
 
-Updates the position of all microbes in the neighbor list stored in `model.properties[listkey]`.
+Updates the position of all microbes in the neighbor list stored in `abmproperties(model)[listkey]`.
 This function assumes that the positions of microbes have been passed
 as the `x` argument to `neighborlist!`.
 """

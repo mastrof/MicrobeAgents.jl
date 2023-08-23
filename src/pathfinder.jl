@@ -2,7 +2,7 @@ export pathfinder!, initialise_pathfinder, pathfinder_step!
 
 function pathfinder!(model::AgentBasedModel, walkmap::BitArray)
     pathfinder = initialise_pathfinder(abmspace(model), walkmap)
-    model.properties[:pathfinder] = pathfinder
+    abmproperties(model)[:pathfinder] = pathfinder
 end
 
 function initialise_pathfinder(
