@@ -7,14 +7,14 @@ using Plots
 # Concentration field from left to right
 function concentration_field(pos, model)
     x,y = pos
-    Lx,Ly = model.space.extent
+    Lx,Ly = spacesize(model)
     C₁, C₂ = model.C₁, model.C₂
     concentration_field(x,y,Lx,Ly,C₁,C₂)
 end
 concentration_field(x,y,Lx,Ly,C₁,C₂) = C₁ + x/Lx*(C₂-C₁)
 function concentration_gradient(pos, model)
     x,y = pos
-    Lx,Ly = model.space.extent
+    Lx,Ly = spacesize(model)
     C₁, C₂ = model.C₁, model.C₂
     ((C₂-C₁)/Lx, 0.0)
 end

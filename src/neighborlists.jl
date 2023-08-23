@@ -35,7 +35,7 @@ end
 
 function neighborlist(model::ABM, cutoff)
     microbes = make_position_vector(model)
-    neighborlist(microbes, model.space, cutoff)
+    neighborlist(microbes, abmspace(model), cutoff)
 end
 function neighborlist(model::ABM, y, cutoff)
     microbes = make_position_vector(model)

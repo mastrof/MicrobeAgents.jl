@@ -19,7 +19,7 @@ using Plots
 end
 
 @everywhere function reinsert!(microbe, model)
-    l = model.space.extent[1]/2
+    l = spacesize(model)[1]/2
     R = model.sphere.r + rand(abmrng(model))*(l-model.sphere.r)
     pos = l .+ rand_vel(abmrng(model), 3) .* R
     move_agent!(microbe, pos, model)

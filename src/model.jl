@@ -1,8 +1,3 @@
-# extended from Agents.jl
-export StandardABM, UnremovableABM, add_agent!, run!
-# exported from Agents.jl without extensions
-export add_agent_pos!, ContinuousSpace
-
 """
     UnremovableABM(MicrobeType, space, timestep; kwargs...)
 Extension of the `Agents.UnremovableABM` method for microbe types.

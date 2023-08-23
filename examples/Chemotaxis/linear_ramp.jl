@@ -5,7 +5,7 @@ using Plots
 @inline function concentration_field(pos, model)
     C₀ = model.C₀
     C₁ = model.C₁
-    Lx = first(model.space.extent)
+    Lx = first(spacesize(model))
     concentration_field(pos,Lx,C₀,C₁)
 end
 @inline concentration_field(pos,Lx,C₀,C₁) = C₀ + (C₁-C₀)*pos[1]/Lx
@@ -13,7 +13,7 @@ end
 @inline function concentration_gradient(pos, model)
     C₀ = model.C₀
     C₁ = model.C₁
-    Lx = first(model.space.extent)
+    Lx = first(spacesize(model))
     concentration_gradient(pos,Lx,C₀,C₁)
 end
 @inline concentration_gradient(pos,Lx,C₀,C₁) = ntuple(i->i==1 ? (C₁-C₀)/Lx : 0.0, length(pos))
