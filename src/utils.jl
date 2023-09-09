@@ -6,7 +6,10 @@ Generate a random velocity vector with unit norm respecting the
 dimensionality of `model`.
 """
 function random_velocity(model::AgentBasedModel{S,A}) where {S,D,A<:AbstractMicrobe{D}}
-    v = rand(abmrng(model), SVector{D}) .* 2 .- 1
+    random_velocity(abmrng(model), D)
+end
+function random_velocity(rng::AbstractRNG, D::Int)
+    v = rand(rng, SVector{D}) .* 2 .- 1
     mag = sqrt(dot(v,v))
     return v ./ mag
 end
