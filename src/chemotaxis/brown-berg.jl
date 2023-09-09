@@ -14,40 +14,17 @@ Default parameters:
 - `receptor_binding_constant = 100` μM
 - `memory = 1` s
 """
-mutable struct BrownBerg{D} <: AbstractMicrobe{D}
-    id::Int
-    pos::NTuple{D,Float64}
-    motility::AbstractMotility
-    vel::NTuple{D,Float64}
+@agent BrownBerg{D} ContinuousAgent{D,Float64} where D AbstractMicrobe{D} begin
     speed::Float64
-    turn_rate::Float64
-    rotational_diffusivity::Float64
-    radius::Float64
-    state::Float64
-    gain::Float64
-    receptor_binding_constant::Float64
-    memory::Float64
-
-    BrownBerg{D}(
-        id::Int=rand(1:typemax(Int32)),
-        pos::NTuple{D,<:Real}=ntuple(zero, D);
-        motility::AbstractMotility=RunTumble(),
-        vel::NTuple{D,<:Real}=rand_vel(D),
-        speed::Real=rand_speed(motility),
-        turn_rate::Real=1 / 0.67,
-        rotational_diffusivity::Real=0.035,
-        radius::Real=0.5,
-        state::Real=0.0,
-        gain::Real=660.0,
-        receptor_binding_constant::Real=100.0,
-        memory::Real=1.0
-    ) where {D} = new{D}(
-        id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
-        Float64(rotational_diffusivity), Float64(radius), Float64(state),
-        Float64(gain), Float64(receptor_binding_constant),
-        Float64(memory)
-    )
-end # struct
+    motility::AbstractMotility = RunTumble()
+    turn_rate::Float64 = 1 / 0.67
+    rotational_diffusivity::Float64 = 0.035
+    radius::Float64 = 0.5
+    state::Float64 = 0.0
+    gain::Float64 = 660.0
+    receptor_binding_constant::Float64 = 100.0
+    memory::Float64 = 1.0
+end
 
 function chemotaxis!(microbe::BrownBerg, model)
     Δt = model.timestep

@@ -17,43 +17,18 @@ Default parameters:
 - `chemotactic_precision = 6.0` → 'Π'
 - `radius = 0.5` μm → 'a'
 """
-mutable struct Brumley{D} <: AbstractMicrobe{D}
-    id::Int
-    pos::NTuple{D,Float64}
-    motility::AbstractMotility
-    vel::NTuple{D,Float64}
+@agent Brumley{D} ContinuousAgent{D} where D AbstractMicrobe{D} begin
     speed::Float64
-    turn_rate::Float64
-    rotational_diffusivity::Float64
-    radius::Float64
-    state::Float64
-    memory::Float64
-    gain_receptor::Float64
-    gain::Float64
-    chemotactic_precision::Float64
-
-    Brumley{D}(
-        id::Int=rand(1:typemax(Int32)),
-        pos::NTuple{D,<:Real}=ntuple(zero, D);
-        motility=RunReverseFlick(speed_forward=[46.5]),
-        vel::NTuple{D,<:Real}=rand_vel(D),
-        speed::Real=rand_speed(motility),
-        turn_rate::Real=1 / 0.45,
-        rotational_diffusivity::Real=0.035,
-        radius::Real=0.5,
-        state::Real=0.0,
-        memory::Real=1.3,
-        gain_receptor::Real=50.0,
-        gain::Real=50.0,
-        chemotactic_precision::Real=6.0
-    ) where {D} = new{D}(
-        id, Float64.(pos), motility, Float64.(vel), Float64(speed), Float64(turn_rate),
-        Float64(rotational_diffusivity), Float64(radius), Float64(state),
-        Float64(memory), Float64(gain_receptor),
-        Float64(gain), Float64(chemotactic_precision)
-    )
-
-end # struct
+    motility::AbstractMotility = RunReverseFlick(speed_forward = [46.5]),
+    turn_rate::Float64 = 1 / 0.45
+    rotational_diffusivity::Float64 = 0.035
+    radius::Float64 = 0.5
+    state::Float64 = 0.0
+    memory::Float64 = 1.3
+    gain_receptor::Float64 = 50.0
+    gain::Float64 = 50.0
+    chemotactic_precision::Float64 = 6.0
+end
 
 function chemotaxis!(microbe::Brumley, model)
     Δt = model.timestep

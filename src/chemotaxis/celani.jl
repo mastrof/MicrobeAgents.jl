@@ -19,43 +19,18 @@ Default parameters:
 - `memory = 1` s
 - `radius = 0.5` μm
 """
-mutable struct Celani{D} <: AbstractMicrobe{D}
-    id::Int
-    pos::NTuple{D,Float64}
-    motility::AbstractMotility
-    vel::NTuple{D,Float64}
+@agent Celani{D} ContinuousAgent{D} where {D} AbstractMicrobe{D} begin
     speed::Float64
-    turn_rate::Float64
-    markovian_variables::Vector{Float64}
-    state::Float64
-    rotational_diffusivity::Float64
-    gain::Float64
-    memory::Float64
-    radius::Float64
-    chemotactic_precision::Float64
-
-    Celani{D}(
-        id::Int=rand(1:typemax(Int32)),
-        pos::NTuple{D,<:Real}=ntuple(zero, D);
-        motility=RunTumble(speed=[30.0]),
-        vel::NTuple{D,<:Real}=rand_vel(D),
-        speed::Real=rand_speed(motility),
-        turn_rate::Real=1 / 0.67, # 1/s
-        markovian_variables::Vector{<:Real}=zeros(3),
-        state::Real=0.0,
-        rotational_diffusivity::Real=0.26, # rad²/s
-        gain::Real=50.0, # 1
-        memory::Real=1.0, # s
-        radius::Real=0.5, # μm
-        chemotactic_precision::Real=0.0
-    ) where {D} = new{D}(
-        id, Float64.(pos), motility, Float64.(vel), Float64(speed),
-        Float64(turn_rate), Float64.(markovian_variables),
-        Float64(state), Float64(rotational_diffusivity),
-        Float64(gain), Float64(memory), Float64(radius),
-        Float64(chemotactic_precision)
-    )
-end # struct
+    motility::AbstractMotility = RunTumble(speed = [30.0])
+    turn_rate::Float64 = 1 / 0.67
+    rotational_diffusivity::Float64 = 0.26
+    radius::Float64 = 0.5
+    state::Float64 = 0.0
+    markovian_variables::Vector{Float64} = zeros(3)
+    gain::Float64 = 50.0
+    memory::Float64 = 1.0
+    chemotactic_precision::Float64 = 0.0
+end
 
 function chemotaxis!(microbe::Celani, model)
     Δt = model.timestep
