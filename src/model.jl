@@ -145,7 +145,7 @@ function Agents.add_agent!(
     if isempty(kwproperties)
         microbe = A(id, pos, properties...)
     else
-        microbe = A(; id, pos, vel = zero(SVector{D}), kwproperties...)
+        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
