@@ -17,9 +17,9 @@ Default parameters:
 - `chemotactic_precision = 6.0` → 'Π'
 - `radius = 0.5` μm → 'a'
 """
-@agent Brumley{D} ContinuousAgent{D} where D AbstractMicrobe{D} begin
+@agent Brumley{D} ContinuousAgent{D,Float64} where D AbstractMicrobe{D} begin
     speed::Float64
-    motility::AbstractMotility = RunReverseFlick(speed_forward = [46.5]),
+    motility::AbstractMotility = RunReverseFlick(speed_forward = [46.5])
     turn_rate::Float64 = 1 / 0.45
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
