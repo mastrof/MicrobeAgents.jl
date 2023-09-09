@@ -1,4 +1,4 @@
-export rand_vel, ChainedFunction, →, distance, distancevector
+export random_velocity, random_speed, ChainedFunction, →, distance, distancevector
 
 """
     random_velocity(model)
@@ -19,6 +19,10 @@ function random_speed(microbe::AbstractMicrobe, model::AgentBasedModel)
     random_speed(abmrng(model), motilepattern(microbe))
 end
 
+"""
+    motilepattern(microbe)
+Get the motility pattern of `microbe`
+"""
 motilepattern(microbe::AbstractMicrobe) = microbe.motility
 
 
