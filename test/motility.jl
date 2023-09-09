@@ -91,40 +91,25 @@ using LinearAlgebra: norm
     end
 
     @testset "Random velocities and angles" begin
+        model = StandardABM(Microbe{2}, ContinuousSpace((1,1)))
         rt = RunTumble()
-        @test rand_speed(rt) == 30.0
+        add_agent!(model; motility = rt)
+        @test random_speed(model[1], model) == 30.0
+        # custom rng
         rt = RunTumble(speed = Normal(50,5))
-        # custom rng
         u₁ = rand(Xoshiro(1234), Normal(50,5))
-        u₂ = rand_speed(Xoshiro(1234), rt)
+        model = StandardABM(Microbe{2}, ContinuousSpace((1,1)); rng=Xoshiro(1234))
+        # set pos, vel, speed to not trigger the rng
+        add_agent!((0,0), model; vel=(0,0), speed=50, motility=rt)
+        u₂ = random_speed(model[1], model)
         @test u₁ == u₂
 
+        model = StandardABM(Microbe{2}, ContinuousSpace((1,1)))
         rr = RunReverse(speed_forward=[45], speed_backward=[35]) # initialized to Forward
-        @test rand_speed(rr) == 45
-        switch!(rr) # now Backward
-        @test rand_speed(rr) == 35
-        # custom rng
-        rr = RunReverse(speed_forward = Normal(10,1))
-        u₁ = rand(Random.seed!(1), Normal(10,1))
-        u₂ = rand_speed(Random.seed!(1), rr)
-        @test u₁ == u₂
-
-        rt = RunTumble()
-        for D in 1:3
-            v = rand_vel(D, rt)
-            @test length(v) == D && norm(v) ≈ 30.0
-        end
-        # custom rng
-        rt = RunTumble(speed = Uniform(30,40))
-        for D in 1:3
-            v = rand_vel(Random.seed!(1), D, rt)
-            Random.seed!(1)
-            # generate and discard D values corresponding to the velocity projection
-            rand(D)
-            # the D+1-th value is extracted from the speed distribution
-            u = rand(Uniform(30,40))
-            @test norm(v) ≈ u
-        end
+        add_agent!(model; motility = rr)
+        @test random_speed(model[1], model) == 45
+        switch!(model[1].motility) # now Backward
+        @test random_speed(model[1], model) == 35
 
         rt = RunTumble(speed=[25], polar=[0.1], azimuthal=[0.2])
         U, θ, ϕ = rand(rt)

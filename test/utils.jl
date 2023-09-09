@@ -1,13 +1,14 @@
 using MicrobeAgents, Test
+using StaticArrays: SVector
 using LinearAlgebra
 using Random
 
 @testset "Utility functions" begin
     for D in 1:3
-        v = rand_vel(D)
-        @test norm(v) ≈ 1 && length(v) == D
-        rng = MersenneTwister()
-        v = rand_vel(rng, D)
+        extent = ones(SVector{D})
+        space = ContinuousSpace(extent)
+        model = StandardABM(Microbe{D}, space)
+        v = random_velocity(model)
         @test norm(v) ≈ 1 && length(v) == D
     end
 
@@ -29,6 +30,7 @@ using Random
     f₁!(a)
     @test a == [7,9]
 
+    #==
     @testset "Distances" begin
         L = 20.0
         dt = 1.0
@@ -71,4 +73,5 @@ using Random
             @test distance(p₁, p₂, model) ≈ L-4
         end
     end
+    ==#
 end

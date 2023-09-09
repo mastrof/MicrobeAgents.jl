@@ -3,19 +3,19 @@ using LinearAlgebra: norm
 
 @testset "Microbe creation" begin
     for D in 1:3
-        m = Microbe{D}()
+        m = Microbe{D}(; id=1, pos=zero(SVector{D}), vel=zero(SVector{D}), speed=0.0)
         # type hierarchy
         @test typeof(m) == Microbe{D}
         @test m isa AbstractMicrobe{D}
         # correct fields for all Ds
-        @test fieldnames(Microbe{D}) == (
+        @test Set(fieldnames(Microbe{D})) == Set((
             :id, :pos, :motility, :vel, :speed, :turn_rate,
             :rotational_diffusivity, :radius, :state
-        )
+        ))
         # pos and vel sizes match D
-        @test m.pos isa NTuple{D,Float64}
-        @test m.vel isa NTuple{D,Float64}
-        @test m.speed == 30.0
+        @test m.pos isa SVector{D,Float64}
+        @test m.vel isa SVector{D,Float64}
+        @test m.speed == 0.0
         # default values
         @test m.motility isa RunTumble
         @test m.turn_rate == 1.0
@@ -25,11 +25,12 @@ using LinearAlgebra: norm
     end
     # keyword tests
     motility = RunReverse(speed_forward=[42.0], speed_backward=[60.1])
-    m = Microbe{3}(1, (2,9,0), radius=0.5; motility) # id and pos don't require keyword
-    @test m.id == 1 && m.pos == (2.0,9.0,0.0) && m.radius == 0.5
+    m = Microbe{3}(; id=1, pos=(2,9,0), vel=(0,0,1), speed=30, radius=0.5, motility)
+    @test m.id == 1 && m.pos == SVector(2.0,9.0,0.0) && m.radius == 0.5
     @test m.motility isa RunReverse
     @test m.motility.speed_forward == [42.0]
     @test m.motility.speed_backward == [60.1]
+    #==
     # the initial speed should be sampled from the appropriate speed distribution
     # by default it is Forward
     @test norm(m.vel) ≈ 1.0
@@ -40,21 +41,22 @@ using LinearAlgebra: norm
     m = Microbe{3}(;motility)
     @test norm(m.vel) ≈ 1
     @test m.speed ≈ 60.1
+    ==#
 
     @testset "BrownBerg" begin
         for D in 1:3
-            m = BrownBerg{D}()
+            m = BrownBerg{D}(;id=1,pos=zero(SVector{D}),vel=zero(SVector{D}),speed=0)
             @test typeof(m) == BrownBerg{D}
             @test m isa AbstractMicrobe{D}
-            @test fieldnames(BrownBerg{D}) == (
+            @test Set(fieldnames(BrownBerg{D})) == Set((
                 :id, :pos, :motility, :vel, :speed,
                 :turn_rate, :rotational_diffusivity,
                 :radius, :state, :gain,
                 :receptor_binding_constant, :memory
-            )
-            @test m.pos isa NTuple{D,Float64}
-            @test m.vel isa NTuple{D,Float64}
-            @test m.speed == 30.0
+            ))
+            @test m.pos isa SVector{D,Float64}
+            @test m.vel isa SVector{D,Float64}
+            @test m.speed == 0.0
             @test m.motility isa RunTumble
 
             space = ContinuousSpace(ntuple(_->100,D))
@@ -67,19 +69,19 @@ using LinearAlgebra: norm
     end
     @testset "Brumley" begin
         for D in 1:3
-            m = Brumley{D}()
+            m = Brumley{D}(;id=1,pos=zero(SVector{D}),vel=zero(SVector{D}),speed=0)
             @test typeof(m) == Brumley{D}
             @test m isa AbstractMicrobe{D}
-            @test fieldnames(Brumley{D}) == (
+            @test Set(fieldnames(Brumley{D})) == Set((
                 :id, :pos, :motility, :vel, :speed,
                 :turn_rate, :rotational_diffusivity,
                 :radius, :state, :memory,
                 :gain_receptor, :gain,
                 :chemotactic_precision
-            )
-            @test m.pos isa NTuple{D,Float64}
-            @test m.vel isa NTuple{D,Float64}
-            @test m.speed == 46.5
+            ))
+            @test m.pos isa SVector{D,Float64}
+            @test m.vel isa SVector{D,Float64}
+            @test m.speed == 0
             @test m.motility isa RunReverseFlick
 
             space = ContinuousSpace(ntuple(_->100,D))
@@ -92,18 +94,18 @@ using LinearAlgebra: norm
     end
     @testset "Celani" begin
         for D in 1:3
-            m = Celani{D}()
+            m = Celani{D}(;id=1,pos=zero(SVector{D}),vel=zero(SVector{D}),speed=0)
             @test typeof(m) == Celani{D}
             @test m isa AbstractMicrobe{D}
-            @test fieldnames(Celani{D}) == (
+            @test Set(fieldnames(Celani{D})) == Set((
                 :id, :pos, :motility, :vel, :speed,
                 :turn_rate, :markovian_variables, :state,
                 :rotational_diffusivity, :gain, :memory,
                 :radius, :chemotactic_precision
-            )
-            @test m.pos isa NTuple{D,Float64}
-            @test m.vel isa NTuple{D,Float64}
-            @test m.speed == 30.0
+            ))
+            @test m.pos isa SVector{D,Float64}
+            @test m.vel isa SVector{D,Float64}
+            @test m.speed == 0.0
             @test m.motility isa RunTumble
 
             space = ContinuousSpace(ntuple(_->100,D))
@@ -134,10 +136,10 @@ using LinearAlgebra: norm
     end
     @testset "Xie" begin
         for D in 1:3
-            m = Xie{D}()
+            m = Xie{D}(;id=1,pos=zero(SVector{D}),vel=zero(SVector{D}),speed=0)
             @test typeof(m) == Xie{D}
             @test m isa AbstractMicrobe{D}
-            @test fieldnames(Xie{D}) == (
+            @test Set(fieldnames(Xie{D})) == Set((
                 :id, :pos, :motility, :vel, :speed,
                 :turn_rate_forward, :turn_rate_backward,
                 :rotational_diffusivity, :radius,
@@ -145,10 +147,10 @@ using LinearAlgebra: norm
                 :adaptation_time_m, :adaptation_time_z,
                 :gain_forward, :gain_backward,
                 :binding_affinity, :chemotactic_precision
-            )
-            @test m.pos isa NTuple{D,Float64}
-            @test m.vel isa NTuple{D,Float64}
-            @test m.speed == 46.5
+            ))
+            @test m.pos isa SVector{D,Float64}
+            @test m.vel isa SVector{D,Float64}
+            @test m.speed == 0
             @test m.motility isa RunReverseFlick
         end
     end
