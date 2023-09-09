@@ -73,7 +73,7 @@ function Agents.add_agent!(
     kwproperties...
 ) where {D,N}
     id = nextid(model)
-    if isempty(kwproperties)
+    if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
         microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)

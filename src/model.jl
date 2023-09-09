@@ -136,13 +136,13 @@ function Agents.add_agent!(
     pos::Agents.ValidPos,
     A::Type{<:AbstractMicrobe{D}},
     model::AgentBasedModel,
-    properties::Vararg{Any,N};
+    properties...;
     vel = nothing,
     speed = nothing,
     kwproperties...
-) where {D,N}
+) where {D}
     id = nextid(model)
-    if isempty(kwproperties)
+    if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
         microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
