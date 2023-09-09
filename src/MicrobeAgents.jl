@@ -7,6 +7,7 @@ using LinearAlgebra
 using Random
 using Rotations
 using StaticArrays
+export SVector
 
 using DSP, AxisArrays, OffsetArrays # for acf and msd
 
