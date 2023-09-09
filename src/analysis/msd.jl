@@ -41,7 +41,7 @@ end
     unfold(trajectory::T, L) where {S<:Tuple, T<:AbstractArray{S,2}}
 Unfold `trajectory` in a domain of periodicity `L`.
 """
-function unfold(trajectory::AbstractMatrix{<:Tuple}, L)
+function unfold(trajectory::AbstractMatrix{<:SVector}, L)
     nsteps, nmicrobes = size(trajectory)
     unfolded = Matrix{eltype(trajectory)}(undef, size(trajectory)...)
     unfolded[1,:] .= trajectory[1,:]

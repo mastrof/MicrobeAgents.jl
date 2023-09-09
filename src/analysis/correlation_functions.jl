@@ -27,7 +27,7 @@ The result is *not* normalized. If `f = acf(x)`, just evaluate
 function acf(x::AbstractMatrix, lags=0:size(x,1)-1)
     mean(mapslices(y -> acf(y, lags), x, dims=1), dims=2)
 end
-function acf(x::AbstractVector{<:Tuple}, lags=0:size(x,1)-1)
+function acf(x::AbstractVector{<:SVector}, lags=0:size(x,1)-1)
     l = size(x,1)
     y = [getindex.(x,i) for i in eachindex(first(x))]
     A = sum([conv(s, reverse(s)) for s in y])
