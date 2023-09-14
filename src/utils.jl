@@ -62,7 +62,7 @@ Evaluate the distance vector from `a` to `b` respecting the spatial
 properties of `model`.
 """
 @inline distancevector(a, b, model) = distancevector(_pos(a), _pos(b), model)
-@inline function distancevector(a::NTuple{D}, b::NTuple{D}, model) where D
+@inline function distancevector(a::SVector{D}, b::SVector{D}, model) where D
     extent = spacesize(model)
     ntuple(i -> wrapcoord(a[i], b[i], extent[i]), D)
 end
