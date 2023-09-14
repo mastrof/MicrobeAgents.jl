@@ -55,7 +55,7 @@ function neighborlist(
     PeriodicSystem(
         xpositions = x,
         # if space is not periodic the unitcell size must be extended by cutoff
-        unitcell = SVector(spacesize(space) .+ (P ? 0.0 : cutoff)),
+        unitcell = spacesize(space) .+ (P ? 0.0 : cutoff),
         cutoff = cutoff,
         output = 0.0
     )
@@ -74,7 +74,7 @@ function neighborlist(
         xpositions = x,
         ypositions = y,
         # if space is not periodic the unitcell size must be extended by cutoff
-        unitcell = SVector(spacesize(space) .+ (P ? 0.0 : cutoff)),
+        unitcell = spacesize(space) .+ (P ? 0.0 : cutoff),
         cutoff = cutoff,
         output = 0.0
     )
@@ -95,21 +95,21 @@ function update_neighborlist!(model, listkey)
 end
 function update_neighborlist!(microbe::AbstractMicrobe, model, listkey)
     neighbor_list = abmproperties(model)[listkey]
-    neighbor_list.xpositions[microbe.id] = SVector(microbe.pos)
+    neighbor_list.xpositions[microbe.id] = microbe.pos
 end
 
 
 @inline function make_position_vector(model::UnremovableABM)
-    [SVector(_pos(a)) for a in allagents(model)]
+    [position(a) for a in allagents(model)]
 end
 @inline function make_position_vector(model::StandardABM)
     ids = sort(collect(allids(model)))
-    [SVector(_pos(model[i])) for i in ids]
+    [position(model[i]) for i in ids]
 end
 @inline function make_position_vector(x::AbstractVector)
-    [SVector{length(xᵢ)}(_pos(xᵢ)) for xᵢ in x]
+    [SVector{length(xᵢ)}(position(xᵢ)) for xᵢ in x]
 end
 @inline function make_position_vector(x::Dict)
     indices = sort(collect(keys(x)))
-    [SVector{length(x[i])}(_pos(x[i])) for i in indices]
+    [SVector{length(x[i])}(position(x[i])) for i in indices]
 end
