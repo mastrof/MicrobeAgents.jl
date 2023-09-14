@@ -6,7 +6,7 @@ using LinearAlgebra: norm
     for D in 1:3, ABM in (StandardABM, UnremovableABM)
         rng = Xoshiro(68)
         dt = 1
-        extent = ntuple(_ -> 300, D)
+        extent = fill(300.0, SVector{D})
         space = ContinuousSpace(extent)
         model = ABM(Microbe{D}, space, dt; rng)
         pos = extent ./ 2

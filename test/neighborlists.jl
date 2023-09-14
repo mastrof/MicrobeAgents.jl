@@ -6,7 +6,7 @@ using Agents
     @testset "StandardABM" begin
         for D in 1:3
             L = 100
-            extent = ntuple(_->L, D)
+            extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             dt = 1
             model = StandardABM(Microbe{D}, space, dt)
@@ -43,7 +43,7 @@ using Agents
     @testset "UnremovableABM" begin
         for D in 1:3
             L = 100
-            extent = ntuple(_->L, D)
+            extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             dt = 1
             model = UnremovableABM(Microbe{D}, space, dt)
