@@ -19,7 +19,7 @@ using LinearAlgebra: norm
         adata = [:pos]
         adf, mdf = run!(model, nsteps; adata)
         traj = vectorize_adf_measurement(adf, :pos)
-        @test traj isa AbstractMatrix{<:Tuple}
+        @test traj isa AbstractMatrix{<:SVector}
         @test size(traj) == (nsteps+1, 1)
         real_traj = [pos .+ vel.*(U*n*dt) for n in 0:nsteps, _ in 1:1]
         Δ = norm.([traj[i] .- real_traj[i] for i in eachindex(traj)])

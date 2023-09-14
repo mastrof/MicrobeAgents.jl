@@ -1,7 +1,6 @@
 using Test
 using MicrobeAgents
 using Agents
-using StaticArrays
 
 @testset "Neighbor Lists" begin
     @testset "StandardABM" begin
@@ -23,20 +22,20 @@ using StaticArrays
             # check that the key is correctly added to the model
             @test haskey(abmproperties(model), listkey)
             # check that positions are correctly stored in the neighbor list
-            microbe_positions = [SVector(model[i].pos) for i in sort(collect(allids(model)))]
+            microbe_positions = [model[i].pos for i in sort(collect(allids(model)))]
             @test microbe_positions == model.neighbors.xpositions
             # add neighbor list updater to model
             model → (model) -> update_neighborlist!(model, listkey)
             run!(model)
             # after the step, the neighbor list positions should be updated to the new positions
-            microbe_positions = [SVector(model[i].pos) for i in sort(collect(allids(model)))]
+            microbe_positions = [model[i].pos for i in sort(collect(allids(model)))]
             @test microbe_positions == model.neighbors.xpositions
             # if a microbe is removed its position is not updated anymore and ids are retained
             j = 6
             remove_agent!(j, model)
             pos_removed = microbe_positions[j]
             run!(model, 20)
-            microbe_positions = [i==j ? pos_removed : SVector(model[i].pos) for i in 1:n]
+            microbe_positions = [i==j ? pos_removed : model[i].pos for i in 1:n]
             @test microbe_positions == model.neighbors.xpositions
         end
     end
@@ -60,13 +59,13 @@ using StaticArrays
             # check that the key is correctly added to the model
             @test haskey(abmproperties(model), listkey)
             # check that positions are correctly stored in the neighbor list
-            microbe_positions = [SVector(model[i].pos) for i in sort(collect(allids(model)))]
+            microbe_positions = [model[i].pos for i in sort(collect(allids(model)))]
             @test microbe_positions == model.neighbors.xpositions
             # add neighbor list updater to model
             model → (model) -> update_neighborlist!(model, listkey)
             run!(model)
             # after the step, the neighbor list positions should be updated to the new positions
-            microbe_positions = [SVector(model[i].pos) for i in sort(collect(allids(model)))]
+            microbe_positions = [model[i].pos for i in sort(collect(allids(model)))]
             @test microbe_positions == model.neighbors.xpositions
         end
     end

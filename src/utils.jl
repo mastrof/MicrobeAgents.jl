@@ -1,20 +1,32 @@
-export rand_vel, ChainedFunction, →, distance, distancevector
+export random_velocity, random_speed, ChainedFunction, →, distance, distancevector
 
 """
-    rand_vel([rng,] N)
-Generate a random N-tuple of unitary norm.
+    random_velocity(model)
+Generate a random velocity vector with unit norm respecting the
+dimensionality of `model`.
 """
-function rand_vel(D::Int)
-    v = rand(D) .* 2 .- 1
-    v₀ = sqrt(dot(v,v)) # faster than norm
-    Tuple(v ./ v₀)
-end # function
+function random_velocity(model::AgentBasedModel{S,A}) where {S,D,A<:AbstractMicrobe{D}}
+    random_velocity(abmrng(model), D)
+end
+function random_velocity(rng::AbstractRNG, D::Int)
+    v = rand(rng, SVector{D}) .* 2 .- 1
+    mag = sqrt(dot(v,v))
+    return v ./ mag
+end
 
-function rand_vel(rng, D::Int)
-    v = rand(rng, D) .* 2 .- 1
-    v₀ = sqrt(dot(v,v)) # faster than norm
-    Tuple(v ./ v₀)
-end # function
+"""
+    random_speed(microbe, model)
+Generate a random speed from the motile pattern of `microbe`.
+"""
+function random_speed(microbe::AbstractMicrobe, model::AgentBasedModel)
+    random_speed(abmrng(model), motilepattern(microbe))
+end
+
+"""
+    motilepattern(microbe)
+Get the motility pattern of `microbe`
+"""
+motilepattern(microbe::AbstractMicrobe) = microbe.motility
 
 
 struct ChainedFunction{H,T} <: Function
@@ -37,7 +49,7 @@ funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.t
 funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
 
 @inline _pos(a::AbstractMicrobe) = a.pos
-@inline _pos(a::NTuple{D}) where D = a
+@inline _pos(a::SVector{D}) where D = a
 """
     distance(a, b, model)
 Evaluate the euclidean distance between `a` and `b` respecting the spatial
@@ -50,7 +62,7 @@ Evaluate the distance vector from `a` to `b` respecting the spatial
 properties of `model`.
 """
 @inline distancevector(a, b, model) = distancevector(_pos(a), _pos(b), model)
-@inline function distancevector(a::NTuple{D}, b::NTuple{D}, model) where D
+@inline function distancevector(a::SVector{D}, b::SVector{D}, model) where D
     extent = spacesize(model)
     ntuple(i -> wrapcoord(a[i], b[i], extent[i]), D)
 end

@@ -4,7 +4,7 @@ export HyperSphere, contact, is_encounter
 HyperSphere(center::NTuple{D}, radius::Real) where D = HyperSphere(Point(Float64.(center)), Float64(radius))
 
 # define _pos to interface with distance functions
-@inline _pos(a::HyperSphere{D}) where D = Tuple(a.center)
+@inline _pos(a::HyperSphere{D}) where D = SVector{D}(a.center)
 
 @inline _radius(a::AbstractMicrobe) = a.radius
 @inline _radius(a::HyperSphere{D}) where D = a.r
