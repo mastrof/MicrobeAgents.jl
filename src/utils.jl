@@ -50,6 +50,7 @@ funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
 
 @inline _pos(a::AbstractMicrobe) = a.pos
 @inline _pos(a::NTuple{D}) where D = a
+@inline _pos(a::SVector{D}) where D = a
 """
     distance(a, b, model)
 Evaluate the euclidean distance between `a` and `b` respecting the spatial
