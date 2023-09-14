@@ -24,21 +24,21 @@ function unfold!(unfolded, cnf₁, cnf₀, L::Real)
     dim = length(first(cnf₁))
     nmicrobes, = size(cnf₁)
     for i in 1:nmicrobes
-        newx = ntuple(μ -> unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L), dim)
+        newx = SVector{dim}(unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L) for μ in 1:dim)
         unfolded[i] = newx
     end # for
 end # function
-function unfold!(unfolded, cnf₁, cnf₀, L::NTuple)
+function unfold!(unfolded, cnf₁, cnf₀, L::SVector)
     dim = length(first(cnf₁))
     nmicrobes, = size(cnf₁)
     for i in 1:nmicrobes
-        newx = ntuple(μ -> unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L[μ]), dim)
+        newx = SVector{dim}(unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L[μ]) for μ in 1:dim)
         unfolded[i] = newx
     end 
 end
 
 """
-    unfold(trajectory::T, L) where {S<:Tuple, T<:AbstractArray{S,2}}
+    unfold(trajectory::T, L) where {S<:SVector, T<:AbstractArray{S,2}}
 Unfold `trajectory` in a domain of periodicity `L`.
 """
 function unfold(trajectory::AbstractMatrix{<:SVector}, L)

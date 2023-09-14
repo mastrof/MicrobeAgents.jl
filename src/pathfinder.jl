@@ -9,7 +9,7 @@ function initialise_pathfinder(
     extent::Real, periodic::Bool,
     walkmap::BitArray{D}
 ) where D
-    initialise_pathfinder(ntuple(_->extent,D), periodic, walkmap)
+    initialise_pathfinder(SVector{D}(extent for _ in 1:D), periodic, walkmap)
 end
 function initialise_pathfinder(
     extent::NTuple{D,<:Real}, periodic::Bool,
