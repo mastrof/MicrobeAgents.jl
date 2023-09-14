@@ -32,7 +32,7 @@ function unfold!(unfolded, cnf₁, cnf₀, L::SVector)
     dim = length(first(cnf₁))
     nmicrobes, = size(cnf₁)
     for i in 1:nmicrobes
-        newx = SVector{D}(unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L[μ]) for μ in 1:dim)
+        newx = SVector{dim}(unfold_coord(cnf₀[i][μ], cnf₁[i][μ], L[μ]) for μ in 1:dim)
         unfolded[i] = newx
     end 
 end
