@@ -171,7 +171,7 @@ in which case the simulations stops when `n` returns true.
 - `showprogress = false`
 See `Agents.run!` and `Agents.step!` for detailed information.
 """
-function Agents.run!(model::AgentBasedModel{S,A}, n = 1;
+function Agents.run!(model::AgentBasedModel{S}, n = 1;
     when = true,
     when_model = when,
     adata = nothing,
@@ -179,7 +179,7 @@ function Agents.run!(model::AgentBasedModel{S,A}, n = 1;
     obtainer = identity,
     agents_first = true,
     showprogress = false
-) where {S<:ContinuousSpace,A<:AbstractMicrobe}
+) where {S<:ContinuousSpace}
     run!(model, microbe_step!, model.update!, n;
         when, when_model,
         adata, mdata,

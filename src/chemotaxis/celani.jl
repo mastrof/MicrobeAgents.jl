@@ -19,7 +19,7 @@ Default parameters:
 - `memory = 1` s
 - `radius = 0.5` μm
 """
-@agent Celani{D} ContinuousAgent{D,Float64} where {D} AbstractMicrobe{D} begin
+@agent struct Celani{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
     motility::AbstractMotility = RunTumble(speed = [30.0])
     turn_rate::Float64 = 1 / 0.67

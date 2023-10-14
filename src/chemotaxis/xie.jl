@@ -29,7 +29,7 @@ Default parameters:
 - `chemotactic_precision = 0.0`
 - `radius = 0.5` μm
 """
-@agent Xie{D} ContinuousAgent{D,Float64} where D AbstractMicrobe{D} begin
+@agent struct Xie{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
     motility::AbstractMotility = RunReverseFlick(speed_forward = [46.5])
     turn_rate_forward::Float64 = 2.3

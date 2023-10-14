@@ -17,7 +17,7 @@ Default parameters:
 - `vel::SVector{D,Float64}` unit velocity vector
 - `speed::Float64` magnitude of the velocity vector
 """
-@agent Microbe{D} ContinuousAgent{D,Float64} where D AbstractMicrobe{D} begin
+@agent struct Microbe{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
     motility::AbstractMotility = RunTumble()
     turn_rate::Float64 = 1.0
