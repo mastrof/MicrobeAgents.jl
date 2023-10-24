@@ -19,7 +19,7 @@ function microbe_step!(microbe::AbstractMicrobe, model)
     affect!(microbe, model)
     # evaluate instantaneous turn rate
     ω = turnrate(microbe, model)
-    if rand(model.rng) < ω * dt # if true reorient microbe
+    if rand(abmrng(model)) < ω * dt # if true reorient microbe
         turn!(microbe, model)
     end
     nothing
@@ -40,7 +40,7 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model)
     affect!(microbe, model)
     # evaluate instantaneous turn rate
     ω = turnrate(microbe, model)
-    if rand(model.rng) < ω * dt # if true reorient microbe
+    if rand(abmrng(model)) < ω * dt # if true reorient microbe
         turn!(microbe, model)
     end
     nothing

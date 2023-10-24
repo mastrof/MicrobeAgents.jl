@@ -19,9 +19,9 @@ using Plots
 end
 
 @everywhere function reinsert!(microbe, model)
-    l = model.space.extent[1]/2
-    R = model.sphere.r + rand(model.rng)*(l-model.sphere.r)
-    pos = l .+ rand_vel(model.rng, 3) .* R
+    l = spacesize(model)[1]/2
+    R = model.sphere.r + rand(abmrng(model))*(l-model.sphere.r)
+    pos = l .+ rand_vel(abmrng(model), 3) .* R
     move_agent!(microbe, pos, model)
     MicrobeAgents.turn!(microbe, model)
 end
@@ -36,7 +36,7 @@ function setupmodel(R, L, n; dt=0.1, rng=Xoshiro(1))
     model = UnremovableABM(Microbe{3}, space, dt; properties, rng)
     foreach(_ -> add_agent!(model; turn_rate=2.0), 1:n)
     model → encounters!
-    model.properties[:old_positions] = map(m -> m.pos, allagents(model))
+    abmproperties(model)[:old_positions] = map(m -> m.pos, allagents(model))
     model
 end
 

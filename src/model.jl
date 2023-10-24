@@ -1,5 +1,5 @@
 # extended from Agents.jl
-export StandardABM, UnremovableABM, add_agent!, run!
+export StandardABM, UnremovableABM, add_agent!
 # exported from Agents.jl without extensions
 export ContinuousSpace
 

@@ -48,20 +48,18 @@ funlist(f::ChainedFunction{<:ChainedFunction,<:ChainedFunction}) = (funlist(f.he
 funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.tail)...)
 funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
 
-@inline _pos(a::AbstractMicrobe) = a.pos
-@inline _pos(a::SVector{D}) where D = a
 """
     distance(a, b, model)
 Evaluate the euclidean distance between `a` and `b` respecting the spatial
 properties of `model`.
 """
-@inline distance(a, b, model) = euclidean_distance(_pos(a), _pos(b), model)
+@inline distance(a, b, model) = euclidean_distance(position(a), position(b), model)
 """
     distancevector(a, b, model)
 Evaluate the distance vector from `a` to `b` respecting the spatial
 properties of `model`.
 """
-@inline distancevector(a, b, model) = distancevector(_pos(a), _pos(b), model)
+@inline distancevector(a, b, model) = distancevector(position(a), position(b), model)
 @inline function distancevector(a::SVector{D}, b::SVector{D}, model) where D
     extent = spacesize(model)
     SVector{D}(wrapcoord(a[i], b[i], extent[i]) for i in 1:D)
@@ -70,3 +68,7 @@ function wrapcoord(x₁, x₂, d)
     α = (x₂-x₁)/d
     (α-round(α))*d
 end
+
+@inline position(a::AbstractMicrobe) = a.pos
+@inline position(a::SVector{D}) where D = a
+@inline position(a::NTuple{D}) where D = SVector{D}(a)
