@@ -72,7 +72,7 @@ function Agents.add_agent!(
     speed=nothing,
     kwproperties...
 ) where {D,N}
-    id = nextid(model)
+    id = Agents.nextid(model)
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
@@ -81,7 +81,7 @@ function Agents.add_agent!(
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
         initialize_markovian_variables!(microbe, model)
     end
-    add_agent_pos!(microbe, model)
+    Agents.add_agent_pos!(microbe, model)
 end
 
 """
