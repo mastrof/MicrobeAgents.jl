@@ -39,7 +39,6 @@ All microbe types *must* have at least the following fields:
 abstract type AbstractMicrobe{D} <: AbstractAgent where D end
 
 include("utils.jl")
-include("distributions.jl")
 include("motility.jl")
 include("rotations.jl")
 include("neighborlists.jl")

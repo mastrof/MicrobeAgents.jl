@@ -5,6 +5,8 @@ export
     MotileState, TwoState, Forward, Backward, switch!,
     random_polar, random_azimuthal
 
+export Arccos # from Agents
+
 """
     AbstractMotility
 General abstract interface for motility patterns.
