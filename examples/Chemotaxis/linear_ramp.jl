@@ -17,7 +17,6 @@ end
     concentration_gradient(pos,Lx,C₀,C₁)
 end
 @inline concentration_gradient(pos,Lx,C₀,C₁) = ntuple(i->i==1 ? (C₁-C₀)/Lx : 0.0, length(pos))
-##
 
 ## simulation parameters
 Lx, Ly = 3000, 1500 # domain size (μm)
@@ -27,7 +26,6 @@ space = ContinuousSpace((Lx,Ly); periodic)
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
 n = 100
-##
 
 ## model setup
 C₀, C₁ = 0.0, 20.0 # μM
@@ -41,18 +39,15 @@ model = UnremovableABM(BrownBerg{2}, space, Δt; properties)
 for i in 1:n
     add_agent!(model)
 end
-##
 
 ## run
 adata = [:pos, :vel]
 adf, mdf = run!(model, nsteps; adata)
-##
 
 ## postprocessing
 traj = vectorize_adf_measurement(adf, :pos)
 x = first.(traj)
 y = last.(traj)
-##
 
 ## plotting
 ts = unique(adf.step) .* Δt
@@ -66,4 +61,3 @@ heatmap(xmesh, ymesh, c', cbar=false, ratio=1, axis=false, c=:bone)
 plot!(xn, yn, lab=false, lw=lw, lc=(1:n)')
 scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)
 plot!(size=(600,300), margin=-30Plots.px)
-##
