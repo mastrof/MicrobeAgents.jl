@@ -39,8 +39,6 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
 )
 ```
 By including these default properties, we make sure that all the chemotaxis models
@@ -51,7 +49,7 @@ to the `properties` dictionary when creating the model.
 function Agents.UnremovableABM(
     T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
     agent_step! = microbe_step!,
-    model_step! = nothing,
+    model_step! = _ -> nothing,
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
@@ -98,8 +96,6 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
 )
 ```
 By including these default properties, we make sure that all the chemotaxis models
@@ -110,7 +106,7 @@ to the `properties` dictionary when creating the model.
 function Agents.StandardABM(
     T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
     agent_step! = microbe_step!,
-    model_step! = nothing,
+    model_step! = _ -> nothing,
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
@@ -160,11 +156,6 @@ function Agents.add_agent!(
 end
 
 
-"""
-    tick!(model::AgentBasedModel)
-Increase time count `model.t` by 1.
-"""
-tick!(model::AgentBasedModel) = (model.t += 1)
 # extend function chaining
 →(model::AgentBasedModel, f, g...) = (model.update! = →(model.update! → f, g...))
 →(model::AgentBasedModel, f) = (model.update! = model.update! → f)
@@ -176,6 +167,4 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
 )
