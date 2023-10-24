@@ -9,15 +9,14 @@ using LinearAlgebra: norm
         model_standard = StandardABM(Microbe{D}, space, timestep)
         @test model_unremovable isa UnremovableABM
         @test model_standard isa StandardABM
-        @test Set(keys(model_standard.properties)) == Set((
+        @test Set(keys(abmproperties(model_standard))) == Set((
             :t, :timestep,
             :concentration_field,
             :concentration_gradient,
             :concentration_time_derivative,
             :compound_diffusivity,
-            :update!
         ))
-        @test model_standard.properties == model_unremovable.properties
+        @test abmproperties(model_standard) == abmproperties(model_unremovable)
     end
 
     @testset "Base Microbe type" begin
