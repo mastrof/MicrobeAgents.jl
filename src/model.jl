@@ -1,7 +1,7 @@
 # extended from Agents.jl
 export StandardABM, UnremovableABM, add_agent!, run!
 # exported from Agents.jl without extensions
-export add_agent_pos!, ContinuousSpace
+export ContinuousSpace
 
 """
     UnremovableABM(MicrobeType, space, timestep; kwargs...)
@@ -148,7 +148,7 @@ function Agents.add_agent!(
     speed = nothing,
     kwproperties...
 ) where {D}
-    id = Agents.nextid(model) # nextid is not public API!
+    id = Agents.nextid(model) # not public API!
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
@@ -156,7 +156,7 @@ function Agents.add_agent!(
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
-    add_agent_pos!(microbe, model)
+    Agents.add_agent_pos!(microbe, model) # not public API!
 end
 
 
