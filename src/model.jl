@@ -10,12 +10,18 @@ Implementation of `AgentBasedModel` where agents can only be added but not remov
 See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 
 **Arguments**
-- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
-- `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial properties of the simulation domain.
+- `MicrobeType`: a concrete subtype of `AbstractMicrobe{D}`,
+  with explicitly specified dimensionality `D`.
+  A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
+- `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType
+  which specifies the spatial properties of the simulation domain.
 - `timestep`: the integration timestep of the simulation.
 
 **Keywords**
-- `properties`: additional container of data to specify model-level properties. MicrobeAgents.jl includes a set of default properties (detailed at the end).
+- `properties`: additional container of data to specify model-level properties.
+  MicrobeAgents.jl includes a set of default properties (detailed at the end).
+- `agent_step!`: stepping function for each agent in the model
+- `model_step!`: stepping function for the model
 - `scheduler = Schedulers.fastest`
 - `rng = Random.default_rng()`
 - `spacing = minimum(extent)/20`
@@ -44,6 +50,8 @@ to the `properties` dictionary when creating the model.
 """
 function Agents.UnremovableABM(
     T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
+    agent_step! = microbe_step!,
+    model_step! = nothing,
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
@@ -54,7 +62,9 @@ function Agents.UnremovableABM(
         properties...,
         :timestep => timestep
     )
-    UnremovableABM(T, space; scheduler, properties, rng, warn)
+    UnremovableABM(T, space;
+        agent_step!, model_step!, scheduler, properties, rng, warn
+    )
 end
 
 
@@ -99,6 +109,8 @@ to the `properties` dictionary when creating the model.
 """
 function Agents.StandardABM(
     T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
+    agent_step! = microbe_step!,
+    model_step! = nothing,
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
@@ -109,7 +121,9 @@ function Agents.StandardABM(
         properties...,
         :timestep => timestep
     )
-    StandardABM(T, space; scheduler, properties, rng, warn)
+    StandardABM(T, space;
+        agent_step!, model_step!, scheduler, properties, rng, warn
+    )
 end
 
 
@@ -150,41 +164,6 @@ function Agents.add_agent!(
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
     add_agent_pos!(microbe, model)
-end
-
-
-"""
-    run!(model, n=1; kwargs...)
-MicrobeAgents extension of `Agents.run!`, which assumes the `agent_step!` to be
-`microbe_step!`, and the `model_step!` to be `model.update!`.
-Runs the model for a number of steps specified by `n`. If `n` is not specified, only 1 step is performed.
-`n` can also be a function `n(model,s)::Bool` (where `s` is the current number of steps taken)
-in which case the simulations stops when `n` returns true.
-
-**Keywords**
-- `when = true`: at which steps to perform collection/processing of agent data.
-- `when_model = when`: at which steps to perform collection/processing of model data.
-- `adata::Vector`: agent data to collect
-- `mdata::Vector`: model data to collect
-- `obtainer = identity`
-- `agents_first = true`: whether agent stepping should be performed before model stepping
-- `showprogress = false`
-See `Agents.run!` and `Agents.step!` for detailed information.
-"""
-function Agents.run!(model::AgentBasedModel{S}, n = 1;
-    when = true,
-    when_model = when,
-    adata = nothing,
-    mdata = nothing,
-    obtainer = identity,
-    agents_first = true,
-    showprogress = false
-) where {S<:ContinuousSpace}
-    run!(model, microbe_step!, model.update!, n;
-        when, when_model,
-        adata, mdata,
-        obtainer, agents_first, showprogress
-    )
 end
 
 
