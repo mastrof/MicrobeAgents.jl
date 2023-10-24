@@ -127,13 +127,6 @@ function Agents.StandardABM(
 end
 
 
-# Microbe constructor generates a random velocity in non-reproducible way.
-# When microbes are created internally these velocity must be generated
-# reproducibly using the model rng, if a vel keyword is not specified.
-# In this case, we want to initialize the microbe with a zero velocity
-# and only then extract a random velocity with the correct rng.
-# It is sufficient to extend this single method because it is
-# the lowest level method to which all the others fall back.
 """
     add_agent!([pos,] [MicrobeType,] model; kwargs...)
 MicrobeAgents extension of `Agents.add_agent!`.
@@ -155,7 +148,7 @@ function Agents.add_agent!(
     speed = nothing,
     kwproperties...
 ) where {D}
-    id = nextid(model)
+    id = Agents.nextid(model) # nextid is not public API!
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
