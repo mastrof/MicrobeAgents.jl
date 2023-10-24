@@ -1,8 +1,3 @@
-# extended from Agents.jl
-export StandardABM, UnremovableABM, add_agent!, run!
-# exported from Agents.jl without extensions
-export add_agent_pos!, ContinuousSpace
-
 """
     UnremovableABM(MicrobeType, space, timestep; kwargs...)
 Extension of the `Agents.UnremovableABM` method for microbe types.
@@ -115,7 +110,7 @@ end
 
 # Microbe constructor generates a random velocity in non-reproducible way.
 # When microbes are created internally these velocity must be generated
-# reproducibly using the model rng, if a vel keyword is not specified.
+# reproducibly using the abmrng(model), if a vel keyword is not specified.
 # In this case, we want to initialize the microbe with a zero velocity
 # and only then extract a random velocity with the correct rng.
 # It is sufficient to extend this single method because it is
@@ -130,7 +125,7 @@ If not specified, `pos` will be assigned randomly in the model domain.
 
 Keywords can be used to specify default values to pass to the microbe constructor,
 otherwise default values from the constructor will be used.
-If unspecified, the function also generates a random velocity vector.
+If unspecified, a random velocity vector and a random speed are generated.
 """
 function Agents.add_agent!(
     pos::Agents.ValidPos,
@@ -139,12 +134,16 @@ function Agents.add_agent!(
     properties...;
     vel = nothing,
     speed = nothing,
-    kwargs...
-) where D
+    kwproperties...
+) where {D}
     id = nextid(model)
-    microbe = A(id, pos, properties...; vel=ntuple(zero,D), speed=0, kwargs...)
-    microbe.vel = isnothing(vel) ? rand_vel(model.rng, D) : vel
-    microbe.speed = isnothing(speed) ? rand_speed(model.rng, microbe.motility) : speed
+    if !isempty(properties)
+        microbe = A(id, pos, properties...)
+    else
+        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
+        microbe.vel = isnothing(vel) ? random_velocity(model) : vel
+        microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
+    end
     add_agent_pos!(microbe, model)
 end
 

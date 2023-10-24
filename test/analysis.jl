@@ -6,12 +6,12 @@ using LinearAlgebra: norm
     dt = 1
     L = 100
     for D in 1:3
-        extent = ntuple(_ -> L, D)
+        extent = fill(float(L), SVector{D})
         space = ContinuousSpace(extent)
-        pos = ntuple(zero, D)
+        pos = zero(SVector{D})
         U = 1
         motility = RunTumble(speed=[U])
-        vel = ntuple(_ -> 1/√D, D)
+        vel = fill(1/√D, SVector{D})
         turn_rate = 0
         model = StandardABM(Microbe{D}, space, dt)
         add_agent!(pos, model; vel, motility, turn_rate)
@@ -19,7 +19,7 @@ using LinearAlgebra: norm
         adata = [:pos]
         adf, mdf = run!(model, nsteps; adata)
         traj = vectorize_adf_measurement(adf, :pos)
-        @test traj isa AbstractMatrix{<:Tuple}
+        @test traj isa AbstractMatrix{<:SVector}
         @test size(traj) == (nsteps+1, 1)
         real_traj = [pos .+ vel.*(U*n*dt) for n in 0:nsteps, _ in 1:1]
         Δ = norm.([traj[i] .- real_traj[i] for i in eachindex(traj)])
@@ -32,7 +32,7 @@ using LinearAlgebra: norm
         dt = 0.1
         L = 100
         for D in 1:3
-            extent = ntuple(_ -> L, D)
+            extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             model = StandardABM(Microbe{D}, space, dt)
             add_agent!(model; turn_rate=Inf) # turns every step
@@ -67,7 +67,8 @@ using LinearAlgebra: norm
             nsteps = 100
             v(microbe) = microbe.speed .* microbe.vel
             adata = [v]
-            L = 100; extent = ntuple(_ -> L, D)
+            L = 100
+            extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             rng = Xoshiro(35)
             model_periodic = StandardABM(Microbe{D}, space, dt; rng)
@@ -93,7 +94,8 @@ using LinearAlgebra: norm
     @testset "MSD" begin
         for D in 1:3
             dt = 0.1
-            L = 100; extent = ntuple(_ -> L, D)
+            L = 100
+            extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             turn_rate = 0 # ballistic motion
             model = StandardABM(Microbe{D}, space, dt)
@@ -109,7 +111,7 @@ using LinearAlgebra: norm
             # previous should be identical in a rectangular domain
             if D > 1 # skip trivial D=1 case
                 L₀ = 100; L₁ = 40
-                extent = ntuple(i -> i==1 ? L₀ : L₁, D)
+                extent = SVector{D}(i == 1 ? L₀ : L₁ for i in 1:D)
                 space = ContinuousSpace(extent)
                 turn_rate = 0 # ballistic motion
                 model = StandardABM(Microbe{D}, space, dt)

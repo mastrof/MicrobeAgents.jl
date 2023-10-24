@@ -12,7 +12,7 @@ using LinearAlgebra: norm
             model2 = StandardABM(Microbe{D}, space, timestep)
             @test model isa UnremovableABM
             @test model2 isa StandardABM
-            @test Set(keys(model.properties)) == Set((
+            @test Set(keys(abmproperties(model))) == Set((
                 :t, :timestep,
                 :concentration_field,
                 :concentration_gradient,

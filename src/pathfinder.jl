@@ -1,15 +1,15 @@
 export pathfinder!, initialise_pathfinder, pathfinder_step!
 
 function pathfinder!(model::AgentBasedModel, walkmap::BitArray)
-    pathfinder = initialise_pathfinder(model.space, walkmap)
-    model.properties[:pathfinder] = pathfinder
+    pathfinder = initialise_pathfinder(abmspace(model), walkmap)
+    abmproperties(model)[:pathfinder] = pathfinder
 end
 
 function initialise_pathfinder(
     extent::Real, periodic::Bool,
     walkmap::BitArray{D}
 ) where D
-    initialise_pathfinder(ntuple(_->extent,D), periodic, walkmap)
+    initialise_pathfinder(SVector{D}(extent for _ in 1:D), periodic, walkmap)
 end
 function initialise_pathfinder(
     extent::NTuple{D,<:Real}, periodic::Bool,

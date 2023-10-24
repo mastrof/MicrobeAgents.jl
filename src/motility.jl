@@ -3,7 +3,7 @@ export
     MotilityOneStep, MotilityTwoStep,
     RunTumble, RunReverse, RunReverseFlick,
     MotileState, TwoState, Forward, Backward, switch!,
-    rand_speed, rand_polar, rand_azimuthal
+    random_polar, random_azimuthal
 
 """
     AbstractMotility
@@ -274,70 +274,39 @@ switch!(m::AbstractMotilityTwoStep) = (m.state = ~m.state; nothing)
 Base.:~(x::TwoState) = TwoState(~Bool(x))
 
 # convenient wrapper to sample new motile state
-Base.rand(m::AbstractMotility) = (rand_speed(m), rand_polar(m), rand_azimuthal(m))
-Base.rand(rng::AbstractRNG, m::AbstractMotility) = (rand_speed(rng,m), rand_polar(rng,m), rand_azimuthal(rng,m))
-# expand rand_vel from utils.jl
-"""
-    rand_speed([rng,] m::AbstractMotilityOneStep)
-Extract value from the speed distribution of the motility pattern `m.speed`.
-"""
-rand_speed(m::AbstractMotilityOneStep) = rand(m.speed)
-rand_speed(rng::AbstractRNG, m::AbstractMotilityOneStep) = rand(rng, m.speed)
-"""
-    rand_speed([rng,] m::AbstractMotilityTwoStep)
-Extract value from the speed distribution of the motility pattern.
-If `motilestate(m) == ForwardState()` extract from `speed_forward`, otherwise
-from `speed_backward`.
-"""
-function rand_speed(m::AbstractMotilityTwoStep)
-    if m.state == Forward
-        return rand(m.speed_forward)
-    else
-        return rand(m.speed_backward)
-    end
-end
-function rand_speed(rng::AbstractRNG, m::AbstractMotilityTwoStep)
-    if m.state == Forward
-        return rand(rng, m.speed_forward)
-    else
-        return rand(rng, m.speed_backward)
-    end
-end
-"""
-    rand_vel([rng,] N::Int, m::AbstractMotility)
-Generate a random N-tuple, with norm defined by the speed distribution of
-the motile pattern `m`.
-"""
-rand_vel(D::Int, m::AbstractMotility) = rand_vel(D) .* rand_speed(m)
-rand_vel(rng::AbstractRNG, D::Int, m::AbstractMotility) = rand_vel(rng, D) .* rand_speed(m)
+Base.rand(rng::AbstractRNG, motility::AbstractMotility) = (
+    random_speed(rng, motility),
+    random_polar(rng, motility),
+    random_azimuthal(rng, motility)
+)
 
-# extract angles from polar and azimuthal distributions
-rand_polar(m::AbstractMotilityOneStep) = rand(m.polar)
-rand_polar(rng::AbstractRNG, m::AbstractMotilityOneStep) = rand(rng, m.polar)
-rand_azimuthal(m::AbstractMotilityOneStep) = rand(m.azimuthal)
-rand_azimuthal(rng::AbstractRNG, m::AbstractMotilityOneStep) = rand(rng, m.azimuthal)
-function rand_polar(m::AbstractMotilityTwoStep)
-    if m.state == Forward
-        return rand(m.polar_forward)
+random_speed(rng::AbstractRNG, motility::AbstractMotilityOneStep) = rand(rng, motility.speed)
+function random_speed(rng::AbstractRNG, motility::AbstractMotilityTwoStep)
+    if motility.state == Forward
+        return rand(rng, motility.speed_forward)
     else
-        return rand(m.polar_backward)
+        return rand(rng, motility.speed_backward)
     end
 end
-function rand_polar(rng::AbstractRNG, m::AbstractMotilityTwoStep)
+
+"""
+    random_polar(rng, motility)
+Sample random value from the distribution of polar reorientations of `motility`.
+"""
+random_polar(rng::AbstractRNG, m::AbstractMotilityOneStep) = rand(rng, m.polar)
+"""
+    random_azimuthal(rng, motility)
+Sample random value from the distribution of azimuthal reorientations of `motility`.
+"""
+random_azimuthal(rng::AbstractRNG, m::AbstractMotilityOneStep) = rand(rng, m.azimuthal)
+function random_polar(rng::AbstractRNG, m::AbstractMotilityTwoStep)
     if m.state == Forward
         return rand(rng, m.polar_forward)
     else
         return rand(rng, m.polar_backward)
     end
 end
-function rand_azimuthal(m::AbstractMotilityTwoStep)
-    if m.state == Forward
-        return rand(m.azimuthal_forward)
-    else
-        return rand(m.azimuthal_backward)
-    end
-end
-function rand_azimuthal(rng::AbstractRNG, m::AbstractMotilityTwoStep)
+function random_azimuthal(rng::AbstractRNG, m::AbstractMotilityTwoStep)
     if m.state == Forward
         return rand(rng, m.azimuthal_forward)
     else
