@@ -5,7 +5,7 @@ export random_velocity, random_speed, ChainedFunction, →, distance, distanceve
 Generate a random velocity vector with unit norm respecting the
 dimensionality of `model`.
 """
-function random_velocity(model::AgentBasedModel{S,A}) where {S,D,A<:AbstractMicrobe{D}}
+function random_velocity(model::AgentBasedModel{<:ContinuousSpace{D}}) where D
     random_velocity(abmrng(model), D)
 end
 function random_velocity(rng::AbstractRNG, D::Int)

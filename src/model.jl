@@ -1,3 +1,8 @@
+# extended from Agents.jl
+export StandardABM, UnremovableABM, add_agent!
+# exported from Agents.jl without extensions
+export ContinuousSpace
+
 """
     UnremovableABM(MicrobeType, space, timestep; kwargs...)
 Extension of the `Agents.UnremovableABM` method for microbe types.
@@ -5,12 +10,18 @@ Implementation of `AgentBasedModel` where agents can only be added but not remov
 See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 
 **Arguments**
-- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
-- `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial properties of the simulation domain.
+- `MicrobeType`: a concrete subtype of `AbstractMicrobe{D}`,
+  with explicitly specified dimensionality `D`.
+  A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
+- `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType
+  which specifies the spatial properties of the simulation domain.
 - `timestep`: the integration timestep of the simulation.
 
 **Keywords**
-- `properties`: additional container of data to specify model-level properties. MicrobeAgents.jl includes a set of default properties (detailed at the end).
+- `properties`: additional container of data to specify model-level properties.
+  MicrobeAgents.jl includes a set of default properties (detailed at the end).
+- `agent_step!`: stepping function for each agent in the model
+- `model_step!`: stepping function for the model
 - `scheduler = Schedulers.fastest`
 - `rng = Random.default_rng()`
 - `spacing = minimum(extent)/20`
@@ -28,8 +39,6 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
 )
 ```
 By including these default properties, we make sure that all the chemotaxis models
@@ -39,6 +48,8 @@ to the `properties` dictionary when creating the model.
 """
 function Agents.UnremovableABM(
     T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
+    agent_step! = microbe_step!,
+    model_step! = _ -> nothing,
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
@@ -49,7 +60,9 @@ function Agents.UnremovableABM(
         properties...,
         :timestep => timestep
     )
-    UnremovableABM(T, space; scheduler, properties, rng, warn)
+    UnremovableABM(T, space;
+        agent_step!, model_step!, scheduler, properties, rng, warn
+    )
 end
 
 
@@ -83,8 +96,6 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
 )
 ```
 By including these default properties, we make sure that all the chemotaxis models
@@ -94,6 +105,8 @@ to the `properties` dictionary when creating the model.
 """
 function Agents.StandardABM(
     T::Type{A}, space::ContinuousSpace{D}, timestep::Real;
+    agent_step! = microbe_step!,
+    model_step! = _ -> nothing,
     scheduler = Schedulers.fastest,
     properties = Dict(),
     rng = Random.default_rng(),
@@ -104,17 +117,12 @@ function Agents.StandardABM(
         properties...,
         :timestep => timestep
     )
-    StandardABM(T, space; scheduler, properties, rng, warn)
+    StandardABM(T, space;
+        agent_step!, model_step!, scheduler, properties, rng, warn
+    )
 end
 
 
-# Microbe constructor generates a random velocity in non-reproducible way.
-# When microbes are created internally these velocity must be generated
-# reproducibly using the abmrng(model), if a vel keyword is not specified.
-# In this case, we want to initialize the microbe with a zero velocity
-# and only then extract a random velocity with the correct rng.
-# It is sufficient to extend this single method because it is
-# the lowest level method to which all the others fall back.
 """
     add_agent!([pos,] [MicrobeType,] model; kwargs...)
 MicrobeAgents extension of `Agents.add_agent!`.
@@ -136,7 +144,7 @@ function Agents.add_agent!(
     speed = nothing,
     kwproperties...
 ) where {D}
-    id = nextid(model)
+    id = Agents.nextid(model) # not public API!
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
@@ -144,50 +152,10 @@ function Agents.add_agent!(
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
-    add_agent_pos!(microbe, model)
+    Agents.add_agent_pos!(microbe, model) # not public API!
 end
 
 
-"""
-    run!(model, n=1; kwargs...)
-MicrobeAgents extension of `Agents.run!`, which assumes the `agent_step!` to be
-`microbe_step!`, and the `model_step!` to be `model.update!`.
-Runs the model for a number of steps specified by `n`. If `n` is not specified, only 1 step is performed.
-`n` can also be a function `n(model,s)::Bool` (where `s` is the current number of steps taken)
-in which case the simulations stops when `n` returns true.
-
-**Keywords**
-- `when = true`: at which steps to perform collection/processing of agent data.
-- `when_model = when`: at which steps to perform collection/processing of model data.
-- `adata::Vector`: agent data to collect
-- `mdata::Vector`: model data to collect
-- `obtainer = identity`
-- `agents_first = true`: whether agent stepping should be performed before model stepping
-- `showprogress = false`
-See `Agents.run!` and `Agents.step!` for detailed information.
-"""
-function Agents.run!(model::AgentBasedModel{S,A}, n = 1;
-    when = true,
-    when_model = when,
-    adata = nothing,
-    mdata = nothing,
-    obtainer = identity,
-    agents_first = true,
-    showprogress = false
-) where {S<:ContinuousSpace,A<:AbstractMicrobe}
-    run!(model, microbe_step!, model.update!, n;
-        when, when_model,
-        adata, mdata,
-        obtainer, agents_first, showprogress
-    )
-end
-
-
-"""
-    tick!(model::AgentBasedModel)
-Increase time count `model.t` by 1.
-"""
-tick!(model::AgentBasedModel) = (model.t += 1)
 # extend function chaining
 →(model::AgentBasedModel, f, g...) = (model.update! = →(model.update! → f, g...))
 →(model::AgentBasedModel, f) = (model.update! = model.update! → f)
@@ -199,6 +167,4 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
-    # model stepper, by default only keeps time
-    :update! => tick!
 )

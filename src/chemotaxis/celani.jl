@@ -19,7 +19,7 @@ Default parameters:
 - `memory = 1` s
 - `radius = 0.5` μm
 """
-@agent Celani{D} ContinuousAgent{D,Float64} where {D} AbstractMicrobe{D} begin
+@agent struct Celani{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
     motility::AbstractMotility = RunTumble(speed = [30.0])
     turn_rate::Float64 = 1 / 0.67
@@ -72,7 +72,7 @@ function Agents.add_agent!(
     speed=nothing,
     kwproperties...
 ) where {D,N}
-    id = nextid(model)
+    id = Agents.nextid(model)
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
@@ -81,7 +81,7 @@ function Agents.add_agent!(
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
         initialize_markovian_variables!(microbe, model)
     end
-    add_agent_pos!(microbe, model)
+    Agents.add_agent_pos!(microbe, model)
 end
 
 """

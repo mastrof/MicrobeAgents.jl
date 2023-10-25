@@ -14,6 +14,9 @@ recommended to use it alongside Agents.jl for extra niceties.
 The package is still at an early stage of intense development.
 Contributions, requests and suggestions are more than welcome.
 
+**To use the latest development version of MicrobeAgents it's required to manually install
+the latest version of Agents first (`]add Agents#main`).**
+
 ## Main features
 - Multiple swimming strategies (run-tumble, run-reverse, run-reverse-flick) with tunable parameters, and possibility to implement your own with minimal effort
 - Classical and modern models of chemotaxis (Berg-Purcell, Celani-Vergassola, Xie, Brumley)

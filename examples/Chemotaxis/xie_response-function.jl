@@ -28,7 +28,8 @@ properties = Dict(
     :t₂ => t₂,
 )
 
-model = UnremovableABM(Xie{3}, space, timestep; properties)
+model_step!(model) = model.t += 1
+model = UnremovableABM(Xie{3}, space, timestep; properties, model_step!)
 add_agent!(model; turn_rate_forward=0, motility=RunReverseFlick(motile_state=MotileState(Forward)))
 add_agent!(model; turn_rate_backward=0, motility=RunReverseFlick(motile_state=MotileState(Backward)))
 

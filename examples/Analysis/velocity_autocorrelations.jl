@@ -20,9 +20,9 @@ nsteps = round(Int, 100τ_run / Δt)
 adata = [:vel]
 adf, = run!(model, nsteps; adata)
 
-adf_runtumble = filter(:id => id -> model.agents[id].motility isa RunTumble, adf; view=true)
-adf_runrev = filter(:id => id -> model.agents[id].motility isa RunReverse, adf; view=true)
-adf_runrevflick = filter(:id => id -> model.agents[id].motility isa RunReverseFlick, adf; view=true)
+adf_runtumble = filter(:id => id -> model[id].motility isa RunTumble, adf; view=true)
+adf_runrev = filter(:id => id -> model[id].motility isa RunReverse, adf; view=true)
+adf_runrevflick = filter(:id => id -> model[id].motility isa RunReverseFlick, adf; view=true)
 adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
 
 t = range(0, (nsteps-1)*Δt; step=Δt)

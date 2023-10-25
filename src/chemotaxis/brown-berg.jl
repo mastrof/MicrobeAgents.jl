@@ -14,7 +14,7 @@ Default parameters:
 - `receptor_binding_constant = 100` μM
 - `memory = 1` s
 """
-@agent BrownBerg{D} ContinuousAgent{D,Float64} where D AbstractMicrobe{D} begin
+@agent struct BrownBerg{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
     motility::AbstractMotility = RunTumble()
     turn_rate::Float64 = 1 / 0.67
