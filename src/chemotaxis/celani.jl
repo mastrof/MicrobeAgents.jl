@@ -21,7 +21,7 @@ Default parameters:
 """
 @agent struct Celani{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility::AbstractMotility = RunTumble(speed = [30.0])
+    motility = RunTumble(speed = [30.0])
     turn_rate::Float64 = 1 / 0.67
     rotational_diffusivity::Float64 = 0.26
     radius::Float64 = 0.5

@@ -16,7 +16,7 @@ Default parameters:
 """
 @agent struct BrownBerg{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility::AbstractMotility = RunTumble()
+    motility = RunTumble()
     turn_rate::Float64 = 1 / 0.67
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
