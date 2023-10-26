@@ -31,7 +31,7 @@ Default parameters:
 """
 @agent struct Xie{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility::AbstractMotility = RunReverseFlick(speed_forward = [46.5])
+    motility = RunReverseFlick(speed_forward = [46.5])
     turn_rate_forward::Float64 = 2.3
     turn_rate_backward::Float64 = 1.9
     rotational_diffusivity::Float64 = 0.26
@@ -59,7 +59,7 @@ end
 # Xie requires its own turnrate functions
 # since it has different parameters for fw and bw states
 function turnrate(microbe::Xie, model)
-    if microbe.motility isa AbstractMotilityTwoStep
+    if motilepattern(microbe) isa AbstractMotilityTwoStep
         return turnrate_twostep(microbe, model)
     else
         return turnrate_onestep(microbe, model)
@@ -67,7 +67,7 @@ function turnrate(microbe::Xie, model)
 end
 function turnrate_twostep(microbe::Xie, model)
     S = microbe.state
-    if microbe.motility.state == Forward
+    if motilepattern(microbe).state == Forward
         ν₀ = microbe.turn_rate_forward
         β = microbe.gain_forward
     else

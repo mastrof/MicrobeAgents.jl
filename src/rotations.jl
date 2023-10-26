@@ -1,12 +1,12 @@
 function turn!(microbe::AbstractMicrobe, model)
     v = microbe.vel
     # extract new speed and rotation angles
-    U₁, θ, ϕ = rand(abmrng(model), microbe.motility)
+    U₁, θ, ϕ = rand(abmrng(model), motilepattern(microbe))
     # reorient and update speed
     microbe.vel = rotate(v, θ, ϕ)
     microbe.speed = U₁
     # switch motile state (does nothing if motility is one-step)
-    switch!(microbe.motility)
+    switch!(motilepattern(microbe))
 end
 
 """

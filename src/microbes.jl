@@ -19,7 +19,7 @@ Default parameters:
 """
 @agent struct Microbe{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility::AbstractMotility = RunTumble()
+    motility = RunTumble()
     turn_rate::Float64 = 1.0
     rotational_diffusivity::Float64 = 0.0
     radius::Float64 = 0.0
