@@ -28,8 +28,8 @@ microbe type lives (1, 2 and 3 are supported).
 
 All microbe types *must* have at least the following fields:
 - `id::Int` id of the microbe (used internally by Agents.jl)
-- `pos::NTuple{D,Float64}` position of the microbe
-- `vel::NTuple{D,Float64}` velocity of the microbe
+- `pos::SVectpr{D,Float64}` position of the microbe
+- `vel::SVector{D,Float64}` velocity of the microbe
 - `motility::AbstractMotility` motile pattern of the microbe
 - `turn_rate::Real` average reorientation rate of the microbe
 - `rotational_diffusivity::Real` coefficient of brownian rotational diffusion
