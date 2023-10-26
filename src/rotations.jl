@@ -3,7 +3,7 @@ function turn!(microbe::AbstractMicrobe, model)
     # extract new speed and rotation angles
     U₁, θ, ϕ = rand(abmrng(model), microbe.motility)
     # reorient and update speed
-    microbe.vel = Tuple(rotate(v, θ, ϕ))
+    microbe.vel = rotate(v, θ, ϕ)
     microbe.speed = U₁
     # switch motile state (does nothing if motility is one-step)
     switch!(microbe.motility)
@@ -21,11 +21,9 @@ function rotational_diffusion!(microbe::AbstractMicrobe, model)
     σ = sqrt(2*D_rot*dt)
     θ = rand(abmrng(model), Normal(0,σ))
     ϕ = rand(abmrng(model), Arccos())
-    microbe.vel = Tuple(rotate(microbe.vel, θ, ϕ))
+    microbe.vel = rotate(microbe.vel, θ, ϕ)
     nothing
 end
-
-rotate(w::Tuple, θ, ϕ) = rotate(SVector(w), θ, ϕ)
 
 """
     rotate(w::SVector{D}, θ, ϕ) where D
