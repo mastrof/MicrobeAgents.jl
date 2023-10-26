@@ -2,18 +2,15 @@
 
 ## Simple stepping
 Type             Time (μs)        Allocs           Memory          
-Microbe{1}       2.13e+00         40               3.73e+03        
-Microbe{2}       2.34e+00         40               3.79e+03        
-Microbe{3}       2.55e+00         40               3.92e+03        
-BrownBerg{1}     2.27e+00         40               3.73e+03        
-BrownBerg{2}     2.65e+00         40               3.79e+03        
-BrownBerg{3}     2.38e+00         40               3.92e+03        
-Brumley{1}       2.27e+00         40               3.73e+03        
-Brumley{2}       2.33e+00         40               3.79e+03        
-Brumley{3}       2.55e+00         40               3.92e+03        
-Celani{1}        2.44e+00         40               3.73e+03        
-Celani{2}        2.50e+00         40               3.79e+03        
-Celani{3}        2.55e+00         40               3.92e+03        
-Xie{1}           2.51e+00         40               3.73e+03        
-Xie{2}           2.28e+00         40               3.79e+03        
-Xie{3}           2.55e+00         40               3.92e+03        
+Microbe{1}       5.96e-01         1.50e+01         5.95e+02        
+Microbe{2}       1.28e+00         3.30e+01         1.11e+03        
+Microbe{3}       1.39e+00         3.30e+01         1.20e+03        
+BrownBerg{1}     1.01e+00         4.20e+01         1.36e+03        
+BrownBerg{2}     1.79e+00         6.00e+01         1.99e+03        
+BrownBerg{3}     2.01e+00         6.00e+01         2.18e+03        
+Brumley{1}       1.31e+00         4.85e+01         1.48e+03        
+Brumley{2}       2.11e+00         6.60e+01         2.10e+03        
+Brumley{3}       2.27e+00         6.60e+01         2.29e+03        
+Celani{1}        9.74e-01         4.00e+01         1.12e+03        
+Celani{2}        1.70e+00         5.80e+01         1.67e+03        
+Celani{3}        1.84e+00         5.80e+01         1.80e+03        

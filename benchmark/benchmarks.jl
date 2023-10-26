@@ -34,7 +34,7 @@ open("benchmarks.md", "w") do io
 end
 
 ## Setup
-microbe_types = [Microbe, BrownBerg, Brumley, Celani, Xie]
+microbe_types = [Microbe, BrownBerg, Brumley, Celani]
 dimensions = [1, 2, 3]
 
 ##
@@ -46,8 +46,14 @@ open("benchmarks.md", "a") do io
             space = ContinuousSpace(ntuple(_ -> 10.0, D))
             dt = 0.1
             model = UnremovableABM(T{D}, space, dt)
-            b = @benchmark run!($model, $(1))
-            @printf io "%-16s %-16.2e %-16d %-16.2e\n" string(T{D}) minimum(b.times)*1e-3 b.allocs b.memory
+            add_agent!(model; turn_rate = 1/dt) # reorients at each step
+            nsteps = 1000
+            b = @benchmark run!($model, $(nsteps))
+            type = string(T{D})
+            mintime = minimum(b.times)*1e-3 / nsteps
+            allocs = b.allocs / nsteps
+            memory = b.memory / nsteps
+            @printf io "%-16s %-16.2e %-16.2e %-16.2e\n" type mintime allocs memory
         end
     end
 end
