@@ -14,8 +14,6 @@ using Rotations
 using StaticArrays
 export SVector
 
-using DSP, AxisArrays, OffsetArrays # for acf and msd
-
 
 export AbstractMicrobe
 """
@@ -63,12 +61,5 @@ using GeometryBasics: HyperSphere, Point
 include("bodies/spheres.jl")
 using Agents.Pathfinding
 include("pathfinder.jl")
-
-# analysis routines
-include("analysis/postprocess.jl")
-include("analysis/msd.jl")
-include("analysis/correlation_functions.jl")
-include("analysis/drift.jl")
-include("analysis/turn_detection.jl")
 
 end
