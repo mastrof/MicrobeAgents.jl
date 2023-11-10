@@ -8,7 +8,7 @@ turn_rate = 1 / τ_run # 1/s
 L = 1e4 # μm
 space = ContinuousSpace((L,L,L))
 
-model = UnremovableABM(Microbe{3}, space, Δt)
+model = StandardABM(Microbe{3}, space, Δt; container=Vector)
 n = 200
 for i in 1:n
     add_agent!(model; turn_rate, motility=RunTumble(speed=[U]))
