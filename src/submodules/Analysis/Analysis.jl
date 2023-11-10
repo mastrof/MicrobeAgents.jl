@@ -5,6 +5,7 @@ module Analysis
 using Autocorrelations
 using MeanSquaredDisplacement
 using DataFrames
+using StaticArrays: SVector
 
 include("postprocess.jl")
 include("acf.jl")
