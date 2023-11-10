@@ -62,4 +62,7 @@ include("bodies/spheres.jl")
 using Agents.Pathfinding
 include("pathfinder.jl")
 
+# submodules
+include("submodules/Analysis/Analysis.jl")
+
 end
