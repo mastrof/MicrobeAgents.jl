@@ -56,7 +56,7 @@ properties = Dict(
     :concentration_field => concentration_field,
     :concentration_gradient => concentration_gradient
 )
-model = UnremovableABM(BrownBerg{2}, space, Δt; periodic, properties)
+model = StandardABM(BrownBerg{2}, space, Δt; periodic, properties, container=Vector)
 for i in 1:n
     add_agent!(model)
 end

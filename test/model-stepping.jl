@@ -3,12 +3,12 @@ using Random
 using LinearAlgebra: norm
 
 @testset "Model stepping" begin
-    for D in 1:3, ABM in (StandardABM, UnremovableABM)
+    for D in 1:3, container in (Dict, Vector)
         rng = Xoshiro(68)
         dt = 1
         extent = fill(300.0, SVector{D})
         space = ContinuousSpace(extent)
-        model = ABM(Microbe{D}, space, dt; rng)
+        model = StandardABM(Microbe{D}, space, dt; rng, container)
         pos = extent ./ 2
         vel1 = random_velocity(model)
         speed1 = random_speed(rng, RunTumble())
@@ -30,7 +30,7 @@ using LinearAlgebra: norm
         # customize microbe affect! function
         # decreases microbe state value by D at each step
         MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state -= D)
-        model = ABM(Microbe{D}, space, dt)
+        model = StandardABM(Microbe{D}, space, dt; container)
         add_agent!(model)
         run!(model, 1)
         @test model[1].state == -D
@@ -42,7 +42,7 @@ using LinearAlgebra: norm
 
         # customize model_step! function
         model_step!(model) = model.t += 1
-        model = ABM(Microbe{D}, space, dt; model_step!)
+        model = StandardABM(Microbe{D}, space, dt; model_step!, container)
         run!(model, 6)
         @test model.t == 6
     end

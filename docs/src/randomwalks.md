@@ -19,10 +19,10 @@ dt = 0.1
 n = 10
 nsteps = 600
 
-model = UnremovableABM(Microbe{1}, space, dt)
+model = StandardABM(Microbe{1}, space, dt; container=Vector)
 foreach(_ -> add_agent!((0,), model), 1:n)
 ```
-By default, `UnremovableABM` will create a periodic domain; this will
+By default, `ContinuousSpace` will create a periodic domain; this will
 allow us to mimic an "infinite" system.
 All the microbes have been initialized from position 0, without
 specifying any further property, so they will be initialized with a random
@@ -62,7 +62,7 @@ space = ContinuousSpace((L,L))
 dt = 0.1
 nsteps = 600
 
-model = UnremovableABM(Microbe{2}, space, dt)
+model = StandardABM(Microbe{2}, space, dt; container=Vector)
 ```
 But we can now add bacteria with different motility patterns
 (we import Distributions.jl to use a Normal distribution for the speed of
