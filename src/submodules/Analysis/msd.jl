@@ -1,4 +1,4 @@
-export imsd!, emsd
+export imsd!, imsd, emsd
 
 """
     unfold_coord(x₀, x₁, L)
@@ -57,7 +57,16 @@ end # function
 function imsd!(df::GroupedDataFrame, sym)
     transform!(df, sym => imsd)
 end
+function imsd(df::AbstractDataFrame, sym)
+    imsd(groupby(df, :id), sym)
+end
+function imsd(df::GroupedDataFrame, sym)
+    imsd.([g[!,sym] for g in df])
+end
 
+function MeanSquaredDisplacement.emsd(df::AbstractDataFrame, sym)
+    emsd(groupby(df, :id), sym)
+end
 function MeanSquaredDisplacement.emsd(df::GroupedDataFrame, sym)
-    emsd([g.vel for g in df])
+    emsd([g[!,sym] for g in df])
 end
