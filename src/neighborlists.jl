@@ -98,13 +98,8 @@ function update_neighborlist!(microbe::AbstractMicrobe, model, listkey)
     neighbor_list.xpositions[microbe.id] = microbe.pos
 end
 
-
-@inline function make_position_vector(model::UnremovableABM)
-    [position(a) for a in allagents(model)]
-end
 @inline function make_position_vector(model::StandardABM)
-    ids = sort(collect(allids(model)))
-    [position(model[i]) for i in ids]
+    map(position, allagents(model))
 end
 @inline function make_position_vector(x::AbstractVector)
     [SVector{length(xᵢ)}(position(xᵢ)) for xᵢ in x]

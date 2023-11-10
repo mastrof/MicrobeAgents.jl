@@ -3,7 +3,7 @@ using MicrobeAgents
 using Agents
 
 @testset "Neighbor Lists" begin
-    @testset "StandardABM" begin
+    @testset "Removable agents" begin
         for D in 1:3
             L = 100
             extent = fill(float(L), SVector{D})
@@ -40,13 +40,13 @@ using Agents
         end
     end
 
-    @testset "UnremovableABM" begin
+    @testset "Unremovable agents" begin
         for D in 1:3
             L = 100
             extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             dt = 1
-            model = UnremovableABM(Microbe{D}, space, dt)
+            model = StandardABM(Microbe{D}, space, dt; container=Vector)
             n = 10
             foreach(_ -> add_agent!(model), 1:n)
             listkey = :neighbors

@@ -6,7 +6,7 @@ L = 1000
 space = ContinuousSpace((L,L))
 dt = 0.01
 
-model = UnremovableABM(Microbe{2}, space, dt)
+model = StandardABM(Microbe{2}, space, dt; container=Vector)
 n = 500
 Drot = 0.1
 τ = 1.5
