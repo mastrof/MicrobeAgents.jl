@@ -1,5 +1,9 @@
 export acf!, acf
 
+function Autocorrelations.acf!(df::AbstractDataFrame, sym; kwargs...)
+    gdf = groupby(df, :id)
+    acf!(gdf, sym; kwargs...)
+end
 function Autocorrelations.acf!(df::GroupedDataFrame, sym; kwargs...)
     f(x) = acf(x; kwargs...)
     transform!(df, sym => f => Symbol("$(sym)_acf"))
