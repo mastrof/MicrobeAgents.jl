@@ -1,4 +1,4 @@
-export adf_to_matrix, adf_to_vectors
+export adf_to_matrix, adf_to_vectors, unfold, unfold!
 
 """
     adf_to_matrix(adf, sym)
@@ -27,6 +27,23 @@ vector of such quantity for each microbe id.
 """
 function adf_to_vectors(adf, sym)
     gdf = groupby(adf, :id)
-    s = [g[!,:sym] for g in gdf]
+    s = [g[!,sym] for g in gdf]
     return s
+end
+
+function MeanSquaredDisplacement.unfold!(adf::AbstractDataFrame, model::ABM)
+    gdf = groupby(adf, :id)
+    extent = spacesize(model)
+    unfold!(gdf, extent)
+end
+function MeanSquaredDisplacement.unfold!(adf::AbstractDataFrame, extent::SVector{D}) where {D}
+    gdf = groupby(adf, :id)
+    unfold!(gdf, extent)
+end
+function MeanSquaredDisplacement.unfold!(gdf::GroupedDataFrame, model::ABM)
+    extent = spacesize(model)
+    unfold!(gdf, extent)
+end
+function MeanSquaredDisplacement.unfold!(gdf::GroupedDataFrame, extent::SVector{D}) where {D}
+    transform!(gdf, :pos => (x -> unfold(x, extent)) => :pos_unfold)
 end
