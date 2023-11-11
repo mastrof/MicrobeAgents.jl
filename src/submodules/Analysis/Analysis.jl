@@ -2,6 +2,7 @@ export Analysis
 
 module Analysis
 
+using MicrobeAgents
 using Autocorrelations
 using MeanSquaredDisplacement
 using DataFrames
