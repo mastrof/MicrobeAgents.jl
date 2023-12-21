@@ -20,7 +20,7 @@ for D in dimensions
             evals = 10,
             samples = 1000,
             setup = (
-                model = UnremovableABM(S, $T, dt),
+                model = StandardABM(S, $T, dt; container=Vector),
                 S = ContinuousSpace(SVector{$D}(10.0 for _ in $D)),
                 dt = 0.1
             )
@@ -45,7 +45,7 @@ open("benchmarks.md", "a") do io
         for D in dimensions
             space = ContinuousSpace(ntuple(_ -> 10.0, D))
             dt = 0.1
-            model = UnremovableABM(T{D}, space, dt)
+            model = StandardABM(T{D}, space, dt; container=Vector)
             add_agent!(model; turn_rate = 1/dt) # reorients at each step
             nsteps = 1000
             b = @benchmark run!($model, $(nsteps))

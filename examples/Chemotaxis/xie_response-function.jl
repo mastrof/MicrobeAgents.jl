@@ -8,7 +8,7 @@ function concentration_field(pos, model)
     t₁ = model.t₁
     t₂ = model.t₂
     dt = model.timestep
-    t = model.t * dt
+    t = abmtime(model) * dt
     concentration_field(t, C₀, C₁, t₁, t₂)
 end
 concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
@@ -29,7 +29,7 @@ properties = Dict(
 )
 
 model_step!(model) = model.t += 1
-model = UnremovableABM(Xie{3}, space, timestep; properties, model_step!)
+model = StandardABM(Xie{3}, space, timestep; properties, model_step!)
 add_agent!(model; turn_rate_forward=0, motility=RunReverseFlick(motile_state=MotileState(Forward)))
 add_agent!(model; turn_rate_backward=0, motility=RunReverseFlick(motile_state=MotileState(Backward)))
 

@@ -13,7 +13,7 @@ U = 30.0 # μm/s
 τ = 1.0 # s
 turn_rate = 1 / τ
 
-models = map(_ -> UnremovableABM(Microbe{3}, space, dt), θs)
+models = map(_ -> StandardABM(Microbe{3}, space, dt; container=Vector), θs)
 nmicrobes = 100
 for (i,θ) in enumerate(θs)
     motility = RunTumble(speed=[U], polar=[θ,-θ])

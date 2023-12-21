@@ -9,7 +9,7 @@ n = 10
 nsteps = 600
 
 ## abm setup
-model = UnremovableABM(Microbe{1}, space, dt)
+model = StandardABM(Microbe{1}, space, dt)
 foreach(_ -> add_agent!((0,), model), 1:n)
 
 ## simulation

@@ -33,7 +33,7 @@ function setupmodel(R, L, n; dt=0.1, rng=Xoshiro(1))
         :sphere => HyperSphere(extent./2, R),
         :encounters => 0,
     )
-    model = UnremovableABM(Microbe{3}, space, dt; properties, rng)
+    model = StandardABM(Microbe{3}, space, dt; properties, rng, container=Vector)
     foreach(_ -> add_agent!(model; turn_rate=2.0), 1:n)
     model → encounters!
     abmproperties(model)[:old_positions] = map(m -> m.pos, allagents(model))

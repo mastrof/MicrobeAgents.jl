@@ -5,18 +5,15 @@ using LinearAlgebra: norm
     for D in 1:3
         timestep = 1
         space = ContinuousSpace(ones(SVector{D}))
-        model_unremovable = UnremovableABM(Microbe{D}, space, timestep)
-        model_standard = StandardABM(Microbe{D}, space, timestep)
-        @test model_unremovable isa UnremovableABM
-        @test model_standard isa StandardABM
-        @test Set(keys(abmproperties(model_standard))) == Set((
-            :t, :timestep,
+        model = StandardABM(Microbe{D}, space, timestep)
+        @test model isa StandardABM
+        @test Set(keys(abmproperties(model))) == Set((
+            :timestep,
             :concentration_field,
             :concentration_gradient,
             :concentration_time_derivative,
             :compound_diffusivity,
         ))
-        @test abmproperties(model_standard) == abmproperties(model_unremovable)
     end
 
     @testset "Base Microbe type" begin
