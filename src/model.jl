@@ -111,7 +111,7 @@ function Agents.StandardABM(
     properties = Dict(),
     rng = Random.default_rng(),
     warn = true,
-) where {D,A<:AbstractMicrobe{D}}
+) where {D,M,A<:AbstractMicrobe{D,M}}
     properties = Dict(
         DEFAULT_ABM_PROPERTIES...,
         properties...,

@@ -36,8 +36,9 @@ All microbe types *must* have at least the following fields:
 - `radius::Real` equivalent spherical radius of the microbe
 - `state::Real` generic variable for a scalar internal state
 """
-abstract type AbstractMicrobe{D} <: AbstractAgent where D end
+abstract type AbstractMicrobe{D,M} <: AbstractAgent where {D,M} end
 
+include("api.jl")
 include("utils.jl")
 include("motility.jl")
 include("rotations.jl")
