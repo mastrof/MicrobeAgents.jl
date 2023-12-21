@@ -8,7 +8,7 @@ function concentration_field(pos, model)
     t₁ = model.t₁
     t₂ = model.t₂
     dt = model.timestep
-    t = model.t * dt
+    t = abmtime(model) * dt
     concentration_field(t, C₀, C₁, t₁, t₂)
 end
 concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
