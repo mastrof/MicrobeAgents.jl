@@ -3,7 +3,7 @@ export position, direction, speed, velocity, motilepattern,
     cwbias,
     distance, distancevector
 
-position(m::AbstractMicrobe) = m.pos
+Base.position(m::AbstractMicrobe) = m.pos
 direction(m::AbstractMicrobe) = m.vel
 speed(m::AbstractMicrobe) = m.speed
 velocity(m::AbstractMicrobe) = direction(m) .* speed(m)
@@ -20,8 +20,8 @@ function distancevector(a::SVector{D}, b::SVector{D}, model) where D
     SVector{D}(wrapcoord(a[i], b[i], extent[i]) for i in 1:D)
 end
 
-position(a::SVector{D}) where D = a
-position(a::NTuple{D}) where D = SVector{D}(a)
+Base.position(a::SVector{D}) where D = a
+Base.position(a::NTuple{D}) where D = SVector{D}(a)
 
 ## utils
 function wrapcoord(x1, x2, d)
