@@ -11,7 +11,7 @@ nsteps = 600
 ## abm setup
 model = StandardABM(Microbe{2}, space, dt)
 # add bacteria with different motile properties
-add_agent!(model; motility=RunReverse(speed_forward=[55]), rotational_diffusivity=0.2)
+add_agent!(model; motility=RunReverse(speed=[55]), rotational_diffusivity=0.2)
 add_agent!(model; motility=RunTumble(speed=Normal(30,6)), turn_rate=0.5)
 add_agent!(model; motility=RunReverseFlick(speed_backward=[6]), rotational_diffusivity=0.1)
 

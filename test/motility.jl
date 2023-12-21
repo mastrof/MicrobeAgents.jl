@@ -3,14 +3,14 @@ using Distributions
 using LinearAlgebra: norm
 
 @testset "Motility" begin
-    @test AbstractMotilityOneStep <: AbstractMotility
-    @test AbstractMotilityTwoStep <: AbstractMotility
-    @test ~(AbstractMotilityOneStep <: AbstractMotilityTwoStep)
+    @test MotilityOneStep <: AbstractMotility
+    @test MotilityTwoStep <: AbstractMotility
+    @test !(MotilityOneStep <: MotilityTwoStep)
 
-    @test fieldnames(RunTumble) == (:speed, :polar, :azimuthal)
+    @test fieldnames(MotilityOneStep) == (:speed, :polar, :azimuthal)
     rt = RunTumble()
     # type hierarchy
-    @test rt isa AbstractMotilityOneStep
+    @test rt isa MotilityOneStep
     # default values
     @test rt.speed == (30.0,)
     @test rt.polar == Uniform(-π, π)
@@ -20,24 +20,21 @@ using LinearAlgebra: norm
     @test rt.speed == Normal(5, 0.1)
     @test rt.polar == [-0.1, 0.1]
     @test rt.azimuthal == (π,)
-    # base constructor without keywords
-    rt2 = RunTumble(Normal(5,0.1), [-0.1, 0.1], (π,))
-    @test rt2.speed == rt.speed && rt2.polar == rt.polar && rt2.azimuthal == rt.azimuthal
 
-    @test fieldnames(RunReverse) == (
-        :speed_forward, :polar_forward, :azimuthal_forward,
+    @test fieldnames(MotilityTwoStep) == (
+        :speed, :polar, :azimuthal,
         :speed_backward, :polar_backward, :azimuthal_backward,
         :motile_state
     )
     # default values
     rr = RunReverse()
-    @test rr isa AbstractMotilityTwoStep
-    @test rr.speed_forward == (30.0,)
-    @test rr.polar_forward == (π,)
-    @test rr.azimuthal_forward == Arccos()
-    @test rr.speed_backward == rr.speed_forward
-    @test rr.polar_backward == rr.polar_forward
-    @test rr.azimuthal_backward == rr.azimuthal_forward
+    @test rr isa MotilityTwoStep
+    @test rr.speed == (30.0,)
+    @test rr.polar == (π,)
+    @test rr.azimuthal == Arccos()
+    @test rr.speed_backward == rr.speed
+    @test rr.polar_backward == rr.polar
+    @test rr.azimuthal_backward == rr.azimuthal
     @test rr.motile_state.state == Forward
     # field overload
     @test rr.state == Forward
@@ -45,19 +42,18 @@ using LinearAlgebra: norm
     rr = RunReverse(; azimuthal_backward = (-π/4,0,π/4))
     @test rr.azimuthal_backward == (-π/4,0,π/4)
     # backward distributions follow forward if unspecified
-    rr = RunReverse(; speed_forward = (45,))
-    @test rr.speed_backward == rr.speed_forward == (45,)
+    rr = RunReverse(; speed = (45,))
+    @test rr.speed_backward == rr.speed == (45,)
 
-    @test fieldnames(RunReverseFlick) == fieldnames(RunReverse)
     # default values
     rrf = RunReverseFlick()
-    @test rrf isa AbstractMotilityTwoStep
-    @test rrf.speed_forward == (30.0,)
-    @test rrf.polar_forward == (π,)
-    @test rrf.azimuthal_forward == Arccos()
-    @test rrf.speed_backward == rrf.speed_forward
+    @test rrf isa MotilityTwoStep
+    @test rrf.speed == (30.0,)
+    @test rrf.polar == (π,)
+    @test rrf.azimuthal == Arccos()
+    @test rrf.speed_backward == rrf.speed
     @test rrf.polar_backward == (-π/2, π/2)
-    @test rrf.azimuthal_backward == rrf.azimuthal_forward
+    @test rrf.azimuthal_backward == rrf.azimuthal
     @test rrf.motile_state.state == Forward
     # field overload
     @test rrf.state == Forward
@@ -65,9 +61,9 @@ using LinearAlgebra: norm
     rrf = RunReverseFlick(; azimuthal_backward = (-π/4,0,π/4))
     @test rrf.azimuthal_backward == (-π/4,0,π/4)
     # polar distributions are independent in run reverse flick
-    rrf = RunReverseFlick(; speed_forward=(45,), polar_forward=(3π,))
-    @test rrf.speed_backward == rrf.speed_forward == (45,)
-    @test rrf.polar_forward == (3π,) && rrf.polar_backward == (-π/2,π/2)
+    rrf = RunReverseFlick(; speed=(45,), polar=(3π,))
+    @test rrf.speed_backward == rrf.speed == (45,)
+    @test rrf.polar == (3π,) && rrf.polar_backward == (-π/2,π/2)
 
     @testset "Motile state" begin
         @test instances(TwoState) == (Forward, Backward)
@@ -105,7 +101,7 @@ using LinearAlgebra: norm
         @test u₁ == u₂
 
         model = StandardABM(Microbe{2}, ContinuousSpace((1,1)))
-        rr = RunReverse(speed_forward=[45], speed_backward=[35]) # initialized to Forward
+        rr = RunReverse(speed=[45], speed_backward=[35]) # initialized to Forward
         add_agent!(model; motility = rr)
         @test random_speed(model[1], model) == 45
         switch!(model[1].motility) # now Backward
