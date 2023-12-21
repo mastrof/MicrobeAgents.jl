@@ -14,7 +14,7 @@ tuned through a `chemotactic_precision` factor inspired by
 'Brumley et al. (2019) PNAS' (defaults to 0, i.e. no noise).
 
 Default parameters:
-- `motility = RunReverseFlick(speed_forward = [46.5])`
+- `motility = RunReverseFlick(speed = [46.5])`
 - `turn_rate_forward = 2.3` Hz
 - `turn_rate_backward = 1.9` Hz
 - `state = 0.0` s

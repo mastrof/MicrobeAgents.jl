@@ -7,7 +7,7 @@ The model is optimized for simulation of marine bacteria and accounts
 for the presence of (gaussian) sensing noise in the chemotactic pathway.
 
 Default parameters:
-- `motility = RunReverseFlick(speed_forward = [46.5])`
+- `motility = RunReverseFlick(speed = [46.5])`
 - `turn_rate = 2.22` Hz → '1/τ₀'
 - `state = 0.0` → 'S'
 - `rotational_diffusivity = 0.035` rad²/s
@@ -19,7 +19,7 @@ Default parameters:
 """
 @agent struct Brumley{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility = RunReverseFlick(speed_forward = [46.5])
+    motility = RunReverseFlick(speed = [46.5])
     turn_rate::Float64 = 1 / 0.45
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
