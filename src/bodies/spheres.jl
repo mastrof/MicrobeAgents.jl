@@ -4,7 +4,7 @@ export HyperSphere, contact, is_encounter
 HyperSphere(center::SVector{D}, radius::Real) where D = HyperSphere(Point(Float64.(center)), Float64(radius))
 
 @inline position(a::HyperSphere{D}) where D = SVector{D}(a.center)
-@inline radius(a::AbstractMicrobe) = a.radius
+#@inline radius(a::AbstractMicrobe) = a.radius
 @inline radius(a::HyperSphere) = a.r
 @inline contact(a,b,model) = distance(a,b,model) ≤ radius(a) + radius(b)
 

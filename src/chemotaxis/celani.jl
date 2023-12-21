@@ -53,12 +53,11 @@ function affect!(microbe::Celani, model)
     chemotaxis!(microbe, model)
 end
 
-function turnrate(microbe::Celani, model)
-    ν₀ = microbe.turn_rate # unbiased
+function cwbias(microbe::Celani, model)
     β = microbe.gain
     S = microbe.state
-    return ν₀ * (1 - β * S) # modulated turn rate
-end # function
+    return (1 - β*S)
+end
 
 # Celani requires a custom add_agent! method
 # to initialize the markovian variables at steady state

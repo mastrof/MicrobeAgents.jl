@@ -28,8 +28,7 @@ properties = Dict(
     :t₂ => t₂,
 )
 
-model_step!(model) = model.t += 1
-model = StandardABM(Xie{3}, space, timestep; properties, model_step!)
+model = StandardABM(Xie{3}, space, timestep; properties)
 add_agent!(model; turn_rate_forward=0, motility=RunReverseFlick(motile_state=MotileState(Forward)))
 add_agent!(model; turn_rate_backward=0, motility=RunReverseFlick(motile_state=MotileState(Backward)))
 

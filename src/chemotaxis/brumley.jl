@@ -55,9 +55,8 @@ function affect!(microbe::Brumley, model)
     chemotaxis!(microbe, model)
 end
 
-function turnrate(microbe::Brumley, model)
-    ν₀ = microbe.turn_rate # unbiased
+function cwbias(microbe::Brumley, model)
     Γ = microbe.gain
     S = microbe.state
-    return (1 + exp(-Γ * S)) * ν₀ / 2 # modulated turn rate
-end # function
+    return (1 + exp(-Γ*S))/2
+end

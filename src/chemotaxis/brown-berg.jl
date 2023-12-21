@@ -45,9 +45,8 @@ function affect!(microbe::BrownBerg, model)
     chemotaxis!(microbe, model)
 end
 
-function turnrate(microbe::BrownBerg, model)
-    ν₀ = microbe.turn_rate # unbiased
+function cwbias(microbe::BrownBerg, model)
     g = microbe.gain
     S = microbe.state
-    return ν₀ * exp(-g * S) # modulated turn rate
-end # function
+    return exp(-g*S)
+end

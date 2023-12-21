@@ -31,7 +31,7 @@ Default parameters:
 """
 @agent struct Xie{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility = RunReverseFlick(speed_forward = [46.5])
+    motility = RunReverseFlick(speed = [46.5])
     turn_rate_forward::Float64 = 2.3
     turn_rate_backward::Float64 = 1.9
     rotational_diffusivity::Float64 = 0.26
@@ -54,33 +54,6 @@ function Base.show(io::IO, ::MIME"text/plain", m::Xie{D}) where {D}
     println(io, "average unbiased turn rate (Hz): forward $(r2dig(m.turn_rate_forward)), backward $(r2dig(m.turn_rate_backward))")
     s = setdiff(fieldnames(typeof(m)), [:id, :pos, :motility, :vel, :turn_rate_forward, :turn_rate_backward])
     print(io, "other properties: " * join(s, ", "))
-end
-
-# Xie requires its own turnrate functions
-# since it has different parameters for fw and bw states
-function turnrate(microbe::Xie, model)
-    if motilepattern(microbe) isa AbstractMotilityTwoStep
-        return turnrate_twostep(microbe, model)
-    else
-        return turnrate_onestep(microbe, model)
-    end
-end
-function turnrate_twostep(microbe::Xie, model)
-    S = microbe.state
-    if motilepattern(microbe).state == Forward
-        ν₀ = microbe.turn_rate_forward
-        β = microbe.gain_forward
-    else
-        ν₀ = microbe.turn_rate_backward
-        β = microbe.gain_backward
-    end
-    return ν₀ * (1 + β * S)
-end
-function turnrate_onestep(microbe::Xie, model)
-    S = microbe.state
-    ν₀ = microbe.turn_rate_forward
-    β = microbe.gain_forward
-    return ν₀ * (1 + β * S)
 end
 
 function chemotaxis!(microbe::Xie, model; ε=1e-16)
@@ -109,4 +82,22 @@ end
 
 function affect!(microbe::Xie, model)
     chemotaxis!(microbe, model)
+end
+
+function cwbias(microbe::Xie, model)
+    S = state(microbe)
+    if state(motilepattern(microbe)) == Forward
+        β = microbe.gain_forward
+    else
+        β = microbe.gain_backward
+    end
+    return (1 + β*S)
+end
+
+function turnrate(microbe::Xie, model)
+    if state(motilepattern(microbe)) == Forward
+        return microbe.turn_rate_forward
+    else
+        return microbe.turn_rate_backward
+    end
 end
