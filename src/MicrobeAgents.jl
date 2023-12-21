@@ -1,7 +1,7 @@
 module MicrobeAgents
 
 using Agents
-export abmproperties, abmrng, abmspace, abmscheduler, spacesize
+export abmproperties, abmrng, abmspace, abmscheduler, abmtime, spacesize
 export StandardABM, ContinuousSpace
 export add_agent!, add_agent_pos!
 export move_agent!, walk!, run!

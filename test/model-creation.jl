@@ -8,7 +8,7 @@ using LinearAlgebra: norm
         model = StandardABM(Microbe{D}, space, timestep)
         @test model isa StandardABM
         @test Set(keys(abmproperties(model))) == Set((
-            :t, :timestep,
+            :timestep,
             :concentration_field,
             :concentration_gradient,
             :concentration_time_derivative,
