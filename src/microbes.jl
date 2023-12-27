@@ -28,9 +28,9 @@ end
 
 r2dig(x) = round(x, digits=2)
 function Base.show(io::IO, ::MIME"text/plain", m::AbstractMicrobe{D}) where D
-    println(io, "$(typeof(m)) with $(M)")
+    println(io, "$(typeof(m)) with $(typeof(motilepattern(m)))")
     println(io, "position (μm): $(r2dig.(position(m))); velocity (μm/s): $(r2dig.(velocity(m)))")
-    println(io, "average unbiased turn rate (Hz): $(r2dig(turn_rate(m)))")
+    println(io, "average unbiased turn rate (Hz): $(r2dig(turnrate(m)))")
     s = setdiff(fieldnames(typeof(m)), [:id, :pos, :motility, :vel, :turn_rate])
     print(io, "other properties: " * join(s, ", "))
 end
