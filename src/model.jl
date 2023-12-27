@@ -91,10 +91,6 @@ function Agents.add_agent!(
 end
 
 
-# extend function chaining
-→(model::AgentBasedModel, f, g...) = (model.update! = →(model.update! → f, g...))
-→(model::AgentBasedModel, f) = (model.update! = model.update! → f)
-
 DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_field => (pos,model) -> 0.0,
     :concentration_gradient => (pos,model) -> zero.(pos),
