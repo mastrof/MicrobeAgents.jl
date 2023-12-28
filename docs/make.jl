@@ -1,11 +1,7 @@
-#=
 cd(@__DIR__)
+import Pkg; Pkg.add(name="Agents", rev="main")
 using MicrobeAgents
 using Documenter
-=#
-# temporary
-push!(LOAD_PATH, "../src/")
-using Documenter, MicrobeAgents
 ENV["JULIA_DEBUG"] = "Documenter"
 CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== nothing
 import Literate
