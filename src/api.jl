@@ -1,6 +1,6 @@
 export position, direction, speed, velocity, motilepattern,
     turnrate, rotational_diffusivity, radius, state,
-    cwbias,
+    tumblebias,
     distance, distancevector
 
 Base.position(m::AbstractMicrobe) = m.pos

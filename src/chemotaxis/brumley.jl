@@ -55,7 +55,7 @@ function affect!(microbe::Brumley, model)
     chemotaxis!(microbe, model)
 end
 
-function cwbias(microbe::Brumley, model)
+function tumblebias(microbe::Brumley)
     Γ = microbe.gain
     S = microbe.state
     return (1 + exp(-Γ*S))/2
