@@ -1,5 +1,4 @@
 cd(@__DIR__)
-ENV["JULIA_PKG_SERVER"] = ""
 ENV["JULIA_DEBUG"] = "Documenter"
 import Pkg; Pkg.add(name="Agents", rev="main")
 using MicrobeAgents
