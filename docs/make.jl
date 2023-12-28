@@ -7,8 +7,7 @@ import Literate
 using Plots
 
 indir_base = joinpath(@__DIR__, "..", "examples")
-toskip = ("Encounters", "Pathfinder", "Analysis")
-sections = filter(s -> !(s in toskip), readdir(indir_base))
+sections = ("RandomWalks", "Chemotaxis")
 outdir_base = joinpath(@__DIR__, "src", "examples")
 indir = Dict(
     section => joinpath(indir_base, section)
