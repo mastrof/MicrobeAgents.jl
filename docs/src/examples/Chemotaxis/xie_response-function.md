@@ -1,6 +1,9 @@
-# # Comparison of chemotactic response functions
+```@meta
+EditURL = "../../../../examples/Chemotaxis/xie_response-function.jl"
+```
 
-#=
+# Comparison of chemotactic response functions
+
 Here we will compare the chemotactic response function of the `Celani`
 and `BrownBerg` model to an impulse stimulus of chemoattractant.
 
@@ -8,7 +11,8 @@ While `Celani` only needs the `concentration_field` to determine the
 chemotactic response, `BrownBerg` also needs the `concentration_time_derivative`
 to be defined explicitly (also the `concentration_gradient` but it's
 not relevant in this specific study).
-=#
+
+````@example xie_response-function
 using MicrobeAgents
 using Plots
 
@@ -84,3 +88,5 @@ plot!(twinx(),
     tickfontcolor=_pink,
     ylab="C (μM)", guidefontcolor=_pink
 )
+````
+
