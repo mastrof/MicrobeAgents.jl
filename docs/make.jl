@@ -41,12 +41,12 @@ end
 
 pages = [
     "Home" => "index.md",
-    "Tutorial" => ["firststeps.md", "randomwalks.md", "chemotaxis.md"],
-    "Validation" => "validation.md",
+    "Introduction" => ["firststeps.md", "randomwalks.md", "chemotaxis.md"],
     "Examples" => [
         [namify(section) => [joinpath.("examples", section, readdir(outdir[section]))...]
          for section in sections]...
     ],
+    "Validation" => "validation.md",
     "API" => "api.md"
 ]
 
