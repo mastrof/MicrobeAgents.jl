@@ -84,7 +84,7 @@ function affect!(microbe::Xie, model)
     chemotaxis!(microbe, model)
 end
 
-function cwbias(microbe::Xie, model)
+function tumblebias(microbe::Xie)
     S = state(microbe)
     if state(motilepattern(microbe)) == Forward
         β = microbe.gain_forward
@@ -94,7 +94,7 @@ function cwbias(microbe::Xie, model)
     return (1 + β*S)
 end
 
-function turnrate(microbe::Xie, model)
+function turnrate(microbe::Xie)
     if state(motilepattern(microbe)) == Forward
         return microbe.turn_rate_forward
     else

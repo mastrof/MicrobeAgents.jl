@@ -45,7 +45,7 @@ function affect!(microbe::BrownBerg, model)
     chemotaxis!(microbe, model)
 end
 
-function cwbias(microbe::BrownBerg, model)
+function tumblebias(microbe::BrownBerg)
     g = microbe.gain
     S = microbe.state
     return exp(-g*S)

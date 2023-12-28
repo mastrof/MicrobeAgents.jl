@@ -18,7 +18,7 @@ function microbe_step!(microbe::AbstractMicrobe, model)
     # update microbe state
     affect!(microbe, model)
     # evaluate instantaneous turn rate
-    ω = turnrate(microbe, model)
+    ω = turnrate(microbe) * tumblebias(microbe)
     if rand(abmrng(model)) < ω * dt # if true reorient microbe
         turn!(microbe, model)
     end
@@ -39,20 +39,15 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model)
     # update microbe state
     affect!(microbe, model)
     # evaluate instantaneous turn rate
-    ω = turnrate(microbe, model)
+    ω = turnrate(microbe) * tumblebias(microbe)
     if rand(abmrng(model)) < ω * dt # if true reorient microbe
         turn!(microbe, model)
     end
     nothing
 end
 
-"""
-    turnrate(microbe, model)
-Evaluate instantaneous turn rate of `microbe`.
-"""
-turnrate(microbe::AbstractMicrobe, model) = turnrate(microbe) * cwbias(microbe, model)
-# no CW bias for generic non-chemotactic microbe
-cwbias(microbe::AbstractMicrobe, model) = 1.0
+# no bias for generic non-chemotactic microbe
+tumblebias(microbe::AbstractMicrobe) = 1.0
 """
     affect!(microbe, model)
 Can be used to arbitrarily update `microbe` state.

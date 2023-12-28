@@ -71,7 +71,7 @@ using LinearAlgebra: norm
                     fieldnames(T)
                 )
 
-                φ(microbe, model) = turnrate(microbe) * cwbias(microbe, model)
+                φ(microbe, model) = turnrate(microbe) * tumblebias(microbe)
                 if T == BrownBerg
                     @test φ(m, model) == m.turn_rate * exp(-m.gain*m.state)
                 elseif T == Brumley
@@ -96,7 +96,7 @@ using LinearAlgebra: norm
                     S = m.state
                     ω = m.turn_rate_forward
                     β = m.gain_forward
-                    @test turnrate(m, model) == ω * (1 + β*S)
+                    @test turnrate(m) == ω * (1 + β*S)
                 end
             end
         end

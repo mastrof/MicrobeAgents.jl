@@ -53,7 +53,7 @@ function affect!(microbe::Celani, model)
     chemotaxis!(microbe, model)
 end
 
-function cwbias(microbe::Celani, model)
+function tumblebias(microbe::Celani)
     β = microbe.gain
     S = microbe.state
     return (1 - β*S)
