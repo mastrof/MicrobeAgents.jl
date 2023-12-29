@@ -31,19 +31,34 @@ function adf_to_vectors(adf, sym)
     return s
 end
 
-function MeanSquaredDisplacement.unfold!(adf::AbstractDataFrame, model::ABM)
+
+"""
+    unfold!(adf, model; key=:position)
+    unfold!(adf, extent; key=:position)
+    unfold!(gdf, model; key=:position)
+    unfold!(gdf, extent; key=:position)
+Unfold the periodic trajectories contained in the agent dataframe `adf` or in the grouped
+dataframe `gdf` where each microbe trajectory was grouped by `:id`.
+The second argument can be either the spatial extent of the model, or the model itself
+from which the extent is automatically extracted.
+
+The keyword argument `key=:position` determines what column of the dataframe has to be
+unfolded.
+"""
+function MeanSquaredDisplacement.unfold!(adf::AbstractDataFrame, model::ABM; key=:position)
     gdf = groupby(adf, :id)
     extent = spacesize(model)
     unfold!(gdf, extent)
 end
-function MeanSquaredDisplacement.unfold!(adf::AbstractDataFrame, extent::SVector{D}) where {D}
+function MeanSquaredDisplacement.unfold!(adf::AbstractDataFrame, extent; key=:position)
     gdf = groupby(adf, :id)
     unfold!(gdf, extent)
 end
-function MeanSquaredDisplacement.unfold!(gdf::GroupedDataFrame, model::ABM)
+function MeanSquaredDisplacement.unfold!(gdf::GroupedDataFrame, model::ABM; key=:position)
     extent = spacesize(model)
     unfold!(gdf, extent)
 end
-function MeanSquaredDisplacement.unfold!(gdf::GroupedDataFrame, extent::SVector{D}) where {D}
-    transform!(gdf, :pos => (x -> unfold(x, extent)) => :pos_unfold)
+function MeanSquaredDisplacement.unfold!(gdf::GroupedDataFrame, extent; key=:position)
+    newkey = Symbol(join((string(key), "unfold"), '_'))
+    transform!(gdf, key => (x -> unfold(x, extent)) => newkey)
 end
