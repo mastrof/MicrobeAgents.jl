@@ -1,6 +1,5 @@
 cd(@__DIR__)
 ENV["JULIA_DEBUG"] = "Documenter"
-import Pkg; Pkg.add(name="Agents", rev="main")
 using MicrobeAgents
 using Documenter
 CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== nothing
