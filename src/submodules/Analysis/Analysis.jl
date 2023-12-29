@@ -4,6 +4,7 @@ module Analysis
 
 using MicrobeAgents
 using Autocorrelations
+using LinearAlgebra
 using MeanSquaredDisplacement
 using DataFrames
 
