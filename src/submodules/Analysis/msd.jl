@@ -1,5 +1,9 @@
 export imsd!, imsd, emsd
 
+function imsd!(df::AbstractDataFrame, sym)
+    gdf = groupby(df, :id)
+    imsd!(gdf, sym)
+end
 function imsd!(df::GroupedDataFrame, sym)
     transform!(df, sym => imsd)
 end
