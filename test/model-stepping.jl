@@ -11,10 +11,10 @@ using LinearAlgebra: norm
         model = StandardABM(Microbe{D}, space, dt; rng, container)
         pos = extent ./ 2
         vel1 = random_velocity(model)
-        speed1 = random_speed(rng, RunTumble())
+        speed1 = rand(rng, speed(RunTumble()))
         add_agent!(pos, model; vel=vel1, speed=speed1, turn_rate=0)
         vel2 = random_velocity(model)
-        speed2 = random_speed(rng, RunReverse())
+        speed2 = rand(rng, speed(RunReverse()))
         add_agent!(pos, model; vel=vel2, speed=speed2, turn_rate=Inf, motility=RunReverse())
         run!(model, 1) # performs 1 microbe_step!
         # x₁ = x₀ + vΔt
@@ -41,9 +41,11 @@ using LinearAlgebra: norm
         @test model[1].state == -D
 
         # customize model_step! function
-        model_step!(model) = model.t += 1
+        properties = Dict(:square_t => 0)
+        model_step!(model) = (abmproperties(model)[:square_t] = abmtime(model)^2)
         model = StandardABM(Microbe{D}, space, dt; model_step!, container)
-        run!(model, 6)
-        @test model.t == 6
+        n = 6
+        run!(model, n)
+        @test abmproperties(model)[:square_t] == (n-1)^2
     end
 end

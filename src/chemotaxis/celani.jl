@@ -21,7 +21,7 @@ Default parameters:
 """
 @agent struct Celani{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility::AbstractMotility = RunTumble(speed = [30.0])
+    motility = RunTumble(speed = [30.0])
     turn_rate::Float64 = 1 / 0.67
     rotational_diffusivity::Float64 = 0.26
     radius::Float64 = 0.5
@@ -53,12 +53,11 @@ function affect!(microbe::Celani, model)
     chemotaxis!(microbe, model)
 end
 
-function turnrate(microbe::Celani, model)
-    ν₀ = microbe.turn_rate # unbiased
+function tumblebias(microbe::Celani)
     β = microbe.gain
     S = microbe.state
-    return ν₀ * (1 - β * S) # modulated turn rate
-end # function
+    return (1 - β*S)
+end
 
 # Celani requires a custom add_agent! method
 # to initialize the markovian variables at steady state

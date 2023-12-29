@@ -1,9 +1,12 @@
-# # 3D Random walk
+```@meta
+EditURL = "../../../../examples/RandomWalks/randomwalk3D.jl"
+```
 
-#=
+# 3D Random walk
+
 Without any significant difference, we can also simulate three-dimensional random walks.
-=#
 
+````@example randomwalk3D
 using MicrobeAgents
 using Distributions
 using Plots
@@ -30,3 +33,5 @@ t = axes(x,1) .* dt
 plot(x, y, z, xlab="x", ylab="y", zlab="z", lw=2, ratio=1,
     lab=["RunReverse" "RunTumble" "RunReverseFlick"]
 )
+````
+

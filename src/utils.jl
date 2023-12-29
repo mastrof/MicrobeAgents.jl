@@ -1,4 +1,4 @@
-export random_velocity, random_speed, ChainedFunction, →, distance, distancevector
+export random_velocity, random_speed
 
 """
     random_velocity(model)
@@ -19,56 +19,5 @@ end
 Generate a random speed from the motile pattern of `microbe`.
 """
 function random_speed(microbe::AbstractMicrobe, model::AgentBasedModel)
-    random_speed(abmrng(model), motilepattern(microbe))
+    rand(abmrng(model), speed(motilepattern(microbe)))
 end
-
-"""
-    motilepattern(microbe)
-Get the motility pattern of `microbe`
-"""
-motilepattern(microbe::AbstractMicrobe) = microbe.motility
-
-
-struct ChainedFunction{H,T} <: Function
-    head::H
-    tail::T
-    ChainedFunction{H,T}(head, tail) where {H,T} = new{H,T}(head, tail)
-    ChainedFunction(head, tail) = new{typeof(head),typeof(tail)}(head, tail)
-end
-(c::ChainedFunction)(x...; kw...) = (c.head(x...; kw...); c.tail(x...; kw...))
-→(f) = f
-→(f,g) = ChainedFunction(f,g)
-→(f, g, h...) = →(f→g, h...)
-
-function Base.show(io::IO, ::MIME"text/plain", f::ChainedFunction)
-    s = join(funlist(f), " → ")
-    print(io, "ChainedFunction: $s")
-end
-funlist(f::ChainedFunction{<:ChainedFunction,<:ChainedFunction}) = (funlist(f.head)..., funlist(f.tail)...)
-funlist(f::ChainedFunction{<:Function,<:ChainedFunction}) = (f.head, funlist(f.tail)...)
-funlist(f::ChainedFunction{<:Function,<:Function}) = (f.head, f.tail)
-
-"""
-    distance(a, b, model)
-Evaluate the euclidean distance between `a` and `b` respecting the spatial
-properties of `model`.
-"""
-@inline distance(a, b, model) = euclidean_distance(position(a), position(b), model)
-"""
-    distancevector(a, b, model)
-Evaluate the distance vector from `a` to `b` respecting the spatial
-properties of `model`.
-"""
-@inline distancevector(a, b, model) = distancevector(position(a), position(b), model)
-@inline function distancevector(a::SVector{D}, b::SVector{D}, model) where D
-    extent = spacesize(model)
-    SVector{D}(wrapcoord(a[i], b[i], extent[i]) for i in 1:D)
-end
-function wrapcoord(x₁, x₂, d)
-    α = (x₂-x₁)/d
-    (α-round(α))*d
-end
-
-@inline position(a::AbstractMicrobe) = a.pos
-@inline position(a::SVector{D}) where D = a
-@inline position(a::NTuple{D}) where D = SVector{D}(a)

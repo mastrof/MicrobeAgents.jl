@@ -1,6 +1,9 @@
-# # Linear concentration ramp
+```@meta
+EditURL = "../../../../examples/Chemotaxis/linear_ramp.jl"
+```
 
-#=
+# Linear concentration ramp
+
 In this example we will setup an in-silico version of a typical laboratory assay,
 with chemotactic bacteria moving in a linear concentration ramp, i.e. a concentration
 field of the form
@@ -27,8 +30,8 @@ choice, but `NTuple`s, `Vector`s, etc.. work just fine.
 All the parameters that we need to evaluate the concentration field and gradient, in our case
 the two concentration values `C₀` and `C₁` and the chamber length `Lx`, should be extracted
 from the `model`.
-=#
 
+````@example linear_ramp
 using MicrobeAgents
 using Plots
 
@@ -47,8 +50,8 @@ end
     concentration_gradient(pos,Lx,C₀,C₁)
 end
 @inline concentration_gradient(pos,Lx,C₀,C₁) = SVector{length(pos)}(i==1 ? (C₁-C₀)/Lx : 0.0 for i in eachindex(pos))
+````
 
-#=
 Now as usual we define the simulation domain and the integration timestep, but we also define
 a `properties` dictionary, which we pass as a keyword argument to `StandardABM`.
 This dictionary will contain all the information regarding our concentration field.
@@ -64,13 +67,14 @@ If we used the base `Microbe`, no matter what field we define, we would only obs
 since no chemotactic behavior is implemented.
 The most classic model of chemotaxis is implemented in the `BrownBerg` type;
 we will not modify its parameters here and just stick to the default values.
-=#
+
+````@example linear_ramp
 Lx, Ly = 3000, 1500 # domain size (μm)
 periodic = false
 space = ContinuousSpace((Lx,Ly); periodic)
 Δt = 0.1 # timestep (s)
 
-## model setup
+# model setup
 C₀, C₁ = 0.0, 20.0 # μM
 properties = Dict(
     :C₀ => C₀,
@@ -84,8 +88,8 @@ for i in 1:n
     add_agent!(model) # add at random positions
 end
 model
+````
 
-#=
 Now that the model is created, we just run it as usual, collecting the position
 of the microbes at each timestep.
 The visualization is slightly more involved since we want to plot
@@ -94,7 +98,8 @@ but there is really no difference from what we have seen in the random walk exam
 
 In the figure, we will see that all the microbes drift towards the right,
 where the concentration of the attractant is higher.
-=#
+
+````@example linear_ramp
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
 adata = [position]
@@ -114,3 +119,5 @@ c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
 heatmap(xmesh, ymesh, c', cbar=false, ratio=1, axis=false, c=:bone)
 plot!(xn, yn, lab=false, lw=lw, lc=(1:n)')
 scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)
+````
+

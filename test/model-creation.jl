@@ -8,7 +8,7 @@ using LinearAlgebra: norm
         model = StandardABM(Microbe{D}, space, timestep)
         @test model isa StandardABM
         @test Set(keys(abmproperties(model))) == Set((
-            :t, :timestep,
+            :timestep,
             :concentration_field,
             :concentration_gradient,
             :concentration_time_derivative,
@@ -27,16 +27,16 @@ using LinearAlgebra: norm
             rng = Xoshiro(123)
             pos = rand(rng, SVector{D})
             vel = random_velocity(rng, D)
-            speed = random_speed(rng, RunTumble())
+            #speed = random_speed(rng, RunTumble())
+            spd = rand(rng, speed(RunTumble()))
             @test model[1] isa Microbe{D}
-            @test model[1].pos == pos
-            @test model[1].vel == vel
-            @test model[1].speed == speed
-            @test model[1].motility isa RunTumble
-            @test model[1].turn_rate == 1.0
-            @test model[1].radius == 0.0
-            @test model[1].rotational_diffusivity == 0.0
-            @test model[1].state == 0.0
+            @test position(model[1]) == pos
+            @test direction(model[1]) == vel
+            @test speed(model[1]) == spd
+            @test turnrate(model[1]) == 1.0
+            @test radius(model[1]) == 0.0
+            @test rotational_diffusivity(model[1]) == 0.0
+            @test state(model[1]) == 0.0
             # add agent with kwproperties
             motility = RunReverse(
                 speed_backward = [24.0],
@@ -44,7 +44,6 @@ using LinearAlgebra: norm
             )
             add_agent!(model; turn_rate = 0.55, motility)
             @test model[2].turn_rate == 0.55
-            @test model[2].motility isa RunReverse
             @test model[2].speed == 24.0
             # add agent with predefined position
             pos = SVector{D}(i/2D for i in 1:D)
@@ -63,21 +62,22 @@ using LinearAlgebra: norm
                 add_agent!(model)
                 m = model[1]
                 @test m isa T{D}
-                @test m.pos == rand(rng, SVector{D})
-                @test m.vel == random_velocity(rng, D)
-                @test m.speed == random_speed(rng, m.motility)
+                @test position(m) == rand(rng, SVector{D})
+                @test direction(m) == random_velocity(rng, D)
+                @test speed(m) == rand(rng, speed(motilepattern(m)))
                 @test issubset(
                     (:id, :pos, :vel, :speed, :motility,
                     :rotational_diffusivity, :radius, :state),
                     fieldnames(T)
                 )
 
+                φ(microbe, model) = turnrate(microbe) * tumblebias(microbe)
                 if T == BrownBerg
-                    @test turnrate(m, model) == m.turn_rate * exp(-m.gain*m.state)
+                    @test φ(m, model) == m.turn_rate * exp(-m.gain*m.state)
                 elseif T == Brumley
-                    @test turnrate(m, model) == (1+exp(-m.gain*m.state))*m.turn_rate/2
+                    @test φ(m, model) == (1+exp(-m.gain*m.state))*m.turn_rate/2
                 elseif T == Celani
-                    @test turnrate(m, model) == m.turn_rate * (1 - m.gain*m.state)
+                    @test φ(m, model) == m.turn_rate * (1 - m.gain*m.state)
                     # when no concentration field is set, markovian variables are zero
                     @test m.markovian_variables == zeros(3)
 
@@ -96,7 +96,7 @@ using LinearAlgebra: norm
                     S = m.state
                     ω = m.turn_rate_forward
                     β = m.gain_forward
-                    @test turnrate(m, model) == ω * (1 + β*S)
+                    @test turnrate(m) == ω * (1 + β*S)
                 end
             end
         end

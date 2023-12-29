@@ -10,19 +10,20 @@ space = ContinuousSpace((L,L,L))
 
 model = StandardABM(Microbe{3}, space, Δt; container=Vector)
 n = 200
-for i in 1:n
-    add_agent!(model; turn_rate, motility=RunTumble(speed=[U]))
-    add_agent!(model; turn_rate, motility=RunReverse(speed_forward=[U]))
-    add_agent!(model; turn_rate, motility=RunReverseFlick(speed_forward=[U]))
+for Motility in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
+    add_agent!(model; turn_rate, motility=Motility(speed=[U]))
 end
+ids_runtumble = 1:n
+ids_runreverse = (1:n) .+ n
+ids_runrevflick = (1:n) .+ 2n
 
 nsteps = round(Int, 100τ_run / Δt)
 adata = [:vel]
 adf, = run!(model, nsteps; adata)
 
-adf_runtumble = filter(:id => id -> model[id].motility isa RunTumble, adf; view=true)
-adf_runrev = filter(:id => id -> model[id].motility isa RunReverse, adf; view=true)
-adf_runrevflick = filter(:id => id -> model[id].motility isa RunReverseFlick, adf; view=true)
+adf_runtumble = filter(:id => id -> id in ids_runtumble, adf; view=true)
+adf_runrev = filter(:id => id -> id in ids_runreverse, adf; view=true)
+adf_runrevflick = filter(:id => id -> id in ids_runrevflick, adf; view=true)
 adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
 
 t = range(0, (nsteps-1)*Δt; step=Δt)

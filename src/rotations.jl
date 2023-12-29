@@ -1,12 +1,12 @@
 function turn!(microbe::AbstractMicrobe, model)
-    v = microbe.vel
+    e = direction(microbe)
     # extract new speed and rotation angles
-    U₁, θ, ϕ = rand(abmrng(model), microbe.motility)
-    # reorient and update speed
-    microbe.vel = rotate(v, θ, ϕ)
+    U₁, θ, ϕ = rand(abmrng(model), motilepattern(microbe))
+    # reorient and update direction
+    microbe.vel = rotate(e, θ, ϕ)
     microbe.speed = U₁
     # switch motile state (does nothing if motility is one-step)
-    switch!(microbe.motility)
+    switch!(motilepattern(microbe))
 end
 
 """
@@ -17,11 +17,11 @@ In 1-dimensional models, this functions does nothing.
 rotational_diffusion!(microbe::AbstractMicrobe{1}, model) = nothing
 function rotational_diffusion!(microbe::AbstractMicrobe, model)
     dt = model.timestep
-    D_rot = microbe.rotational_diffusivity
+    D_rot = rotational_diffusivity(microbe)
     σ = sqrt(2*D_rot*dt)
     θ = rand(abmrng(model), Normal(0,σ))
     ϕ = rand(abmrng(model), Arccos())
-    microbe.vel = rotate(microbe.vel, θ, ϕ)
+    microbe.vel = rotate(direction(microbe), θ, ϕ)
     nothing
 end
 

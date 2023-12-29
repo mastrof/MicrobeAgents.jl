@@ -16,7 +16,7 @@ Default parameters:
 """
 @agent struct BrownBerg{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
     speed::Float64
-    motility::AbstractMotility = RunTumble()
+    motility = RunTumble()
     turn_rate::Float64 = 1 / 0.67
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
@@ -45,9 +45,8 @@ function affect!(microbe::BrownBerg, model)
     chemotaxis!(microbe, model)
 end
 
-function turnrate(microbe::BrownBerg, model)
-    ν₀ = microbe.turn_rate # unbiased
+function tumblebias(microbe::BrownBerg)
     g = microbe.gain
     S = microbe.state
-    return ν₀ * exp(-g * S) # modulated turn rate
-end # function
+    return exp(-g*S)
+end

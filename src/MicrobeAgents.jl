@@ -1,8 +1,8 @@
 module MicrobeAgents
 
 using Agents
-export abmproperties, abmrng, abmspace, abmscheduler, spacesize
-export ABM, StandardABM, ContinuousSpace
+export abmproperties, abmrng, abmspace, abmscheduler, abmtime, spacesize
+export StandardABM, ContinuousSpace
 export add_agent!, add_agent_pos!
 export move_agent!, walk!, run!
 
@@ -34,8 +34,9 @@ All microbe types *must* have at least the following fields:
 - `radius::Real` equivalent spherical radius of the microbe
 - `state::Real` generic variable for a scalar internal state
 """
-abstract type AbstractMicrobe{D} <: AbstractAgent where D end
+abstract type AbstractMicrobe{D} <: AbstractAgent where {D} end
 
+include("api.jl")
 include("utils.jl")
 include("motility.jl")
 include("rotations.jl")
