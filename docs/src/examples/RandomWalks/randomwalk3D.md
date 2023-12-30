@@ -24,7 +24,8 @@ nsteps = 600
 adata = [position]
 adf, _ = run!(model, nsteps; adata)
 
-traj = MicrobeAgents.unfold(vectorize_adf_measurement(adf,:position), L)
+Analysis.unfold!(adf, model)
+traj = Analysis.adf_to_matrix(adf, :position_unfold)
 x = first.(traj)
 y = getindex.(traj, 2)
 z = last.(traj)

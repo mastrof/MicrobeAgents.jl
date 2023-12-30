@@ -56,16 +56,25 @@ adata = [position]
 adf, _ = run!(model, nsteps; adata);
 
 #=
-We now want to visualize our results.
+The simulation is done. We now want to visualize our results.
 One last thing we need to is to "unfold" the trajectories of our microbes.
 In fact, since we used a periodic domain, if we just plotted the trajectories
 we would see them crossing between the two sides of the box, which is not what we want.
 
 With the unfolding, the trajectories are expanded as if they were simulated in an
 infinite system.
+
+The `unfold!` function and other useful post-processing functions can be
+accessed through the `Analysis` submodule of MicrobeAgents.jl.
+`unfold!` operates directly on the agent dataframe `adf`
+and generates a new column `:position_unfold` from the raw `:position` column.
+After the unfolding, we extract the individual trajectories in the form of a
+matrix with `adf_to_matrix`, where each trajectory will be stored as a column.
+This will be convenient for plotting.
 =#
 
-traj = MicrobeAgents.unfold(vectorize_adf_measurement(adf,:position), L)
+Analysis.unfold!(adf, model)
+traj = Analysis.adf_to_matrix(adf, :position_unfold)
 x = first.(traj)
 t = axes(x,1) .* dt
 
