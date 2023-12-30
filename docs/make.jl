@@ -41,7 +41,7 @@ end
 
 pages = [
     "Home" => "index.md",
-    "Introduction" => ["firststeps.md", "randomwalks.md", "chemotaxis.md"],
+    "Introduction" => "firststeps.md",
     "Examples" => [
         [namify(section) => [joinpath.("examples", section, readdir(outdir[section]))...]
          for section in sections]...
@@ -64,7 +64,7 @@ makedocs(
 
 if CI
     deploydocs(;
-        repo = "github.com/mastrof/MicrobeAgents.jl.git",
+        repo = "github.com/mastrof/MicrobeAgents.jl",
         target = "build",
         push_preview = true
     )
