@@ -1,12 +1,12 @@
 ```@meta
-EditURL = "../../../../examples/RandomWalks/randomwalk3D.jl"
+EditURL = "../../../../examples/RandomWalks/3_randomwalk3D.jl"
 ```
 
 # 3D Random walk
 
 Without any significant difference, we can also simulate three-dimensional random walks.
 
-````@example randomwalk3D
+````@example 3_randomwalk3D
 using MicrobeAgents
 using Distributions
 using Plots

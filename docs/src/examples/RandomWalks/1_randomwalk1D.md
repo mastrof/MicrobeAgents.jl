@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "../../../../examples/RandomWalks/randomwalk1D.jl"
+EditURL = "../../../../examples/RandomWalks/1_randomwalk1D.jl"
 ```
 
 # 1D Random walk
@@ -19,7 +19,7 @@ For the integration timestep, we choose a value of 0.1 s.
 
 Remember that lengths are always assumed to be in units of microns, times in seconds.
 
-````@example randomwalk1D
+````@example 1_randomwalk1D
 using MicrobeAgents
 
 L = 1000 # space size in μm
@@ -37,7 +37,7 @@ With the first (optional) argument to `add_agent!`, we can define the starting
 position of the microbe. For convenience, we will initialize all of them
 from position `(0,)`.
 
-````@example randomwalk1D
+````@example 1_randomwalk1D
 n = 10 # number of microbes to add
 foreach(_ -> add_agent!((0,), model), 1:n)
 ````
@@ -53,7 +53,7 @@ The `run!` function will return a dataframe for the agent data (`adf`)
 and one for the model data (`mdf`) collected during the simulation.
 Here we are only collecting agent data and no model data.
 
-````@example randomwalk1D
+````@example 1_randomwalk1D
 nsteps = 600
 adata = [position]
 adf, _ = run!(model, nsteps; adata);
@@ -76,7 +76,7 @@ After the unfolding, we extract the individual trajectories in the form of a
 matrix with `adf_to_matrix`, where each trajectory will be stored as a column.
 This will be convenient for plotting.
 
-````@example randomwalk1D
+````@example 1_randomwalk1D
 Analysis.unfold!(adf, model)
 traj = Analysis.adf_to_matrix(adf, :position_unfold)
 x = first.(traj)

@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "../../../../examples/Chemotaxis/linear_ramp.jl"
+EditURL = "../../../../examples/Chemotaxis/1_linear_ramp.jl"
 ```
 
 # Linear concentration ramp
@@ -31,7 +31,7 @@ All the parameters that we need to evaluate the concentration field and gradient
 the two concentration values `C₀` and `C₁` and the chamber length `Lx`, should be extracted
 from the `model`.
 
-````@example linear_ramp
+````@example 1_linear_ramp
 using MicrobeAgents
 using Plots
 
@@ -68,7 +68,7 @@ since no chemotactic behavior is implemented.
 The most classic model of chemotaxis is implemented in the `BrownBerg` type;
 we will not modify its parameters here and just stick to the default values.
 
-````@example linear_ramp
+````@example 1_linear_ramp
 Lx, Ly = 3000, 1500 # domain size (μm)
 periodic = false
 space = ContinuousSpace((Lx,Ly); periodic)
@@ -99,7 +99,7 @@ but there is really no difference from what we have seen in the random walk exam
 In the figure, we will see that all the microbes drift towards the right,
 where the concentration of the attractant is higher.
 
-````@example linear_ramp
+````@example 1_linear_ramp
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
 adata = [position]

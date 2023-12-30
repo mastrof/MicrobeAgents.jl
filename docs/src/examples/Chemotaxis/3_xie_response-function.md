@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "../../../../examples/Chemotaxis/xie_response-function.jl"
+EditURL = "../../../../examples/Chemotaxis/3_xie_response-function.jl"
 ```
 
 # Response function (Xie)
@@ -29,7 +29,7 @@ homogeneously over space.
 The excitation will occur at a time `t₁` and go back to baseline levels
 at a time `t₂`.
 
-````@example xie_response-function
+````@example 3_xie_response-function
 using MicrobeAgents
 using Plots
 
@@ -72,7 +72,7 @@ To keep the microbes in these motile states for the entire experiment duration,
 we suppress their tumbles, and (just for total consistency with experiments)
 we also set their speed to 0.
 
-````@example xie_response-function
+````@example 3_xie_response-function
 add_agent!(model; turn_rate_forward=0,
     motility=RunReverseFlick(motile_state=MotileState(Forward), speed=[0])
 )
@@ -86,7 +86,7 @@ In addition to the `tumblebias`, we will also monitor two other quantities
 which represent the methylation and dephosphorylation processes which
 together control the chemotactic response of the bacterium.
 
-````@example xie_response-function
+````@example 3_xie_response-function
 nsteps = round(Int, T/dt)
 adata = [tumblebias, :state_m, :state_z]
 adf, = run!(model, nsteps; adata)
@@ -103,7 +103,7 @@ concentration level, and when it drops back to the basal level we observe
 a sharp positive response (the tumble bisa increases) before adapting
 again to the new concentration level.
 
-````@example xie_response-function
+````@example 3_xie_response-function
 _green = palette(:default)[3]
 plot()
 x = (0:dt:T) .- t₁
@@ -128,7 +128,7 @@ the response (defined by the difference between these two quantities), shows
 a sharp decrease followed by a slower relaxation.
 The same occurs for the negative stimulus.
 
-````@example xie_response-function
+````@example 3_xie_response-function
 x = (0:dt:T) .- t₁
 τ_m = model[1].adaptation_time_m
 τ_z = model[1].adaptation_time_z

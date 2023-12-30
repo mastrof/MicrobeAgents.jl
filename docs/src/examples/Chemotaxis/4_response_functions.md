@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "../../../../examples/Chemotaxis/response_functions.jl"
+EditURL = "../../../../examples/Chemotaxis/4_response_functions.jl"
 ```
 
 # Comparison of chemotactic response functions
@@ -12,7 +12,7 @@ chemotactic response, `BrownBerg` also needs the `concentration_time_derivative`
 to be defined explicitly (also the `concentration_gradient` but it's
 not relevant in this specific study).
 
-````@example response_functions
+````@example 4_response_functions
 using MicrobeAgents
 using Plots
 

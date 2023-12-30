@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "../../../../examples/Chemotaxis/celani_gauss2D.jl"
+EditURL = "../../../../examples/Chemotaxis/2_celani_gauss2D.jl"
 ```
 
 # Noisy chemotaxis towards Gaussian source
@@ -9,7 +9,7 @@ of the `Celani` model, in the presence of sensing noise (via the `chemotactic_pr
 Playing with the `chemotactic_precision`, it can be seen that the clustering of bacteria
 at the source becomes stronger with decreasing noise (decreasing chemotactic precision).
 
-````@example celani_gauss2D
+````@example 2_celani_gauss2D
 using MicrobeAgents
 using Plots
 
