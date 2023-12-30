@@ -1,4 +1,4 @@
-# First steps
+# Introduction
 
 ## Structure
 An `AgentBasedModel` object embeds all the properties of the system to be simulated
