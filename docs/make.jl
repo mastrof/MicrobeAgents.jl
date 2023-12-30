@@ -6,6 +6,7 @@ CI = get(ENV, "CI", nothing) == "true" || get(ENV, "GITHUB_TOKEN", nothing) !== 
 import Literate
 using Plots
 
+# use Literate to compile examples
 indir_base = joinpath(@__DIR__, "..", "examples")
 sections = ("RandomWalks", "Chemotaxis")
 outdir_base = joinpath(@__DIR__, "src", "examples")
@@ -26,6 +27,15 @@ for section in sections
     end
 end
 
+# use Literate to compile validation scripts
+valdir_in = joinpath(@__DIR__, "..", "examples/Validation")
+valdir_out = joinpath(@__DIR__, "src", "validation")
+rm(valdir_out; force=true, recursive=true)
+mkpath(valdir_out)
+for file in readdir(valdir_in)
+    Literate.markdown(joinpath(valdir_in, file), valdir_out; credit=false)
+end
+
 
 # convert camelcase directory names to space-separated section names
 function namify(s)
@@ -41,12 +51,12 @@ end
 
 pages = [
     "Home" => "index.md",
-    "Introduction" => ["firststeps.md", "randomwalks.md", "chemotaxis.md"],
+    "Introduction" => "introduction.md",
     "Examples" => [
         [namify(section) => [joinpath.("examples", section, readdir(outdir[section]))...]
          for section in sections]...
     ],
-    "Validation" => "validation.md",
+    "Validation" => joinpath.("validation", readdir(valdir_out)),
     "API" => "api.md"
 ]
 
@@ -64,7 +74,7 @@ makedocs(
 
 if CI
     deploydocs(;
-        repo = "github.com/mastrof/MicrobeAgents.jl.git",
+        repo = "github.com/mastrof/MicrobeAgents.jl",
         target = "build",
         push_preview = true
     )

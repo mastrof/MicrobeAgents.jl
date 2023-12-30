@@ -1,5 +1,5 @@
 ```@meta
-EditURL = "../../../../examples/Chemotaxis/linear_ramp.jl"
+EditURL = "../../../../examples/Chemotaxis/1_linear_ramp.jl"
 ```
 
 # Linear concentration ramp
@@ -31,7 +31,7 @@ All the parameters that we need to evaluate the concentration field and gradient
 the two concentration values `C₀` and `C₁` and the chamber length `Lx`, should be extracted
 from the `model`.
 
-````@example linear_ramp
+````@example 1_linear_ramp
 using MicrobeAgents
 using Plots
 
@@ -68,7 +68,7 @@ since no chemotactic behavior is implemented.
 The most classic model of chemotaxis is implemented in the `BrownBerg` type;
 we will not modify its parameters here and just stick to the default values.
 
-````@example linear_ramp
+````@example 1_linear_ramp
 Lx, Ly = 3000, 1500 # domain size (μm)
 periodic = false
 space = ContinuousSpace((Lx,Ly); periodic)
@@ -99,13 +99,13 @@ but there is really no difference from what we have seen in the random walk exam
 In the figure, we will see that all the microbes drift towards the right,
 where the concentration of the attractant is higher.
 
-````@example linear_ramp
+````@example 1_linear_ramp
 T = 120 # simulation time (s)
 nsteps = round(Int, T/Δt)
 adata = [position]
 adf, mdf = run!(model, nsteps; adata)
 
-traj = vectorize_adf_measurement(adf, :position)
+traj = Analysis.adf_to_matrix(adf, :position)
 x = first.(traj)
 y = last.(traj)
 
@@ -116,7 +116,9 @@ ymesh = range(0,Ly,length=100)
 xn = @view x[:,1:10]
 yn = @view y[:,1:10]
 c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
-heatmap(xmesh, ymesh, c', cbar=false, ratio=1, axis=false, c=:bone)
+heatmap(xmesh, ymesh, c', cbar=false, c=:bone,
+    ratio=1, axis=false, grid=false, xlims=(0,Lx), ylims=(0,Ly)
+)
 plot!(xn, yn, lab=false, lw=lw, lc=(1:n)')
 scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)
 ````

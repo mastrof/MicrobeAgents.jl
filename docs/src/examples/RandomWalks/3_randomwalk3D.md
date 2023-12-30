@@ -1,12 +1,12 @@
 ```@meta
-EditURL = "../../../../examples/RandomWalks/randomwalk3D.jl"
+EditURL = "../../../../examples/RandomWalks/3_randomwalk3D.jl"
 ```
 
 # 3D Random walk
 
 Without any significant difference, we can also simulate three-dimensional random walks.
 
-````@example randomwalk3D
+````@example 3_randomwalk3D
 using MicrobeAgents
 using Distributions
 using Plots
@@ -24,7 +24,8 @@ nsteps = 600
 adata = [position]
 adf, _ = run!(model, nsteps; adata)
 
-traj = MicrobeAgents.unfold(vectorize_adf_measurement(adf,:position), L)
+Analysis.unfold!(adf, model)
+traj = Analysis.adf_to_matrix(adf, :position_unfold)
 x = first.(traj)
 y = getindex.(traj, 2)
 z = last.(traj)

@@ -1,15 +1,12 @@
-```@meta
-EditURL = "../../../../examples/Chemotaxis/celani_gauss2D.jl"
-```
+# # Noisy chemotaxis towards Gaussian source
 
-# Noisy chemotaxis towards Gaussian source
-
+#=
 In this example we set up a static Gaussian source and observe the chemotactic behavior
 of the `Celani` model, in the presence of sensing noise (via the `chemotactic_precision`).
 Playing with the `chemotactic_precision`, it can be seen that the clustering of bacteria
 at the source becomes stronger with decreasing noise (decreasing chemotactic precision).
+=#
 
-````@example celani_gauss2D
 using MicrobeAgents
 using Plots
 
@@ -41,7 +38,7 @@ nsteps = 5000
 adata = [position]
 adf, = run!(model, nsteps; adata)
 
-traj = vectorize_adf_measurement(adf, :position)
+traj = Analysis.adf_to_matrix(adf, :position)
 xmesh = range(0, first(spacesize(model)); length=100)
 ymesh = range(0, last(spacesize(model)); length=100)
 c = [concentration_field(p, p₀, C, σ) for p in Iterators.product(xmesh, ymesh)]
@@ -52,5 +49,3 @@ a = axes(x,1) ./ size(x,1)
 plot!(x, y,
     lab=false, lims=(0,1000), lw=1, alpha=a
 )
-````
-

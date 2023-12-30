@@ -1,6 +1,9 @@
-# # Comparison of chemotactic response functions
+```@meta
+EditURL = "../../../../examples/Chemotaxis/4_response_functions.jl"
+```
 
-#=
+# Comparison of chemotactic response functions
+
 Here we will compare the chemotactic response function of the `Celani`
 and `BrownBerg` model to an impulse stimulus of chemoattractant.
 
@@ -8,7 +11,8 @@ While `Celani` only needs the `concentration_field` to determine the
 chemotactic response, `BrownBerg` also needs the `concentration_time_derivative`
 to be defined explicitly (also the `concentration_gradient` but it's
 not relevant in this specific study).
-=#
+
+````@example 4_response_functions
 using MicrobeAgents
 using Plots
 
@@ -68,7 +72,7 @@ nsteps = round(Int, T/dt)
 adata = [tumblebias]
 adf, = run!(model, nsteps; adata)
 
-S = vectorize_adf_measurement(adf, :tumblebias)
+S = Analysis.adf_to_matrix(adf, :tumblebias)
 
 _pink = palette(:default)[4]
 plot()
@@ -84,3 +88,5 @@ plot!(twinx(),
     tickfontcolor=_pink,
     ylab="C (μM)", guidefontcolor=_pink
 )
+````
+

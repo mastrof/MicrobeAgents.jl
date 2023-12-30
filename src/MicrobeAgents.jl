@@ -2,7 +2,7 @@ module MicrobeAgents
 
 using Agents
 export abmproperties, abmrng, abmspace, abmscheduler, abmtime, spacesize
-export StandardABM, ContinuousSpace
+export ABM, StandardABM, ContinuousSpace
 export add_agent!, add_agent_pos!
 export move_agent!, walk!, run!
 
@@ -13,8 +13,6 @@ using Random
 using Rotations
 using StaticArrays
 export SVector
-
-using DSP, AxisArrays, OffsetArrays # for acf and msd
 
 
 export AbstractMicrobe
@@ -65,11 +63,7 @@ include("bodies/spheres.jl")
 using Agents.Pathfinding
 include("pathfinder.jl")
 
-# analysis routines
-include("analysis/postprocess.jl")
-include("analysis/msd.jl")
-include("analysis/correlation_functions.jl")
-include("analysis/drift.jl")
-include("analysis/turn_detection.jl")
+# submodules
+include("submodules/Analysis/Analysis.jl")
 
 end

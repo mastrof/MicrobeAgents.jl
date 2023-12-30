@@ -35,17 +35,20 @@ only speed is relevant here.
 To run the simulation while collecting the bacterial positions
 at each step we will then run
 ```
-adata = [:pos]
+adata = [position]
 adf, _ = run!(model, nsteps; adata)
 ```
-The dataframe `adf` can now be turned into a matrix of positions,
-with each row representing a different timepoint, and each column
-a different microbe. And since we used periodic boundary conditions,
-the trajectories can be unfolded
+Since the simulation box is periodic, the trajectories we collected in `adf`
+fold around at the box edges. We can unfold them with the `unfold!` function
+available through the `Analysis` submodule.
+The unfolded coordinates will be stored in a new column `:position_unfold`.
+For convenient plotting we can turn this new dataframe column into a matrix with
+one trajectory per column with `adf_to_matrix`.
 ```
-trajectories = MicrobeAgents.unfold(vectorize_adf_measurement(adf, :pos), L)
+Analysis.unfold!(adf, model)
+trajectories = Analysis.adf_to_matrix(adf, :position_unfold)
 ```
-`trajectories` is now a `Matrix{Tuple{Float64}}`.
+`trajectories` is now a `Matrix{SVector{1,Float64}}`.
 To obtain the `x` positions for plotting we can call
 ```
 x = first.(trajectories)

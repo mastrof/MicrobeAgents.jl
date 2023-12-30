@@ -100,7 +100,7 @@ nsteps = round(Int, T/Δt)
 adata = [position]
 adf, mdf = run!(model, nsteps; adata)
 
-traj = vectorize_adf_measurement(adf, :position)
+traj = Analysis.adf_to_matrix(adf, :position)
 x = first.(traj)
 y = last.(traj)
 
@@ -111,6 +111,8 @@ ymesh = range(0,Ly,length=100)
 xn = @view x[:,1:10]
 yn = @view y[:,1:10]
 c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
-heatmap(xmesh, ymesh, c', cbar=false, ratio=1, axis=false, c=:bone)
+heatmap(xmesh, ymesh, c', cbar=false, c=:bone,
+    ratio=1, axis=false, grid=false, xlims=(0,Lx), ylims=(0,Ly)
+)
 plot!(xn, yn, lab=false, lw=lw, lc=(1:n)')
 scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)

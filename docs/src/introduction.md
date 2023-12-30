@@ -1,4 +1,4 @@
-# First steps
+# Introduction
 
 ## Structure
 An `AgentBasedModel` object embeds all the properties of the system to be simulated
@@ -130,17 +130,17 @@ We just need to specify how many steps we want
 to simulate and what data to collect during the run:
 ```
 nsteps = 100
-adf, mdf = run!(model, nsteps; adata=[:pos])
+adf, mdf = run!(model, nsteps; adata=[position])
 ```
 `run!` will return two dataframes, one for the agent-level data (`adf`) and one
 for the model-level data (`mdf`, which in this case will be empty).
 This way, we have produced our first random walk.
-Since `adf.pos` is a vector of tuples, we first have to unpack the x and y values
+Since `adf.position` is a vector of tuples, we first have to unpack the x and y values
 and then we are ready to plot our trajectory.
 ```
 using Plots
-x = first.(adf.pos)
-y = last.(adf.pos)
+x = first.(adf.position)
+y = last.(adf.position)
 plot(x, y)
 ```
 
