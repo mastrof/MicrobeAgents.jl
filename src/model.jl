@@ -87,7 +87,7 @@ function Agents.add_agent!(
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
-    Agents.add_agent_pos!(microbe, model) # not public API!
+    Agents.add_agent_own_pos!(microbe, model) # not public API!
 end
 
 

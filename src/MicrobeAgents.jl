@@ -3,7 +3,7 @@ module MicrobeAgents
 using Agents
 export abmproperties, abmrng, abmspace, abmscheduler, abmtime, spacesize
 export ABM, StandardABM, ContinuousSpace
-export add_agent!, add_agent_pos!
+export add_agent!, add_agent_own_pos!
 export move_agent!, walk!, run!
 
 using CellListMap.PeriodicSystems

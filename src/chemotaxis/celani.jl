@@ -80,7 +80,7 @@ function Agents.add_agent!(
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
         initialize_markovian_variables!(microbe, model)
     end
-    Agents.add_agent_pos!(microbe, model)
+    Agents.add_agent_own_pos!(microbe, model)
 end
 
 """
