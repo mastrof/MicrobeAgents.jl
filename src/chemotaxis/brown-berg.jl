@@ -1,4 +1,4 @@
-export BrownBerg, chemotaxis!
+export BrownBerg
 
 """
     BrownBerg{D} <: AbstractMicrobe{D}
@@ -40,10 +40,6 @@ function chemotaxis!(microbe::BrownBerg, model)
     microbe.state = (1 - β) * M + S * β # new weighted dPb/dt
     return nothing
 end # function
-
-function affect!(microbe::BrownBerg, model)
-    chemotaxis!(microbe, model)
-end
 
 function tumblebias(microbe::BrownBerg)
     g = microbe.gain

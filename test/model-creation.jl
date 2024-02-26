@@ -13,6 +13,7 @@ using LinearAlgebra: norm
             :concentration_gradient,
             :concentration_time_derivative,
             :compound_diffusivity,
+            :affect!
         ))
     end
 

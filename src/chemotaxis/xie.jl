@@ -1,4 +1,4 @@
-export Xie, chemotaxis!
+export Xie
 
 """
     Xie{D} <: AbstractMicrobe{D}
@@ -78,10 +78,6 @@ function chemotaxis!(microbe::Xie, model; ε=1e-16)
     microbe.state_z = z
     microbe.state = a₀ * (m / τ_m - z / τ_z)
     return nothing
-end
-
-function affect!(microbe::Xie, model)
-    chemotaxis!(microbe, model)
 end
 
 function tumblebias(microbe::Xie)

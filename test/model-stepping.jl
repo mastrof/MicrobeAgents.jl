@@ -29,15 +29,11 @@ using LinearAlgebra: norm
 
         # customize microbe affect! function
         # decreases microbe state value by D at each step
-        MicrobeAgents.affect!(microbe::Microbe{D}, model) = (microbe.state -= D)
-        model = StandardABM(Microbe{D}, space, dt; container)
+        affect!(microbe::Microbe{D}, model) where D = (microbe.state -= D)
+        properties = Dict(:affect! => affect!)
+        model = StandardABM(Microbe{D}, space, dt; container, properties)
         add_agent!(model)
         run!(model, 1)
-        @test model[1].state == -D
-        # restore default affect! function
-        MicrobeAgents.affect!(microbe::Microbe{D}, model) = nothing
-        run!(model, 1)
-        # now the state has not changed from previous step
         @test model[1].state == -D
 
         # customize model_step! function

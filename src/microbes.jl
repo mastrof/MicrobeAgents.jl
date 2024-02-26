@@ -1,4 +1,4 @@
-export Microbe
+export Microbe, chemotaxis!, tumblebias
 
 """
     Microbe{D} <: AbstractMicrobe{D}
@@ -25,6 +25,11 @@ and the default parameters
     radius::Float64 = 0.0
     state::Float64 = 0.0
 end
+
+# fallback functions for default random behavior
+chemotaxis!(microbe::AbstractMicrobe, model) = nothing
+tumblebias(microbe::AbstractMicrobe) = 1.0
+
 
 r2dig(x) = round(x, digits=2)
 function Base.show(io::IO, ::MIME"text/plain", m::AbstractMicrobe{D}) where D

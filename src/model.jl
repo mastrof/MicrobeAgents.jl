@@ -28,6 +28,7 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0, # scalar
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
+    :affect! => chemotaxis!
 )
 ```
 By including these default properties, we make sure that all the chemotaxis models
@@ -97,4 +98,5 @@ DEFAULT_ABM_PROPERTIES = Dict(
     :concentration_time_derivative => (pos,model) -> 0.0,
     # required by models of chemotaxis, default value is glutamate diffusivity
     :compound_diffusivity => 608.0,
+    :affect! => chemotaxis!
 )
