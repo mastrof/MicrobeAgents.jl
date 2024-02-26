@@ -1,4 +1,4 @@
-export microbe_step!, microbe_pathfinder_step!, turnrate, affect!
+export microbe_step!, microbe_pathfinder_step!
 
 """
     microbe_step!(microbe, model)
@@ -16,7 +16,7 @@ function microbe_step!(microbe::AbstractMicrobe, model)
     # reorient through rotational diffusion
     rotational_diffusion!(microbe, model)
     # update microbe state
-    affect!(microbe, model)
+    model.affect!(microbe, model)
     # evaluate instantaneous turn rate
     ω = turnrate(microbe) * tumblebias(microbe)
     if rand(abmrng(model)) < ω * dt # if true reorient microbe
@@ -37,7 +37,7 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model)
     # reorient through rotational diffusion
     rotational_diffusion!(microbe, model)
     # update microbe state
-    affect!(microbe, model)
+    model.affect!(microbe, model)
     # evaluate instantaneous turn rate
     ω = turnrate(microbe) * tumblebias(microbe)
     if rand(abmrng(model)) < ω * dt # if true reorient microbe
@@ -45,11 +45,3 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model)
     end
     nothing
 end
-
-# no bias for generic non-chemotactic microbe
-tumblebias(microbe::AbstractMicrobe) = 1.0
-"""
-    affect!(microbe, model)
-Can be used to arbitrarily update `microbe` state.
-"""
-affect!(microbe::AbstractMicrobe, model) = nothing

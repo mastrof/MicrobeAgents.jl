@@ -1,4 +1,4 @@
-export Brumley, chemotaxis!
+export Brumley
 
 """
     Brumley{D} <: AbstractMicrobe{D}
@@ -50,10 +50,6 @@ function chemotaxis!(microbe::Brumley, model)
     microbe.state = α * S + (1 - α) * κ * τₘ * M
     return nothing
 end # function
-
-function affect!(microbe::Brumley, model)
-    chemotaxis!(microbe, model)
-end
 
 function tumblebias(microbe::Brumley)
     Γ = microbe.gain

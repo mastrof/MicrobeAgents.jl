@@ -1,4 +1,4 @@
-export Celani, chemotaxis!
+export Celani
 
 """
     Celani{D} <: AbstractMicrobe{D}
@@ -48,10 +48,6 @@ function chemotaxis!(microbe::Celani, model)
     microbe.state = λ^2 * (W[2] - λ * W[3] / 2)
     return nothing
 end # function
-
-function affect!(microbe::Celani, model)
-    chemotaxis!(microbe, model)
-end
 
 function tumblebias(microbe::Celani)
     β = microbe.gain
