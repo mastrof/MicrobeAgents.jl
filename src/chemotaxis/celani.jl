@@ -35,7 +35,7 @@ end
 function chemotaxis!(microbe::Celani, model)
     Δt = model.timestep
     Dc = model.compound_diffusivity
-    c = model.concentration_field(microbe.pos, model)
+    c = concentration(model)(position(microbe), model)
     a = microbe.radius
     Π = microbe.chemotactic_precision
     σ = CONV_NOISE * Π * sqrt(3 * c / (5 * π * Dc * a * Δt)) # noise (Berg-Purcell)
@@ -51,7 +51,7 @@ end # function
 
 function tumblebias(microbe::Celani)
     β = microbe.gain
-    S = microbe.state
+    S = state(microbe)
     return (1 - β*S)
 end
 
@@ -87,7 +87,7 @@ with respect to the `concentration_field` defined by `model`.
 function initialize_markovian_variables!(microbe::Celani, model)
     W = microbe.markovian_variables
     λ = 1 / microbe.memory
-    M = model.concentration_field(microbe.pos, model)
+    M = concentration(model)(position(microbe), model)
     W[1] = M / λ
     W[2] = W[1] / λ
     W[3] = 2W[2] / λ

@@ -41,6 +41,7 @@ include("utils.jl")
 include("motility.jl")
 include("rotations.jl")
 include("neighborlists.jl")
+include("fields.jl")
 
 include("microbes.jl")
 include("microbe_step.jl")

@@ -59,7 +59,7 @@ end
 function chemotaxis!(microbe::Xie, model; ε=1e-16)
     Δt = model.timestep
     Dc = model.compound_diffusivity
-    c = model.concentration_field(microbe.pos, model)
+    c = concentration(model)(position(microbe), model)
     K = microbe.binding_affinity
     a = microbe.radius
     Π = microbe.chemotactic_precision
