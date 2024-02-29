@@ -39,7 +39,7 @@ function chemotaxis!(microbe::Celani, model)
     a = microbe.radius
     Π = microbe.chemotactic_precision
     σ = CONV_NOISE * Π * sqrt(3 * c / (5 * π * Dc * a * Δt)) # noise (Berg-Purcell)
-    M = rand(Normal(c, σ)) # measurement
+    M = rand(abmrng(model), Normal(c, σ)) # measurement
     λ = 1 / microbe.memory
     W = microbe.markovian_variables
     W[1] += (-λ * W[1] + M) * Δt

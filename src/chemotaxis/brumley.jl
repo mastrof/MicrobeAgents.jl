@@ -44,7 +44,7 @@ function chemotaxis!(microbe::Brumley, model)
     # gradient measurement
     μ = dot(microbe.vel, ∇u) * microbe.speed + ∂ₜu # mean
     σ = CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise
-    M = rand(Normal(μ, σ)) # measurement
+    M = rand(abmrng(model), Normal(μ, σ)) # measurement
     # update internal state
     S = microbe.state
     microbe.state = α * S + (1 - α) * κ * τₘ * M
