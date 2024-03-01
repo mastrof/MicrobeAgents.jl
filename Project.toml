@@ -13,8 +13,8 @@ GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MeanSquaredDisplacement = "13c93d70-909c-440c-af92-39d48ffa2ba2"
 OffsetArrays = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+Quaternions = "94ee1d12-ae83-5a48-8b1c-48b8ff168ae0"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Rotations = "6038ab10-8711-5258-84ad-4b1120ba62dc"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
@@ -22,7 +22,6 @@ Agents = "6"
 CellListMap = "0.8"
 Distributions = "0.25"
 GeometryBasics = "0.4"
-Rotations = "1"
 StaticArrays = "1"
 julia = "1"
 

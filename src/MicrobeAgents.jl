@@ -10,7 +10,7 @@ using CellListMap.PeriodicSystems
 using Distributions
 using LinearAlgebra
 using Random
-using Rotations
+using Quaternions
 using StaticArrays
 export SVector
 
