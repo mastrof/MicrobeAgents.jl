@@ -32,27 +32,29 @@ end
 
 function chemotaxis!(microbe::Brumley, model)
     Δt = model.timestep
-    Dc = model.compound_diffusivity
+    Dc = chemoattractant_diffusivity(model)
     τₘ = microbe.memory
     α = exp(-Δt / τₘ) # memory persistence factor
     a = microbe.radius
     Π = microbe.chemotactic_precision
     κ = microbe.gain_receptor
-    u = model.concentration_field(microbe.pos, model)
-    ∇u = model.concentration_gradient(microbe.pos, model)
-    ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
+    pos = position(microbe)
+    vel = velocity(microbe)
+    u = concentration(pos, model)
+    ∇u = gradient(pos, model)
+    ∂ₜu = time_derivative(pos, model)
     # gradient measurement
-    μ = dot(microbe.vel, ∇u) * microbe.speed + ∂ₜu # mean
+    μ = dot(vel, ∇u) + ∂ₜu # mean
     σ = CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise
     M = rand(abmrng(model), Normal(μ, σ)) # measurement
     # update internal state
-    S = microbe.state
+    S = state(microbe)
     microbe.state = α * S + (1 - α) * κ * τₘ * M
     return nothing
 end # function
 
 function tumblebias(microbe::Brumley)
     Γ = microbe.gain
-    S = microbe.state
+    S = state(microbe)
     return (1 + exp(-Γ*S))/2
 end

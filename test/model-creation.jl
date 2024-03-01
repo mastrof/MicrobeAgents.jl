@@ -9,10 +9,7 @@ using LinearAlgebra: norm
         @test model isa StandardABM
         @test Set(keys(abmproperties(model))) == Set((
             :timestep,
-            :concentration_field,
-            :concentration_gradient,
-            :concentration_time_derivative,
-            :compound_diffusivity,
+            :chemoattractant,
             :affect!
         ))
     end
@@ -85,7 +82,8 @@ using LinearAlgebra: norm
                     # initialize a new model with non-zero concentration field
                     C = 2.0
                     concentration_field(pos, model) = C
-                    properties = Dict(:concentration_field => concentration_field)
+                    chemoattractant = GenericChemoattractant{D,Float64}(;concentration_field)
+                    properties = Dict(:chemoattractant => chemoattractant)
                     s = ContinuousSpace(ones(SVector{D}))
                     model_c = StandardABM(Celani{D}, s, 1.0; properties)
                     add_agent!(model_c)

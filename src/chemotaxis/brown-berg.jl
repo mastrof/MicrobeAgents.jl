@@ -31,11 +31,13 @@ function chemotaxis!(microbe::BrownBerg, model)
     τₘ = microbe.memory
     β = exp(-Δt / τₘ) # memory loss factor
     KD = microbe.receptor_binding_constant
-    S = microbe.state # weighted dPb/dt at previous step
-    u = model.concentration_field(microbe.pos, model)
-    ∇u = model.concentration_gradient(microbe.pos, model)
-    ∂ₜu = model.concentration_time_derivative(microbe.pos, model)
-    du_dt = dot(microbe.vel, ∇u) * microbe.speed + ∂ₜu
+    S = state(microbe) # weighted dPb/dt at previous step
+    pos = position(microbe)
+    vel = velocity(microbe)
+    u = concentration(pos, model)
+    ∇u = gradient(pos, model)
+    ∂ₜu = time_derivative(pos, model)
+    du_dt = dot(vel, ∇u) + ∂ₜu
     M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement
     microbe.state = (1 - β) * M + S * β # new weighted dPb/dt
     return nothing
@@ -43,6 +45,6 @@ end # function
 
 function tumblebias(microbe::BrownBerg)
     g = microbe.gain
-    S = microbe.state
+    S = state(microbe)
     return exp(-g*S)
 end

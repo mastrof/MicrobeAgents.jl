@@ -37,11 +37,11 @@ using LinearAlgebra: norm
         @test model[1].state == -D
 
         # customize model_step! function
-        properties = Dict(:square_t => 0)
-        model_step!(model) = (abmproperties(model)[:square_t] = abmtime(model)^2)
-        model = StandardABM(Microbe{D}, space, dt; model_step!, container)
+        properties = Dict(:square_t => [0])
+        model_step!(model) = (abmproperties(model)[:square_t][1] = abmtime(model)^2)
+        model = StandardABM(Microbe{D}, space, dt; model_step!, container, properties)
         n = 6
         run!(model, n)
-        @test abmproperties(model)[:square_t] == (n-1)^2
+        @test abmproperties(model)[:square_t][1] == (n-1)^2
     end
 end
