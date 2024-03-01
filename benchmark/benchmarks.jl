@@ -41,7 +41,8 @@ dimensions = [1, 2, 3]
 ##
 open(filename, "a") do io
     @printf io "## Simple stepping\n"
-    @printf io "%-16s %-16s %-16s %-16s\n" "Type" "Time (μs)" "Allocs" "Memory"
+    @printf io "%-16s | %-16s | %-16s | %-16s\n" "Type" "Time (μs)" "Allocs" "Memory"
+    @printf io " --- | --- | --- | --- \n"
     for T in microbe_types
         for D in dimensions
             space = ContinuousSpace(ntuple(_ -> 10.0, D))
@@ -54,7 +55,7 @@ open(filename, "a") do io
             mintime = minimum(b.times)*1e-3 / nsteps
             allocs = b.allocs / nsteps
             memory = b.memory / nsteps
-            @printf io "%-16s %-16.2e %-16.2e %-16.2e\n" type mintime allocs memory
+            @printf io "%-16s | %-16.2e | %-16.2e | %-16.2e\n" type mintime allocs memory
         end
     end
 end
