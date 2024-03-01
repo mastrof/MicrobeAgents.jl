@@ -5,9 +5,8 @@ Here we will compare the chemotactic response function of the `Celani`
 and `BrownBerg` model to an impulse stimulus of chemoattractant.
 
 While `Celani` only needs the `concentration_field` to determine the
-chemotactic response, `BrownBerg` also needs the `concentration_time_derivative`
-to be defined explicitly (also the `concentration_gradient` but it's
-not relevant in this specific study).
+chemotactic response, `BrownBerg` also needs the the time derivative (`concentration_ramp`)
+to be defined explicitly (also the `concentration_gradient` but it's not relevant in this specific study).
 =#
 using MicrobeAgents
 using Plots
@@ -25,16 +24,16 @@ end
 concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
 
 δ(t,dt) = 0 <= t <= dt ? 1.0/dt : 0.0 # discrete approximation to Dirac delta
-function concentration_time_derivative(pos, model)
+function concentration_ramp(pos, model)
     C₀ = model.C₀
     C₁ = model.C₁
     t₁ = model.t₁
     t₂ = model.t₂
     dt = model.timestep
     t = abmtime(model) * dt
-    concentration_time_derivative(t, C₀, C₁, t₁, t₂, dt)
+    concentration_ramp(t, C₀, C₁, t₁, t₂, dt)
 end
-function concentration_time_derivative(t, C₀, C₁, t₁, t₂, dt)
+function concentration_ramp(t, C₀, C₁, t₁, t₂, dt)
     C₁*(δ(t-t₁, dt) - δ(t-t₂, dt))
 end
 
@@ -45,9 +44,12 @@ T = 50.0 # s
 dt = 0.1 # s
 t₁ = 10.0 # s
 t₂ = 30.0 # s
+chemoattractant = GenericChemoattractant{3,Float64}(;
+    concentration_field,
+    concentration_ramp
+)
 properties = Dict(
-    :concentration_field => concentration_field,
-    :concentration_time_derivative => concentration_time_derivative,
+    :chemoattractant => chemoattractant,
     :C₀ => C₀,
     :C₁ => C₁,
     :t₁ => t₁,

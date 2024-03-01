@@ -34,7 +34,7 @@ The measurement, ``\mathcal{M}``, determines the evolution of an internal state
 ```
 This internal state, in turn, determines the tumbling rate.
 
-We will study how ``Pi`` affects the drift velocity of bacteria.
+We will study how ``\Pi`` affects the drift velocity of bacteria.
 
 ````@example 5_drift_exponential
 using MicrobeAgents
@@ -62,9 +62,12 @@ dt = 0.1
 
 C0 = 10.0
 λ = Lx/2
+chemoattractant = GenericChemoattractant{3,Float64}(;
+    concentration_field,
+    concentration_gradient
+)
 properties = Dict(
-    :concentration_field => concentration_field,
-    :concentration_gradient => concentration_gradient,
+    :chemoattractant => chemoattractant,
     :C0 => C0,
     :λ => λ,
 )
@@ -104,7 +107,7 @@ for (i,g) in enumerate(gdf)
 end
 avg_drift = vec(mean(drift_velocities; dims=1))
 
-# we also apply a smoothing function to remove some noise
+# we apply a smoothing function to remove some noise for better visualization
 function moving_average(y::AbstractVector, m::Integer)
     @assert isodd(m)
     out = similar(y)

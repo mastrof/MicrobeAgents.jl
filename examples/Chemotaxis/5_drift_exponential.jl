@@ -59,9 +59,12 @@ dt = 0.1
 
 C0 = 10.0
 λ = Lx/2
+chemoattractant = GenericChemoattractant{3,Float64}(;
+    concentration_field,
+    concentration_gradient
+)
 properties = Dict(
-    :concentration_field => concentration_field,
-    :concentration_gradient => concentration_gradient,
+    :chemoattractant => chemoattractant,
     :C0 => C0,
     :λ => λ,
 )

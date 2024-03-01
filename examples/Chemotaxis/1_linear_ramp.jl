@@ -55,11 +55,10 @@ This dictionary will contain all the information regarding our concentration fie
 
 Note that the `:C₀` and `:C₁` keys have been defined by us; we could have chosen different
 names for them.
-The `concentration_field` and `concentration_gradient` functions instead **must** be assigned
-to the `:concentration_field` and `:concentration_gradient` keys respectively; this is required
-by MicrobeAgents and assigning these functions to any other key will not produce the desired results.
+The `concentration_field` and `concentration_gradient` functions instead **must** be wrapped into an `AbstractChemoattractant` type and attached to the `:chemoattractant` keyword; this is required by MicrobeAgents and assigning these functions to any other key will not produce the desired results.
+In this example, we define the chemoattractant as a `GenericChemoattractant`, a special type which takes `concentration_field` and `concentration_gradient` as keyword arguments. Notice it also takes the model dimensionality and number type as parameters.
 
-To observe chemotaxis, we must use a microbe type for which chemotactic behavior is implemented.
+Finally, to observe chemotaxis, we must use a microbe type for which chemotactic behavior is implemented.
 If we used the base `Microbe`, no matter what field we define, we would only observe a random walk
 since no chemotactic behavior is implemented.
 The most classic model of chemotaxis is implemented in the `BrownBerg` type;
@@ -72,11 +71,14 @@ space = ContinuousSpace((Lx,Ly); periodic)
 
 ## model setup
 C₀, C₁ = 0.0, 20.0 # μM
+chemoattractant = GenericChemoattractant{2,Float64}(;
+    concentration_field,
+    concentration_gradient
+)
 properties = Dict(
     :C₀ => C₀,
     :C₁ => C₁,
-    :concentration_field => concentration_field,
-    :concentration_gradient => concentration_gradient
+    :chemoattractant => chemoattractant
 )
 model = StandardABM(BrownBerg{2}, space, Δt; properties)
 n = 100 # number of microbes
