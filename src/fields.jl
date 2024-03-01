@@ -1,4 +1,4 @@
-export AbstractChemoattractant,
+export AbstractChemoattractant, chemoattractant,
     concentration, gradient, time_derivative, chemoattractant_diffusivity,
     GenericChemoattractant
 
