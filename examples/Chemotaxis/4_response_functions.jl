@@ -44,12 +44,11 @@ T = 50.0 # s
 dt = 0.1 # s
 t₁ = 10.0 # s
 t₂ = 30.0 # s
-chemoattractant = GenericChemoattractant{3,Float64}(;
-    concentration_field,
-    concentration_ramp
-)
 properties = Dict(
-    :chemoattractant => chemoattractant,
+    :chemoattractant => GenericChemoattractant{3,Float64}(;
+        concentration_field,
+        concentration_ramp
+    ),
     :C₀ => C₀,
     :C₁ => C₁,
     :t₁ => t₁,

@@ -82,8 +82,8 @@ using LinearAlgebra: norm
                     # initialize a new model with non-zero concentration field
                     C = 2.0
                     concentration_field(pos, model) = C
-                    chemoattractant = GenericChemoattractant{D,Float64}(;concentration_field)
-                    properties = Dict(:chemoattractant => chemoattractant)
+                    chemo = GenericChemoattractant{D,Float64}(;concentration_field)
+                    properties = Dict(:chemoattractant => chemo)
                     s = ContinuousSpace(ones(SVector{D}))
                     model_c = StandardABM(Celani{D}, s, 1.0; properties)
                     add_agent!(model_c)

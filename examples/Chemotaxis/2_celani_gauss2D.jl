@@ -24,9 +24,8 @@ space = ContinuousSpace(extent; periodic=false)
 p₀ = extent./2 # μm
 C = 1.0 # μM
 σ = 100.0 # μm
-chemoattractant = GenericChemoattractant{2,Float64}(; concentration_field)
 properties = Dict(
-    :chemoattractant => chemoattractant,
+    :chemoattractant => GenericChemoattractant{2,Float64}(; concentration_field),
     :C => C,
     :σ => σ,
     :p₀ => p₀,
