@@ -1,97 +1,32 @@
-export AbstractConcentrationField, field, concentration, gradient, time_derivative,
-    GenericConcentrationField,
-    SteadyDiffusiveField, background, intensity, source_size, origin,
-    SteadyExpField, decay_length
+export AbstractChemoattractant,
+    concentration, gradient, time_derivative, chemoattractant_diffusivity,
+    GenericChemoattractant
 
-abstract type AbstractConcentrationField{D} end
+abstract type AbstractChemoattractant{D,T} end
 
-field(model::ABM) = model.field
-concentration(model::ABM) = concentration(field(model))
-gradient(model::ABM) = gradient(field(model))
-time_derivative(model::ABM) = time_derivative(field(model))
-concentration(f::AbstractConcentrationField) = f.concentration_field
-gradient(f::AbstractConcentrationField) = f.concentration_gradient
-time_derivative(f::AbstractConcentrationField) = f.concentration_ramp
-
-@kwdef struct GenericConcentrationField{D} <: AbstractConcentrationField{D}
-    concentration_field = (pos, model) -> 0.0
-    concentration_gradient = (pos, model) -> zero(SVector{D,Float64})
-    concentration_ramp = (pos, model) -> 0.0
+@inline function concentration(pos::SVector{D,T}, model::ABM) where {D,T}
+    concentration(chemoattractant(model))(pos, model)::T
+end
+@inline function gradient(pos::SVector{D,T}, model::ABM) where {D,T}
+    gradient(chemoattractant(model))(pos, model)::SVector{D,T}
+end
+@inline function time_derivative(pos::SVector{D,T}, model::ABM) where {D,T}
+    time_derivative(chemoattractant(model))(pos, model)::T
 end
 
+chemoattractant(model::ABM) = model.chemoattractant
+concentration(model::ABM) = concentration(chemoattractant(model))
+gradient(model::ABM) = concentration(chemoattractant(model))
+time_derivative(model::ABM) = time_derivative(chemoattractant(model))
+chemoattractant_diffusivity(model::ABM) = chemoattractant_diffusivity(chemoattractant(model))
+concentration(c::AbstractChemoattractant) = c.concentration_field
+gradient(c::AbstractChemoattractant) = c.concentration_gradient
+time_derivative(c::AbstractChemoattractant) = c.concentration_ramp
+chemoattractant_diffusivity(c::AbstractChemoattractant) = c.diffusivity
 
-@kwdef struct SteadyDiffusiveField{D} <: AbstractConcentrationField{D}
-    C0::Float64
-    C1::Float64
-    R::Float64
-    origin::SVector{D,Float64} = zero(SVector{D,Float64})
-    concentration_field = field_diffusive
-    concentration_gradient = gradient_diffusive
-    concentration_ramp = (pos, model) -> 0.0
-end
-background(f::SteadyDiffusiveField) = f.C0
-intensity(f::SteadyDiffusiveField) = f.C1
-source_size(f::SteadyDiffusiveField) = f.R
-origin(f::SteadyDiffusiveField) = f.origin
-
-function field_diffusive(pos::SVector{D}, model) where D
-    F = field(model)
-    C0 = background(F)
-    C1 = intensity(F)
-    R = source_size(F)
-    P = origin(F)
-    r = euclidean_distance(pos, P, model)
-    return C0 + C1*R/r
-end
-
-function gradient_diffusive(pos::SVector{D}, model) where D
-    F = field(model)
-    C1 = intensity(F)
-    R = source_size(F)
-    P = origin(F)
-    rvec = distancevector(P, pos, model)
-    r2 = dot(rvec, rvec)
-    r3 = r2 * sqrt(r2)
-    return SVector{D}(-C1*R*r/r3 for r in rvec)
-end
-
-
-@kwdef struct SteadyExpField{D} <: AbstractConcentrationField{D}
-    C0::Float64
-    C1::Float64
-    λ::Float64
-    R::Float64
-    origin::SVector{D,Float64} = zero(SVector{D,Float64})
-    concentration_field = field_exp
-    concentration_gradient = gradient_exp
-    concentration_ramp = (pos, model) -> 0.0
-end
-background(f::SteadyExpField) = f.C0
-intensity(f::SteadyExpField) = f.C1
-source_size(f::SteadyExpField) = f.R
-origin(f::SteadyExpField) = f.origin
-decay_length(f::SteadyExpField) = f.λ
-
-function field_exp(pos::SVector{D}, model) where D
-    F = field(model)
-    C0 = background(F)
-    C1 = intensity(F)
-    R = source_size(F)
-    P = origin(F)
-    λ = decay_length(F)
-    r = euclidean_distance(pos, P, model)
-    return C0 + C1*R/r * exp(-(r-R)/λ)
-end
-
-function gradient_exp(pos::SVector{D}, model) where D
-    F = field(model)
-    C1 = intensity(F)
-    R = source_size(F)
-    P = origin(F)
-    λ = decay_length(F)
-    rvec = distancevector(P, pos, model)
-    r2 = dot(rvec, rvec)
-    r = sqrt(r2)
-    r3 = r*r2
-    SVector{D}(-(λ+r)*r*exp(-(r-R)/λ)/(λ*r3) for r in rvec)
+@kwdef struct GenericChemoattractant{D,T} <: AbstractChemoattractant{D,T}
+    concentration_field::Function = (pos, model) -> zero(T)
+    concentration_gradient::Function = (pos, model) -> zero(SVector{D,T})
+    concentration_ramp::Function = (pos, model) -> zero(T)
+    diffusivity::T = T(608.0) # μm²/s
 end

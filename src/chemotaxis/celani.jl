@@ -34,8 +34,8 @@ end
 
 function chemotaxis!(microbe::Celani, model)
     Δt = model.timestep
-    Dc = model.compound_diffusivity
-    c = concentration(model)(position(microbe), model)
+    Dc = chemoattractant_diffusivity(model)
+    c = concentration(position(microbe), model)
     a = microbe.radius
     Π = microbe.chemotactic_precision
     σ = CONV_NOISE * Π * sqrt(3 * c / (5 * π * Dc * a * Δt)) # noise (Berg-Purcell)
@@ -87,7 +87,7 @@ with respect to the `concentration_field` defined by `model`.
 function initialize_markovian_variables!(microbe::Celani, model)
     W = microbe.markovian_variables
     λ = 1 / microbe.memory
-    M = concentration(model)(position(microbe), model)
+    M = concentration(position(microbe), model)
     W[1] = M / λ
     W[2] = W[1] / λ
     W[3] = 2W[2] / λ

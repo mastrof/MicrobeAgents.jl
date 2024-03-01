@@ -34,9 +34,9 @@ function chemotaxis!(microbe::BrownBerg, model)
     S = state(microbe) # weighted dPb/dt at previous step
     pos = position(microbe)
     vel = velocity(microbe)
-    u = concentration(model)(pos, model)
-    ∇u = gradient(model)(pos, model)
-    ∂ₜu = time_derivative(model)(pos, model)
+    u = concentration(pos, model)
+    ∇u = gradient(pos, model)
+    ∂ₜu = time_derivative(pos, model)
     du_dt = dot(vel, ∇u) + ∂ₜu
     M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement
     microbe.state = (1 - β) * M + S * β # new weighted dPb/dt

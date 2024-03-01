@@ -23,9 +23,7 @@ When a model is created, a default set of properties is included in the model
 (`MicrobeAgents.default_ABM_properties`):
 ```
 DEFAULT_ABM_PROPERTIES = Dict(
-    :field => GenericConcentrationField{D}()
-    # required by models of chemotaxis, default value is glutamate diffusivity
-    :compound_diffusivity => 608.0,
+    :chemoattractant => GenericChemoattractant{D,Float64}()
     :affect! => chemotaxis!
 )
 ```
@@ -45,10 +43,10 @@ function Agents.StandardABM(
     agents_first = true,
     warn = true,
 ) where {D,A<:AbstractMicrobe{D}}
-    properties = Dict(
+    properties = (;
         make_default_abm_properties(D)...,
         properties...,
-        :timestep => timestep
+        timestep = timestep
     )
     StandardABM(T, space;
         agent_step!, model_step!, container,
@@ -91,7 +89,6 @@ end
 
 
 make_default_abm_properties(D) = Dict(
-    :field => GenericConcentrationField{D}(),
-    :compound_diffusivity => 608.0, # μm²/s
+    :chemoattractant => GenericChemoattractant{D,Float64}(),
     :affect! => chemotaxis!
 )
