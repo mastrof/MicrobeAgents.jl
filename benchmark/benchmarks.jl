@@ -29,7 +29,8 @@ for D in dimensions
 end
 ==#
 
-open("benchmarks.md", "w") do io
+filename = "benchmarks.md"
+open(filename, "w") do io
     @printf io "# MicrobeAgents.jl benchmarks - %s \n\n" Pkg.project().version
 end
 
@@ -38,7 +39,7 @@ microbe_types = [Microbe, BrownBerg, Brumley, Celani]
 dimensions = [1, 2, 3]
 
 ##
-open("benchmarks.md", "a") do io
+open(filename, "a") do io
     @printf io "## Simple stepping\n"
     @printf io "%-16s %-16s %-16s %-16s\n" "Type" "Time (μs)" "Allocs" "Memory"
     for T in microbe_types
