@@ -40,14 +40,21 @@ rotate(w::SVector{1}, θ) = rotate(w)
 rotate(w::SVector{1}) = -w
 
 rotate(w::SVector{2}, θ, ϕ) = rotate(w, θ)
-rotate(w::SVector{2}, θ) = Angle2d(θ)*w
+function rotate(w::SVector{2}, θ)
+    s, c = sincos(θ)
+    SVector{2}(c*w[1]-s*w[2], s*w[1]+c*w[2])
+end
 
 function rotate(w::SVector{3}, θ, ϕ)
     # find one vector u which is normal to w
     # rotate w around its normal u by θ
     # then rotate the resulting vector around w by ϕ
     u = normalvector(w)
-    AngleAxis(ϕ, w...) * AngleAxis(θ, u...) * w
+    q0 = Quaternion(0, w[1], w[2], w[3])
+    q1 = quaternion_from_axisangle(u, θ)
+    q2 = quaternion_from_axisangle(w, ϕ)
+    q = (q2*q1) * q0 * conj(q2*q1)
+    SVector{3}(imag_part(q))
 end
 """
     normalvector(w::SVector{3})
@@ -59,4 +66,14 @@ function normalvector(w::SVector{3})
     u = SVector(0., 0., 0.)
     u = setindex(u, w[m], n)
     u = setindex(u, -w[n], m)
+end
+
+"""
+    quaternion_from_axisangle(axis, angle)
+Obtain a quaternion representation of the rotation around `axis` by `angle`.
+"""
+function quaternion_from_axisangle(axis::SVector{3,<:Real}, angle::Real)
+    s, c = sincos(angle / 2)
+    axis = normalize(axis)
+    return Quaternion(c, s*axis[1], s*axis[2], s*axis[3])
 end
