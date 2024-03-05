@@ -11,10 +11,9 @@ of microbes.
 By convention the drift velocity will be positive
 for motion towards the target point.
 
-If `normalize` is set to `true`, drift velocities are normalized by the
-instantaneous speed of the microbe.
-
 **Keywords**
+- `normalize = false`: whether drift velocities should be normalized by
+  the instantaneous speed of the microbes
 - `pos_key::Symbol = :position`: name of the column containing microbe positions
 - `vel_key::Symbol = :velocity`: name of the column containing microbe velocities
 """
@@ -76,10 +75,9 @@ Requires the existence of a column containing the velocity of microbes.
 By convention the drift velocity will be positive
 for motion along the target directoin.
 
-If `normalize` is set to `true`, drift velocities are normalized by the
-instantaneous speed of the microbe.
-
 **Keywords**
+- `normalize = false`: whether drift velocities should be normalized by the
+  instantaneous speed of the microbes
 - `vel_key::Symbol = :velocity`: name of the column containing microbe velocities
 """
 function driftvelocity_direction! end
