@@ -27,7 +27,7 @@ function driftvelocity_point!(
     normalize=false,
 ) where D
     gdf = groupby(adf, :id)
-    driftvelocity_direction!(gdf, target; pos_key, vel_key, normalize)
+    driftvelocity_point!(gdf, target; pos_key, vel_key, normalize)
 end
 function driftvelocity_point!(
     gdf::GroupedDataFrame,
