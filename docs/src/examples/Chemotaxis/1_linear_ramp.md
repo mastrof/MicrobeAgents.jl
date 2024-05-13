@@ -109,7 +109,7 @@ traj = Analysis.adf_to_matrix(adf, :position)
 x = first.(traj)
 y = last.(traj)
 
-ts = unique(adf.step) .* Δt
+ts = unique(adf.time) .* Δt
 lw = eachindex(ts) ./ length(ts) .* 3
 xmesh = range(0,Lx,length=100)
 ymesh = range(0,Ly,length=100)

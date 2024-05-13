@@ -9,7 +9,7 @@ Requires all microbes to exist from start to end of the simulations
 """
 function adf_to_matrix(adf, sym)
     nmicrobes = unique(adf[!,:id]) |> length
-    nsteps = unique(adf[!,:step]) |> length
+    nsteps = unique(adf[!,:time]) |> length
     datatype = typeof(adf[1,sym])
     s = Matrix{datatype}(undef, nsteps, nmicrobes)
     for i in 1:nmicrobes
