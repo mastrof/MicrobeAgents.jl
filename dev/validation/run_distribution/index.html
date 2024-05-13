@@ -18,24 +18,24 @@ adata = [velocity]
 adf, = run!(model, nsteps; adata)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(<span class="sgr1">5000500×3 DataFrame
      Row │ time   id     velocity
          │<span class="sgr90"> Int64  Int64  SArray…
-─────────┼───────────────────────────────────────────────
-       1 │     0      1  [22.2538, 0.448435, 20.1139]
-       2 │     0      2  [-19.317, 0.968623, 22.9329]
-       3 │     0      3  [13.0617, -12.1558, 24.117]
-       4 │     0      4  [12.4417, 17.8204, 20.6794]
-       5 │     0      5  [-15.3764, 13.3723, -22.0169]
-       6 │     0      6  [-10.4114, 25.6572, -11.5461]
-       7 │     0      7  [21.3263, -20.5919, 4.60028]
-       8 │     0      8  [13.8133, -24.1008, 11.3289]
+─────────┼────────────────────────────────────────────────
+       1 │     0      1  [23.5296, -6.20276, 17.5466]
+       2 │     0      2  [-19.9755, 16.9904, -14.5707]
+       3 │     0      3  [-28.4325, -7.8399, -5.48909]
+       4 │     0      4  [15.3035, 19.1022, -17.3466]
+       5 │     0      5  [-24.7114, 0.166123, -17.0094]
+       6 │     0      6  [17.6309, -21.5665, -11.1372]
+       7 │     0      7  [-21.406, -10.0832, 18.4422]
+       8 │     0      8  [12.8846, -21.7828, -16.1089]
     ⋮    │   ⋮      ⋮                   ⋮
- 5000494 │ 10000    494  [13.5386, 23.8847, -12.0924]
- 5000495 │ 10000    495  [3.47023, 29.4727, 4.39529]
- 5000496 │ 10000    496  [7.09292, -20.8113, -20.4103]
- 5000497 │ 10000    497  [15.0956, -25.2994, 5.66253]
- 5000498 │ 10000    498  [27.4356, 6.89514, 9.98731]
- 5000499 │ 10000    499  [-9.81269, 28.2631, 2.21583]
- 5000500 │ 10000    500  [-20.0885, -22.2744, -0.554393]
-</span><span class="sgr36">                                     5000485 rows omitted, 0×0 DataFrame)</span></span></code></pre><p>To verify that we sample the expected distribution, we will first estimate the run lengths in our simulation with <code>Analysis.detect_turns!</code> and <code>Analysis.run_durations</code>, and then we will fit the resulting distribution with an <code>Exponential</code> distribution from Distributions.jl. We expect the fitted distribution to match our histogram and return a timescale <code>tau</code> close to the value of <code>runtime_expected</code>.</p><pre><code class="language-julia hljs">using Distributions
+ 5000494 │ 10000    494  [1.61312, 19.4904, -22.7491]
+ 5000495 │ 10000    495  [-3.68245, -29.3308, -5.113]
+ 5000496 │ 10000    496  [3.82782, 15.2773, -25.5333]
+ 5000497 │ 10000    497  [-17.1318, 24.1171, 4.98642]
+ 5000498 │ 10000    498  [15.7845, 3.63244, 25.2519]
+ 5000499 │ 10000    499  [24.0275, -17.8358, -2.13574]
+ 5000500 │ 10000    500  [-26.3354, 14.1142, -2.68999]
+</span><span class="sgr36">                                      5000485 rows omitted, 0×0 DataFrame)</span></span></code></pre><p>To verify that we sample the expected distribution, we will first estimate the run lengths in our simulation with <code>Analysis.detect_turns!</code> and <code>Analysis.run_durations</code>, and then we will fit the resulting distribution with an <code>Exponential</code> distribution from Distributions.jl. We expect the fitted distribution to match our histogram and return a timescale <code>tau</code> close to the value of <code>runtime_expected</code>.</p><pre><code class="language-julia hljs">using Distributions
 Analysis.detect_turns!(adf)
 run_lengths = vcat(Analysis.run_durations(adf)...) .* dt
 estimated_pdf = fit(Exponential, run_lengths)
@@ -46,4 +46,4 @@ histogram(run_lengths; bins=dt/2:2dt:5τ, normalize=:pdf,
     lab=&quot;Simulation; τ = $(runtime_expected) s&quot;, lw=0)
 plot!(dt:dt:5τ, t -&gt; pdf(estimated_pdf, t-dt); lw=2,
     lab=&quot;exp(-t/τ)/τ; τ = $(round(τ;digits=3)) s&quot;)
-plot!(xlab=&quot;Δt (s)&quot;, ylab=&quot;P(Δt)&quot;)</code></pre><img src="35b7caed.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../msd_runtumble/">« Mean squared displacement</a><a class="docs-footer-nextpage" href="../velocity_autocorrelations/">Velocity autocorrelation functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Wednesday 8 May 2024 15:39">Wednesday 8 May 2024</span>. Using Julia version 1.10.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+plot!(xlab=&quot;Δt (s)&quot;, ylab=&quot;P(Δt)&quot;)</code></pre><img src="de17c005.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../msd_runtumble/">« Mean squared displacement</a><a class="docs-footer-nextpage" href="../velocity_autocorrelations/">Velocity autocorrelation functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Monday 13 May 2024 06:16">Monday 13 May 2024</span>. Using Julia version 1.10.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
