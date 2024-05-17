@@ -6,9 +6,9 @@ export ABM, StandardABM, ContinuousSpace
 export add_agent!, add_agent_own_pos!
 export move_agent!, walk!, run!
 
-using CellListMap.PeriodicSystems
 using Distributions
 using LinearAlgebra
+using MixedStructTypes
 using Random
 using Quaternions
 using StaticArrays
@@ -41,7 +41,6 @@ include("api.jl")
 include("utils.jl")
 include("motility.jl")
 include("rotations.jl")
-include("neighborlists.jl")
 include("fields.jl")
 
 include("microbes.jl")
