@@ -29,7 +29,7 @@ end
 
 # fallback functions for default random behavior
 chemotaxis!(microbe::AbstractMicrobe, model) = nothing
-tumblebias(microbe::AbstractMicrobe) = 1.0
+bias(microbe::AbstractMicrobe) = 1.0
 
 
 r2dig(x) = round(x, digits=2)
