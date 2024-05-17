@@ -76,17 +76,20 @@ function Agents.add_agent!(
     speed = nothing,
     kwproperties...
 ) where {D}
+    @assert haskey(kwproperties, :motility) "Missing required keyword argument `motility`"
+    N = get_motility_N(kwproperties[:motility])
     id = Agents.nextid(model) # not public API!
     if !isempty(properties)
-        microbe = A(id, pos, properties...)
+        microbe = A{N}(id, pos, properties...)
     else
-        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
+        microbe = A{N}(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
     Agents.add_agent_own_pos!(microbe, model) # not public API!
 end
 
+get_motility_N(m::Motility{N}) where {N} = N
 
 make_default_abm_properties(D) = Dict(
     :chemoattractant => GenericChemoattractant{D,Float64}(),
