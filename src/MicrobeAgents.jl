@@ -12,6 +12,7 @@ using LinearAlgebra
 using Random
 using Quaternions
 using StaticArrays
+using StatsBase
 export SVector
 
 
@@ -34,7 +35,7 @@ All microbe types *must* have at least the following fields:
 - `radius::Real` equivalent spherical radius of the microbe
 - `state::Real` generic variable for a scalar internal state
 """
-abstract type AbstractMicrobe{D} <: AbstractAgent where {D} end
+abstract type AbstractMicrobe{D,N} <: AbstractAgent where {D,N} end
 
 include("api.jl")
 include("utils.jl")
@@ -56,7 +57,7 @@ global const CONV_NOISE::Float64 = 0.04075
 include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
 include("chemotaxis/celani.jl")
-include("chemotaxis/xie.jl")
+#include("chemotaxis/xie.jl")
 
 # obstacles, encounters, pathfinding...
 using GeometryBasics: HyperSphere, Point
