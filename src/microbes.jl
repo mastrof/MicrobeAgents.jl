@@ -14,7 +14,6 @@ states of the microbe's motility pattern.
 - `motility::Motility{N}` motility pattern
 
 and the default parameters
-- `motility::AbstractMotility = RunTumble()` motile pattern of the microbe
 - `rotational_diffusivity::Float64 = 0.0` coefficient of brownian rotational diffusion
 - `radius::Float64 = 0.0` equivalent spherical radius of the microbe
 - `state::Float64 = 0.0` generic variable for a scalar internal state
