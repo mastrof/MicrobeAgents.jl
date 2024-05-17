@@ -60,18 +60,31 @@ function Agents.add_agent!(
     pos::Agents.ValidPos,
     A::Type{<:Celani{D}},
     model::AgentBasedModel,
-    properties::Vararg{Any,M};
+    properties...;
     vel=nothing,
     speed=nothing,
     kwproperties...
-) where {D,M}
+) where {D}
     @assert haskey(kwproperties, :motility) "Missing required keyword argument `motility`"
     N = get_motility_N(kwproperties[:motility])
+    add_agent!(pos, A{N}, model, properties...; vel, speed, kwproperties...)
+end
+
+function Agents.add_agent!(
+    pos::Agents.ValidPos,
+    A::Type{Celani{D,N}},
+    model::AgentBasedModel,
+    properties...;
+    vel=nothing,
+    speed=nothing,
+    kwproperties...
+) where {D,N}
+    @assert haskey(kwproperties, :motility) "Missing required keyword argument `motility`"
     id = Agents.nextid(model)
     if !isempty(properties)
-        microbe = A{N}(id, pos, properties...)
+        microbe = A(id, pos, properties...)
     else
-        microbe = A{N}(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
+        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
         initialize_markovian_variables!(microbe, model)

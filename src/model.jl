@@ -55,6 +55,22 @@ function Agents.StandardABM(
 end
 
 
+function Agents.add_agent!(
+    pos::Agents.ValidPos,
+    A::Type{<:AbstractMicrobe{D}},
+    model::AgentBasedModel,
+    properties...;
+    vel = nothing,
+    speed = nothing,
+    kwproperties...
+) where {D}
+    @assert haskey(kwproperties, :motility) "Missing required keyword argument `motility`"
+    N = get_motility_N(kwproperties[:motility])
+    add_agent!(pos, A{N}, model, properties...; vel, speed, kwproperties...)
+end
+
+get_motility_N(m::Motility{N}) where {N} = N
+
 """
     add_agent!([pos,] [MicrobeType,] model; kwargs...)
 MicrobeAgents extension of `Agents.add_agent!`.
@@ -69,27 +85,24 @@ If unspecified, a random velocity vector and a random speed are generated.
 """
 function Agents.add_agent!(
     pos::Agents.ValidPos,
-    A::Type{<:AbstractMicrobe{D}},
+    A::Type{<:AbstractMicrobe{D,N}},
     model::AgentBasedModel,
     properties...;
     vel = nothing,
     speed = nothing,
     kwproperties...
-) where {D}
+) where {D,N}
     @assert haskey(kwproperties, :motility) "Missing required keyword argument `motility`"
-    N = get_motility_N(kwproperties[:motility])
     id = Agents.nextid(model) # not public API!
     if !isempty(properties)
-        microbe = A{N}(id, pos, properties...)
+        microbe = A(id, pos, properties...)
     else
-        microbe = A{N}(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
+        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
     Agents.add_agent_own_pos!(microbe, model) # not public API!
 end
-
-get_motility_N(m::Motility{N}) where {N} = N
 
 make_default_abm_properties(D) = Dict(
     :chemoattractant => GenericChemoattractant{D,Float64}(),
