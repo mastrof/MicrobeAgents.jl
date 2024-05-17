@@ -16,9 +16,9 @@ function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
     turn!(microbe, model) # reorientation
     model.affect!(microbe, model) # update microbe's internal state
     # probability to switch motile state
-    p = dt * bias(microbe) / duration(motility(microbe))
+    p = dt * bias(microbe) / duration(motilepattern(microbe))
     if rand(abmrng(model)) < p
-        switch!(microbe, model)
+        update_motilestate!(microbe, model)
     end
 end
 
