@@ -9,20 +9,17 @@ Perform an integration step for `microbe`. In order:
 4. Evaluate instantaneous turn rate through dedicated `turnrate` function
 5. Reorient `microbe` if necessary
 """
-function microbe_step!(microbe::AbstractMicrobe, model)
-    dt = model.timestep # integration timestep
-    # update microbe position
-    move_agent!(microbe, model, speed(microbe)*dt)
-    # reorient through rotational diffusion
-    rotational_diffusion!(microbe, model)
-    # update microbe state
-    model.affect!(microbe, model)
-    # evaluate instantaneous turn rate
-    ω = turnrate(microbe) * tumblebias(microbe)
-    if rand(abmrng(model)) < ω * dt # if true reorient microbe
-        turn!(microbe, model)
+function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
+    dt = abmtimestep(model)
+    move_agent!(microbe, model, speed(microbe)*dt) # translation
+    rotational_diffusion!(microbe, model) # rotational noise
+    turn!(microbe, model) # reorientation
+    model.affect!(microbe, model) # update microbe's internal state
+    # probability to switch motile state
+    p = dt * bias(microbe) / duration(motility(microbe))
+    if rand(abmrng(model)) < p
+        switch!(microbe, model)
     end
-    nothing
 end
 
 """
