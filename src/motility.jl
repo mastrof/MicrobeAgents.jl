@@ -12,14 +12,15 @@ end
 
 # Base motile states
 Run(duration::Real, speed) = 
-    MotileState(speed, zero(duration), zero(duration), duration)
+    MotileState(speed, [zero(duration)], [zero(duration)], duration)
 Tumble(duration::Real, polar=Uniform(-π,+π),  azimuthal=Arccos()) =
-    MotileState(zero(duration), polar, azimuthal, duration)
+    MotileState([zero(duration)], polar, azimuthal, duration)
 Reverse(duration::Real, polar=(π,), azimuthal=Arccos()) =
-    MotileState(zero(duration), polar, azimuthal, duration)
+    MotileState([zero(duration)], polar, azimuthal, duration)
 Flick(duration::Real, polar=(+π/2,-π/2), azimuthal=Arccos()) =
-    MotileState(zero(duration), polar, azimuthal, duration)
-Stop(duration::Real) = MotileState(zero(duration), zero(duration), zero(duration), duration)
+    MotileState([zero(duration)], polar, azimuthal, duration)
+Stop(duration::Real) =
+    MotileState([zero(duration)], [zero(duration)], [zero(duration)], duration)
 
 TransitionWeights{N,T} = ProbabilityWeights{T,T,SVector{N,T}}
 
@@ -126,8 +127,9 @@ end
 # API
 function update_motilestate!(microbe::AbstractMicrobe, model::AgentBasedModel)
     update_motilestate!(motilepattern(microbe), model)
+    microbe.speed = rand(abmrng(model), speed(motilepattern(microbe)))
 end
-function update_motilestate!(motility::AbstractMotility, model::AgentBasedModel)
+function update_motilestate!(motility::Motility, model::AgentBasedModel)
     i = state(motility)
     w = transition_weights(motility, i)
     j = sample(abmrng(model), eachindex(w), w)
@@ -139,10 +141,10 @@ state(m::Motility) = m.current_state
 states(m::Motility) = m.motile_states
 transition_weights(m::Motility) = m.transition_probabilities
 transition_weights(m::Motility, i::Integer) = transition_weights(m)[i]
-duration(m::Motility) = duration(state(m))
-speed(m::Motility) = speed(state(m))
-polar(m::Motility) = polar(state(m))
-azimuthal(m::Motility) = azimuthal(state(m))
+duration(m::Motility) = duration(states(m)[state(m)])
+speed(m::Motility) = speed(states(m)[state(m)])
+polar(m::Motility) = polar(states(m)[state(m)])
+azimuthal(m::Motility) = azimuthal(states(m)[state(m)])
 duration(s::MotileState) = s.duration
 speed(s::MotileState) = s.speed
 polar(s::MotileState) = s.polar
