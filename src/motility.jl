@@ -1,26 +1,41 @@
-export MotileState, Run, Tumble, Reverse, Flick, Stop
+export MotileState, RunState, TurnState, Run, Tumble, Reverse, Flick, Stop
 export Motility, RunTumble, RunReverse, RunReverseFlick, RunStop
-export update_motilestate!, state, states, transition_weights
+export update_motilestate!, motilestate, state, states, transition_weights, duration
 export Arccos # from Agents
 
-struct MotileState
-    speed
-    polar
-    azimuthal
-    duration
+@compact_structs MotileState begin
+    @kwdef struct RunState
+        duration
+        speed
+        polar = [zero(duration)]
+        azimuthal = [zero(duration)]
+    end
+    @kwdef struct TurnState
+        duration
+        speed = [zero(duration)]
+        polar
+        azimuthal
+    end
+end
+
+function biased(s::MotileState)
+    if kindof(s) === :RunState
+        return true
+    else # TurnState
+        return false
+    end
 end
 
 # Base motile states
-Run(duration::Real, speed) = 
-    MotileState(speed, [zero(duration)], [zero(duration)], duration)
+Run(duration::Real, speed) = RunState(; duration, speed)
 Tumble(duration::Real, polar=Uniform(-π,+π),  azimuthal=Arccos()) =
-    MotileState([zero(duration)], polar, azimuthal, duration)
+    TurnState(; duration, polar, azimuthal)
 Reverse(duration::Real, polar=(π,), azimuthal=Arccos()) =
-    MotileState([zero(duration)], polar, azimuthal, duration)
+    TurnState(; duration, polar, azimuthal)
 Flick(duration::Real, polar=(+π/2,-π/2), azimuthal=Arccos()) =
-    MotileState([zero(duration)], polar, azimuthal, duration)
+    TurnState(; duration, polar, azimuthal)
 Stop(duration::Real) =
-    MotileState([zero(duration)], [zero(duration)], [zero(duration)], duration)
+    TurnState(; duration, polar=[zero(duration)], azimuthal=[zero(duration)])
 
 TransitionWeights{N,T} = ProbabilityWeights{T,T,SVector{N,T}}
 
@@ -137,6 +152,10 @@ function update_motilestate!(motility::Motility, model::AgentBasedModel)
 end
 update_motilestate!(motility::Motility, j::Int) = (motility.current_state = j)
 
+function motilestate(microbe::AbstractMicrobe)
+    m = motilepattern(microbe)
+    states(m)[state(m)]
+end
 state(m::Motility) = m.current_state
 states(m::Motility) = m.motile_states
 transition_weights(m::Motility) = m.transition_probabilities
