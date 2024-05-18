@@ -57,19 +57,19 @@ properties = Dict(
 
 model = StandardABM(Union{BrownBerg{3},Celani{3}}, space, dt; properties)
 
-add_agent!(BrownBerg{3}, model; turn_rate=0, motility=RunTumble(speed=[0]),
+add_agent!(BrownBerg{3}, model; motility=RunTumble(1.0, [0]),
     memory=1,
 )
-add_agent!(Celani{3}, model; turn_rate=0, motility=RunTumble(speed=[0]), gain=4)
-add_agent!(Celani{3}, model; turn_rate=0, motility=RunTumble(speed=[0]), gain=4,
+add_agent!(Celani{3}, model; motility=RunTumble(1.0, [0]), gain=4)
+add_agent!(Celani{3}, model; motility=RunTumble(1.0, [0]), gain=4,
     chemotactic_precision=50.0
 )
 
 nsteps = round(Int, T/dt)
-adata = [tumblebias]
+adata = [MicrobeAgents.bias]
 adf, = run!(model, nsteps; adata)
 
-S = Analysis.adf_to_matrix(adf, :tumblebias)
+S = Analysis.adf_to_matrix(adf, :bias)
 
 _pink = palette(:default)[4]
 plot()

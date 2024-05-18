@@ -67,7 +67,7 @@ we will not modify its parameters here and just stick to the default values.
 Lx, Ly = 3000, 1500 # domain size (μm)
 periodic = false
 space = ContinuousSpace((Lx,Ly); periodic)
-Δt = 0.1 # timestep (s)
+Δt = 0.05 # timestep (s)
 
 ## model setup
 C₀, C₁ = 0.0, 20.0 # μM
@@ -78,10 +78,16 @@ properties = Dict(
         concentration_field, concentration_gradient
     )
 )
-model = StandardABM(BrownBerg{2}, space, Δt; properties)
+model = StandardABM(Celani{2}, space, Δt; properties)
 n = 100 # number of microbes
 for i in 1:n
-    add_agent!(model) # add at random positions
+    p0 = spacesize(model) ./ 2
+    delta = rand(abmrng(model), SVector{2}) .* 10
+    pos = p0 .+ delta # random scatter around center
+    motility = RunTumble(0.67, [30.0], 0.2)
+    add_agent!(pos, model;
+        motility, chemotactic_precision=36
+    )
 end
 model
 
@@ -108,11 +114,11 @@ ts = unique(adf.time) .* Δt
 lw = eachindex(ts) ./ length(ts) .* 3
 xmesh = range(0,Lx,length=100)
 ymesh = range(0,Ly,length=100)
-xn = @view x[:,1:10]
-yn = @view y[:,1:10]
+xn = @view x[:,1:15]
+yn = @view y[:,1:15]
 c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
 heatmap(xmesh, ymesh, c', cbar=false, c=:bone,
     ratio=1, axis=false, grid=false, xlims=(0,Lx), ylims=(0,Ly)
 )
-plot!(xn, yn, lab=false, lw=lw, lc=(1:n)')
+plot!(xn, yn, lab=false, lw=lw, lc=(1:n)', palette=palette(:thermal,size(xn,2)))
 scatter!(xn[end,:], yn[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)

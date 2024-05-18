@@ -6,7 +6,8 @@ Here we simulate a population of one-dimensional random walkers.
 First we shall set up the model: we need to define the microbe type,
 the space and the integration timestep.
 
-For the microbe type, we will choose the base type `Microbe{1}`.
+For the microbe type, we will choose the base type `Microbe{1}`, where
+parameter `1` refers to the number of dimensions in which the microbe can move.
 
 For the space, we need to set the domain size and whether it is periodic or not.
 We will use a periodic box with an extent of 1000 μm;
@@ -26,17 +27,26 @@ model = StandardABM(Microbe{1}, space, dt)
 
 #=
 Now that the model is initialized, we will add 10 microbes.
-If we don't provide any argument on creation, default values from the constructor
-will be used, i.e., an isotropic `RunTumble` motility, with speed 30 μm/s, an
-unbiased tumbling rate of 1 Hz...
 
 With the first (optional) argument to `add_agent!`, we can define the starting
 position of the microbe. For convenience, we will initialize all of them
 from position `(0,)`.
+
+Moreover, it's always required to specify the motility of the microbes via
+the keyword argument `motility`.
+For example, `RunTumble` needs as inputs the average duration of runs
+and the distribution of run speeds. Passing a one-element vector `[U]`
+means that all runs will have the same velocity `U`.
+We could have also specified the average duration of tumbles
+(equal to reversals in 1 dimension) via an optional 3rd argument (try it! e.g. 0.5);
+when unspecified, the tumbles are taken to be instantaneous.
 =#
 
 n = 10 # number of microbes to add
-foreach(_ -> add_agent!((0,), model), 1:n)
+τ_run = 1.0 # average run duration in s
+U = 30.0 # swimming speed in μm/s
+motility = RunTumble(τ_run, [U], 0.5)
+foreach(_ -> add_agent!((0,), model; motility), 1:n)
 
 #=
 We can now run the simulation.
