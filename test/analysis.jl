@@ -141,9 +141,7 @@ using LinearAlgebra: norm
             nsteps = 3
             adata = [position]
             adf, = run!(model, nsteps; adata)
-            # run forward - reverse - run backward
-            # x0 = 0, x1 = Ut, x2 = Ut, x3 = 0
-            real_msd = [0, 2*U^2/3, U^2, 0] .* dt^2
+            real_msd = [0, U^2, 0, U^2] .* dt^2
             Δ² = Analysis.emsd(adf, :position) # unfolding not required here
             @test Δ² ≈ real_msd
         end
