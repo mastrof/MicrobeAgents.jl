@@ -143,7 +143,6 @@ end
 # API
 function update_motilestate!(microbe::AbstractMicrobe, model::AgentBasedModel)
     update_motilestate!(motilepattern(microbe), model)
-    microbe.speed = rand(abmrng(model), speed(motilepattern(microbe)))
 end
 function update_motilestate!(motility::Motility, model::AgentBasedModel)
     i = state(motility)
@@ -152,6 +151,10 @@ function update_motilestate!(motility::Motility, model::AgentBasedModel)
     update_motilestate!(motility, j)
 end
 update_motilestate!(motility::Motility, j::Int) = (motility.current_state = j)
+
+function update_speed!(microbe::AbstractMicrobe, model::AgentBasedModel)
+    microbe.speed = rand(abmrng(model), speed(motilestate(microbe)))
+end
 
 function motilestate(microbe::AbstractMicrobe)
     m = motilepattern(microbe)

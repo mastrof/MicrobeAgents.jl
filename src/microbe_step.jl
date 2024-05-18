@@ -21,13 +21,15 @@ function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
     if rand(abmrng(model)) < p
         # transition to new motile state
         update_motilestate!(microbe, model)
-    end
-    # if the new motile state is a TurnState with duration 0
-    # immediately turn and transition to another state
-    new_motilestate = motilestate(microbe)
-    if kindof(new_motilestate) === :TurnState && duration(motilestate(microbe)) == 0
-        turn!(microbe, model)
-        update_motilestate!(microbe, model)
+        # if the new motile state is a TurnState with duration 0
+        # immediately turn and transition to another state
+        new_motilestate = motilestate(microbe)
+        if kindof(new_motilestate) === :TurnState && iszero(duration(new_motilestate))
+            turn!(microbe, model)
+            update_motilestate!(microbe, model)
+        end
+        # sample new speed
+        update_speed!(microbe, model)
     end
 end
 
@@ -38,7 +40,7 @@ Identical to `microbe_step!` except that motion is constrained by the pathfinder
 """
 function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
     dt = abmtimestep(model)
-    pathfinder_step!(microbe, model, dt) # translation
+    move_agent!(microbe, model, dt) # translation
     rotational_diffusion!(microbe, model) # rotational noise
     model.affect!(microbe, model) # update microbe's internal state
     if can_turn(microbe)
@@ -48,13 +50,15 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedMod
     if rand(abmrng(model)) < p
         # transition to new motile state
         update_motilestate!(microbe, model)
-    end
-    # if the new motile state is a TurnState with duration 0
-    # immediately turn and transition to another state
-    new_motilestate = motilestate(microbe)
-    if kindof(new_motilestate) === :TurnState && duration(motilestate(microbe)) == 0
-        turn!(microbe, model)
-        update_motilestate!(microbe, model)
+        # if the new motile state is a TurnState with duration 0
+        # immediately turn and transition to another state
+        new_motilestate = motilestate(microbe)
+        if kindof(new_motilestate) === :TurnState && iszero(duration(new_motilestate))
+            turn!(microbe, model)
+            update_motilestate!(microbe, model)
+        end
+        # sample new speed
+        update_speed!(microbe, model)
     end
 end
 
