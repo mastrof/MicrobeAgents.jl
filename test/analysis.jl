@@ -10,11 +10,12 @@ using LinearAlgebra: norm
         space = ContinuousSpace(extent)
         pos = zero(SVector{D})
         U = 1
-        motility = RunTumble(speed=[U])
-        vel = fill(1/√D, SVector{D})
+        #motility = RunTumble(speed=[U])
         turn_rate = 0
+        motility = RunTumble(1/turn_rate, [U], 0.0)
+        vel = fill(1/√D, SVector{D})
         model = StandardABM(Microbe{D}, space, dt)
-        add_agent!(pos, model; vel, motility, turn_rate)
+        add_agent!(pos, model; vel, motility)
         nsteps = 10
         adata = [position]
         adf, mdf = run!(model, nsteps; adata)
@@ -67,26 +68,27 @@ using LinearAlgebra: norm
         for D in 1:3
             dt = 0.1
             nsteps = 100
-            adata = [velocity]
+            adata = [direction]
             L = 100
             extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
             rng = Xoshiro(35)
             model_periodic = StandardABM(Microbe{D}, space, dt; rng)
-            add_agent!(model_periodic)
+            motility = RunTumble(1.0, [30.0], 0.0)
+            add_agent!(model_periodic; motility)
             adf_periodic, = run!(model_periodic, nsteps; adata)
             rng = Xoshiro(35)
             space = ContinuousSpace(extent; periodic=false)
             model_closed = StandardABM(Microbe{D}, space, dt; rng)
-            add_agent!(model_closed)
+            add_agent!(model_closed; motility)
             adf_closed, = run!(model_closed, nsteps; adata)
             # boundary conditions don't affect vacf
-            vacf_periodic = Analysis.acf(adf_periodic, :velocity)
-            vacf_closed = Analysis.acf(adf_closed, :velocity)
+            vacf_periodic = Analysis.acf(adf_periodic, :direction)
+            vacf_closed = Analysis.acf(adf_closed, :direction)
             @test vacf_periodic[1] ≈ vacf_closed[1]
             @test length(vacf_periodic[1]) == nsteps+1
-            # lag-0 value corresponds to speed squared
-            @test vacf_periodic[1][1] .≈ (model_periodic[1].speed)^2
+            # lag-0 value is unity
+            @test vacf_periodic[1][1] ≈ 1
             # no value can be larger than the value at lag 0
             @test maximum(vacf_periodic[1]) == vacf_periodic[1][1]
         end
@@ -98,13 +100,15 @@ using LinearAlgebra: norm
             L = 100
             extent = fill(float(L), SVector{D})
             space = ContinuousSpace(extent)
-            turn_rate = 0 # ballistic motion
             model = StandardABM(Microbe{D}, space, dt)
-            add_agent!(model; turn_rate)
+            turn_rate = 0 # ballistic motion
+            U = 30.0
+            motility = RunTumble(1/turn_rate, [U], 0.0)
+            add_agent!(model; motility)
             nsteps = 50
             adata = [position]
             adf, = run!(model, nsteps; adata)
-            real_msd = @. (30 * (0:nsteps)*dt)^2 # 30 is default speed
+            real_msd = @. (U * (0:nsteps)*dt)^2
             Analysis.unfold!(adf, model; key=:position)
             @test hasproperty(adf, :position_unfold)
             Δ² = Analysis.emsd(adf, :position_unfold)
@@ -116,26 +120,30 @@ using LinearAlgebra: norm
                 L₀ = 100; L₁ = 40
                 extent = SVector{D}(i == 1 ? L₀ : L₁ for i in 1:D)
                 space = ContinuousSpace(extent)
-                turn_rate = 0 # ballistic motion
                 model = StandardABM(Microbe{D}, space, dt)
-                add_agent!(model; turn_rate)
+                turn_rate = 0 # ballistic motion
+                U = 30.0
+                motility = RunTumble(1/turn_rate, [U], 0.0)
+                add_agent!(model; motility)
                 nsteps = 50
                 adata = [position]
                 adf, = run!(model, nsteps; adata)
                 Analysis.unfold!(adf, model; key=:position)
-                real_msd = @. (30 * (0:nsteps)*dt)^2 # 30 is default speed
+                real_msd = @. (U * (0:nsteps)*dt)^2 # 30 is default speed
                 Δ² = Analysis.emsd(adf, :position_unfold)
                 @test Δ² ≈ real_msd
             end
 
-            motility = RunReverse()
             turn_rate = Inf # reversal at each step
+            motility = RunReverse(1/turn_rate, [U], 1/turn_rate, [U])
             model = StandardABM(Microbe{D}, space, dt)
-            add_agent!(extent./2, model; motility, turn_rate)
-            nsteps = 5
+            add_agent!(extent./2, model; motility)
+            nsteps = 3
             adata = [position]
             adf, = run!(model, nsteps; adata)
-            real_msd = [0, 30^2, 0, 30^2, 0, 30^2] .* dt^2
+            # run forward - reverse - run backward
+            # x0 = 0, x1 = Ut, x2 = Ut, x3 = 0
+            real_msd = [0, 2*U^2/3, U^2, 0] .* dt^2
             Δ² = Analysis.emsd(adf, :position) # unfolding not required here
             @test Δ² ≈ real_msd
         end

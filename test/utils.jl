@@ -18,8 +18,9 @@ using Random
             for T1 in MicrobeTypes, T2 in MicrobeTypes
                 space = ContinuousSpace(ntuple(_ -> 100, D); periodic=true)
                 model = StandardABM(Union{T1,T2}, space, 0.1)
-                add_agent!(T1, model)
-                add_agent!(position(model[1]), T2, model)
+                motility = RunTumble(0.67, [30.0], 0.0)
+                add_agent!(T1, model; motility)
+                add_agent!(position(model[1]), T2, model; motility)
                 delta = SVector{D}(randn(D) .* 5)
                 walk!(model[2], delta, model)
                 @test distance(model[1], model[2], model) ≈ norm(delta)
