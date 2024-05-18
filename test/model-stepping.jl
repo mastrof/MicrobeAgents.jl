@@ -10,29 +10,30 @@ using LinearAlgebra: norm
         space = ContinuousSpace(extent)
         model = StandardABM(Microbe{D}, space, dt; rng, container)
         pos = extent ./ 2
+        m1 = RunTumble(Inf, [30.0], 0.0) # infinite run
         vel1 = random_velocity(model)
-        speed1 = rand(rng, speed(RunTumble()))
-        add_agent!(pos, model; vel=vel1, speed=speed1, turn_rate=0)
+        speed1 = rand(rng, speed(m1))
+        add_agent!(pos, model; vel=vel1, speed=speed1, motility=m1)
+        m2 = RunReverse(0, [10.0], 0, [10.0]) # switching every step
         vel2 = random_velocity(model)
-        speed2 = rand(rng, speed(RunReverse()))
-        add_agent!(pos, model; vel=vel2, speed=speed2, turn_rate=Inf, motility=RunReverse())
+        speed2 = rand(rng, speed(m2))
+        add_agent!(pos, model; vel=vel2, speed=speed2, motility=m2)
         run!(model, 1) # performs 1 microbe_step!
         # x₁ = x₀ + vΔt
-        @test all(model[1].pos .≈ pos .+ vel1 .* speed1 .* dt)
-        @test all(model[2].pos .≈ pos .+ vel2 .* speed2 .* dt)
+        @test position(model[1]) ≈ @. pos + vel1 * speed1 * dt
+        @test position(model[2]) ≈ @. pos + vel2 * speed2 * dt
         # v is the same for the agent with zero turn rate
-        @test all(model[1].vel .≈ vel1)
+        @test velocity(model[1]) ≈ vel1 .* speed1
         # v is changed for the other agent
-        @test ~all(model[2].vel .≈ vel2)
-        # and since it turned its motile state changed from Forward to Backward
-        @test model[2].motility.state == Backward
+        @test velocity(model[2]) ≈ zero(vel2)
 
         # customize microbe affect! function
         # decreases microbe state value by D at each step
         affect!(microbe::Microbe{D}, model) where D = (microbe.state -= D)
         properties = Dict(:affect! => affect!)
         model = StandardABM(Microbe{D}, space, dt; container, properties)
-        add_agent!(model)
+        motility = RunTumble(1.0, [30.0], 0.0)
+        add_agent!(model; motility)
         run!(model, 1)
         @test model[1].state == -D
 
