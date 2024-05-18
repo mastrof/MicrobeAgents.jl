@@ -30,8 +30,13 @@ space = ContinuousSpace((L,L,L))
 
 model = StandardABM(Microbe{3}, space, Δt; container=Vector)
 n = 200
-for Motility in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
-    add_agent!(model; turn_rate, motility=Motility(speed=[U]))
+for Mot in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
+    if Mot == RunTumble
+        motility = RunTumble(τ_run, [U], 0.0)
+    else
+        motility = Mot(τ_run, [U], τ_run, [U])
+    end
+    add_agent!(model; motility)
 end
 ## keep track of ids of each motile strategy
 ids_runtumble = 1:n
@@ -39,7 +44,7 @@ ids_runreverse = (1:n) .+ n
 ids_runrevflick = (1:n) .+ 2n
 
 nsteps = round(Int, 100τ_run / Δt)
-adata = [velocity]
+adata = [direction]
 adf, = run!(model, nsteps; adata)
 
 ## separate the dataframes by motile strategy
@@ -51,7 +56,7 @@ adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
 ## evaluate the autocorrelation functions
 using StatsBase: mean
 t = range(0, (nsteps-1)*Δt; step=Δt)
-Φ = hcat([mean(Analysis.acf(a, :velocity; normalize=true)) for a in adfs]...)
+Φ = hcat([mean(Analysis.acf(a, :direction; normalize=true)) for a in adfs]...)
 
 ## from Taktikos et al.
 Φ_theoretical = hcat([

@@ -31,14 +31,13 @@ space = ContinuousSpace(extent)
 
 U = 30.0 # μm/s
 τ = 1.0 # s
-turn_rate = 1 / τ
 
 ## we initialize a separate model for each different θ
 models = map(_ -> StandardABM(Microbe{3}, space, dt; container=Vector), θs)
 nmicrobes = 100
 for (i,θ) in enumerate(θs)
-    motility = RunTumble(speed=[U], polar=[θ,-θ])
-    foreach(_ -> add_agent!(models[i]; motility, turn_rate), 1:nmicrobes)
+    motility = RunTumble(τ, [U], 0.0, [θ,-θ])
+    foreach(_ -> add_agent!(models[i]; motility), 1:nmicrobes)
 end
 
 nsteps = round(Int, 100τ / dt)
