@@ -14,7 +14,9 @@ function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
     move_agent!(microbe, model, speed(microbe)*dt) # translation
     rotational_diffusion!(microbe, model) # rotational noise
     model.affect!(microbe, model) # update microbe's internal state
-    turn!(microbe, model) # reorientation
+    if can_turn(microbe)
+        turn!(microbe, model) # reorientation
+    end
     p = switching_probability(microbe, model)
     if rand(abmrng(model)) < p
         # transition to new motile state
@@ -46,4 +48,9 @@ function switching_probability(microbe, model)
     τ = duration(M)
     β = biased(M) ? bias(microbe) : 1.0
     return β * dt / τ
+end
+
+function can_turn(microbe)
+    m = motilestate(microbe)
+    !isnothing(polar(m))
 end
