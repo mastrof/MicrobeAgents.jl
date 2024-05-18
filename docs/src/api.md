@@ -1,35 +1,14 @@
 # API
 
-## [Microbes](@id Microbes)
-```@docs
-AbstractMicrobe
-Microbe
-BrownBerg
-Brumley
-Celani
-Xie
-```
-
 ```@docs
 position
 direction
 speed
 velocity
 motilepattern
-turnrate
 rotational_diffusivity
 radius
 state
-```
-
-## [Motility](@id Motility)
-```@docs
-AbstractMotility
-MotilityOneStep
-MotilityTwoStep
-RunTumble
-RunReverse
-RunReverseFlick
 ```
 
 ## [Utils](@id Utils)

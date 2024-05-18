@@ -5,17 +5,16 @@ motility and chemotaxis, built on the amazing [Agents.jl](https://github.com/Jul
 
 ## Features
 - Runs in 1, 2 and 3 spatial dimensions.
-- Provides various motility patterns (Run-Tumble, Run-Reverse, Run-Reverse-Flick), all with customizable speed and turn angle distributions.
-- Various models of bacterial chemotaxis (Brown & Berg, PNAS 1974; Celani & Vergassola, PNAS 2010; Xie et al, Biophys J 2014; Brumley et al, PNAS 2019).
-- Fast analysis routines for common quantities of interest (run statistics, MSD, autocorrelation functions, drift velocity).
+- Provides base motility patterns (Run-Tumble, Run-Reverse, Run-Reverse-Flick, Run-Stop), all with customizable speed and turn angle distributions, and allows user definition of new arbitrary patterns.
+- Includes various models of bacterial chemotaxis (Brown & Berg, PNAS 1974; Celani & Vergassola, PNAS 2010; Xie et al, Biophys J 2014; Brumley et al, PNAS 2019).
+- Fast analysis routines for common quantities of interest (MSD, autocorrelation functions, drift velocity).
 
 ## Limitations (some may be temporary, others may be not)
 - Only continuous space models are supported
-- Reorientations are always assumed to be instantaneous; this approximation is really only reasonable when the integration timestep is above 50ms.
 - Integration timestep also sets the sensory integration timescale in chemotactic models.
 
 ## What this package is not good for
-Although, in principle, you can add arbitrary layers of complexity on top the provided interface, there are a few things for which this package is not a recommended choice.
+Although, in principle, you can add arbitrary layers of complexity on top the provided interface, there are a few things for which this package is not a recommended choice and dedicated tools should be used instead:
 - Hydrodynamic interactions.
 - Atomistic representation of biochemical pathways.
 

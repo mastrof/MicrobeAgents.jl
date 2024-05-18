@@ -49,9 +49,9 @@ concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
 space = ContinuousSpace(ntuple(_ -> 500.0, 3)) # μm
 C₀ = 0.01 # μM
 C₁ = 5.0-C₀ # μM
-T = 60.0 # s
-t₁ = 20.0 # s
-t₂ = 40.0 # s
+T = 50.0 # s
+t₁ = 15.0 # s
+t₂ = 35.0 # s
 properties = Dict(
     :chemoattractant => GenericChemoattractant{3,Float64}(; concentration_field),
     :C₀ => C₀,
@@ -61,7 +61,7 @@ properties = Dict(
 )
 
 dt = 0.1 # s
-model = StandardABM(Xie{3}, space, dt; properties)
+model = StandardABM(Xie{3,4}, space, dt; properties)
 ````
 
 A peculiarity of the `Xie` model is that the chemotactic properties of the
@@ -73,12 +73,9 @@ we suppress their tumbles, and (just for total consistency with experiments)
 we also set their speed to 0.
 
 ````@example 3_xie_response-function
-add_agent!(model; turn_rate_forward=0,
-    motility=RunReverseFlick(motile_state=MotileState(Forward), speed=[0])
-)
-add_agent!(model; turn_rate_backward=0,
-    motility=RunReverseFlick(motile_state=MotileState(Backward), speed=[0])
-)
+add_agent!(model; motility=RunReverseFlick(Inf, [0], 0.0, [0]))
+add_agent!(model; motility=RunReverseFlick(0.0, [0], Inf, [0]))
+model[2].motility.current_state = 3 # manually set to backward run state
 ````
 
 In addition to the `tumblebias`, we will also monitor two other quantities
@@ -88,10 +85,10 @@ together control the chemotactic response of the bacterium.
 
 ````@example 3_xie_response-function
 nsteps = round(Int, T/dt)
-adata = [tumblebias, :state_m, :state_z]
+adata = [MicrobeAgents.bias, :state_m, :state_z]
 adf, = run!(model, nsteps; adata)
 
-S = Analysis.adf_to_matrix(adf, :tumblebias)
+S = Analysis.adf_to_matrix(adf, :bias)
 m = (Analysis.adf_to_matrix(adf, :state_m))[:,1] # take only fw
 z = (Analysis.adf_to_matrix(adf, :state_z))[:,1] # take only fw
 ````
@@ -111,7 +108,7 @@ plot!(
     x, S,
     lw=1.5, lab=["Forward" "Backward"]
 )
-plot!(ylims=(-0.1,4.5), ylab="Response", xlab="time (s)")
+plot!(ylims=(-0.1,2.6), ylab="Response", xlab="time (s)")
 plot!(twinx(),
     x, t -> concentration_field(t.+t₁,C₀,C₁,t₁,t₂),
     ls=:dash, lw=1.5, lc=_green, lab=false,

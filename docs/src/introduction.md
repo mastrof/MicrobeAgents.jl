@@ -11,8 +11,8 @@ but custom behaviors can be implemented via user-defined functions.
 The typical workflow to run a simulation in MicrobeAgents.jl goes as follows:
 1. Define the size and properties of the space in which the microbes will move.
 2. Choose an appropriate microbe type to represent the desired behavior, or define a new one.
-3. Initialize an `AgentBasedModel` object with the desired space, microbe type, integration time step, and any extra property needed for the simulation.
-4. Populated the ABM with microbe instances.
+3. Initialize an `AgentBasedModel` object with the desired space, microbe type, integration timestep, and any extra property needed for the simulation.
+4. Populate the ABM with microbe instances.
 5. Choose the observables to collect during production and run the model.
 
 MicrobeAgents.jl re-exports and extends various function from Agents.jl in order to work
@@ -40,22 +40,19 @@ ContinuousSpace(extent; periodic=(true,false,false))
 
 
 ## Microbes
-Microbes are represented by subtypes of the `AbstractMicrobe` type, which is in turn a subtype of `AbstractAgent` introduced by Agents.jl
+Microbes are represented by subtypes of the `AbstractMicrobe` type, which is in turn a subtype of `AbstractAgent` from Agents.jl
 ```@docs
 AbstractMicrobe
 ```
 
-MicrobeAgents provides different `AbstractMicrobe` subtypes representing different models of bacterial behavior from the literature.
+MicrobeAgents provides different `AbstractMicrobe` subtypes representing different models of bacterial behavior from the scientific literature.
 The list of implemented models can be obtained with `subtypes(AbstractMicrobe)`.
 
 A basic type, which is typically sufficient for simple motility simulations and does not include chemotaxis, is the `Microbe` type.
 ```@docs
 Microbe
 ```
-
-The dimensionality of `Microbe` *must* always be specified on creation. All the fields are instead optional, and if not specified will be assigned default values.
-Microbe instances should only be created within an `AgentBasedModel`.
-
+Microbe instances should only be created within an `AgentBasedModel`, the fundamental structure which embeds everything that has to do with the agent-based simulations you want to run.
 In MicrobeAgents.jl, models are created through the `StandardABM` function.
 ```@docs
 StandardABM
@@ -69,19 +66,24 @@ dt = 0.1
 model = StandardABM(Microbe{1}, space, dt)
 ```
 
-Now, calling `add_agent!(model)` will populate the model with microbes of
-the specified type (`Microbe{1}`) using the default values of the constructor,
-and automatically generating a random position and a random velocity vector.
+Now, with the `add_agent!` function we will populate the model with microbes of
+the specified type (`Microbe{1}`).
+The only argument we must *always* specify for `add_agent!` is the motility of the microbe, via the `motility` keyword. An overview of the motility interface is given later;
+For now we will just use a Run-Tumble motility with an average run duration of 1 second
+and a constant swimming speed of 20 micron / second.
+If unspecified, position, direction and speed of the microbe will be assigned randomly;
+all the other fields will be assigned default values from the constructor (unless specified).
 To select a position, it can be passed as the first argument to the `add_agent!` call,
 and any other bacterial parameter can be defined via keyword arguments.
 All of the following are valid calls
 ```
+motility = RunTumble(1.0, [20.0])
 # a Microbe with large radius and low tumble rate
-add_agent!(model; radius=10.0, turn_rate=0.17)
+add_agent!(model; motility, radius=10.0)
 # a Microbe with custom position and high coefficient of rotational diffusion
-add_agent!((53.2,), model; rotational_diffusivity=0.5)
+add_agent!((53.2,), model; motility, rotational_diffusivity=0.5)
 # a Microbe initialized with velocity to the right
-add_agent!(model; vel=(1.0,))
+add_agent!(model; motility, vel=(1.0,))
 ```
 
 All the other subtypes of `AbstractMicrobe` work in a similar way, although
@@ -135,7 +137,8 @@ adf, mdf = run!(model, nsteps; adata=[position])
 `run!` will return two dataframes, one for the agent-level data (`adf`) and one
 for the model-level data (`mdf`, which in this case will be empty).
 This way, we have produced our first random walk.
-Since `adf.position` is a vector of tuples, we first have to unpack the x and y values
+Since `adf.position` is a vector of static vectors,
+we first have to unpack the x and y values
 and then we are ready to plot our trajectory.
 ```
 using Plots
@@ -146,28 +149,29 @@ plot(x, y)
 
 
 ## Motility patterns
-In MicrobeAgents.jl, motility patterns are represented as instances of
-`AbstractMotility`.
-In particular, currently available patterns are distinguished into two further
-categories: `AbstractMotilityOneStep` or `AbstractMotilityTwoStep`.
-```@docs; canonical=false
-MotilityOneStep
-MotilityTwoStep
-```
-One-step motility pattern are characterized by a single swimming stage. Two-step
-motility patterns instead have two stages which can have distinct properties;
-these two stages are referred to as "forward" and "backward" but can really
-represent anything.
+In MicrobeAgents.jl, motility patterns are represented through the
+`Motility{N}` type.
+A `Motility` is composed of `N` instances of `MotileState` and of a set
+of transition probabilities between these `N` states.
+A `MotileState` contains information about the speed distribution,
+turn angle distributions, and average lifetime of a particular
+state of motion.
 
-MicrobeAgents.jl defines three standard motility patterns:
+There are two kinds of `MotileState`s, `RunState` and `TurnState`.
+A `RunState` is used to represent states associated with translational
+motion and no angular reorientation (e.g. `Run`).
+A `TurnState` is instead used to represent states where no translational
+motion happens, but where reorientations may occur
+(e.g. `Tumble`, `Reverse`, `Flick`, `Stop`).
+
+Instances of `MotileState`s can be arbitrarily combined into a `Motility`.
 ```@docs
-RunTumble()
-RunReverse()
-RunReverseFlick()
+Motility
 ```
-The default values provided by the constructors always consider a constant
-swimming speed of 30 (micron/s) and "ideal" turn-angle distributions
-(isotropic for tumbles, perfect 180 and 90 degree reorientations for reverse and flicks).
-For more accurate simulation where the reorientation statistics of the microbes
-is important, appropriate distributions should be specified;
-the constructors will accept any object that can be sampled via `rand()`.
+The most common motility patterns are, however, pre-implemented.
+```@docs
+RunTumble
+RunReverse
+RunReverseFlick
+RunStop
+```
