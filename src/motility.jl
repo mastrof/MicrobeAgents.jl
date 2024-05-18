@@ -90,8 +90,8 @@ end
 
 # Base motility patterns
 function RunTumble(
-    run_duration, run_speed, tumble_duration,
-    polar=Uniform(-π, +π), azimuthal=Arccos()
+    run_duration, run_speed,
+    tumble_duration=0, polar=Uniform(-π, +π), azimuthal=Arccos()
 )
     Motility(
         (Run(run_duration, run_speed), Tumble(tumble_duration, polar, azimuthal)),
@@ -118,8 +118,9 @@ end
 function RunReverseFlick(
     run_duration_forward, run_speed_forward,
     run_duration_backward, run_speed_backward,
-    reverse_duration=0.0, polar_reverse=(π,), azimuthal_reverse=Arccos(),
-    flick_duration=0.0, polar_flick=(-π/2,+π/2), azimuthal_flick=Arccos(),
+    reverse_duration=0, flick_duration=0,
+    polar_reverse=(π,), azimuthal_reverse=Arccos(),
+    polar_flick=(-π/2,+π/2), azimuthal_flick=Arccos(),
 )
     Motility(
         (
