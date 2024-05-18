@@ -22,6 +22,13 @@ function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
         # transition to new motile state
         update_motilestate!(microbe, model)
     end
+    # if the new motile state is a TurnState with duration 0
+    # immediately turn and transition to another state
+    new_motilestate = motilestate(microbe)
+    if kindof(new_motilestate) === :TurnState && duration(motilestate(microbe)) == 0
+        turn!(microbe, model)
+        update_motilestate!(microbe, model)
+    end
 end
 
 """
@@ -34,10 +41,19 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedMod
     pathfinder_step!(microbe, model, dt) # translation
     rotational_diffusion!(microbe, model) # rotational noise
     model.affect!(microbe, model) # update microbe's internal state
-    turn!(microbe, model) # reorientation
+    if can_turn(microbe)
+        turn!(microbe, model) # reorientation
+    end
     p = switching_probability(microbe, model)
     if rand(abmrng(model)) < p
         # transition to new motile state
+        update_motilestate!(microbe, model)
+    end
+    # if the new motile state is a TurnState with duration 0
+    # immediately turn and transition to another state
+    new_motilestate = motilestate(microbe)
+    if kindof(new_motilestate) === :TurnState && duration(motilestate(microbe)) == 0
+        turn!(microbe, model)
         update_motilestate!(microbe, model)
     end
 end
