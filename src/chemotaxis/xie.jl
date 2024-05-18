@@ -29,9 +29,9 @@ Default parameters:
 - `chemotactic_precision = 0.0`
 - `radius = 0.5` μm
 """
-@agent struct Xie{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
+@agent struct Xie{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
     speed::Float64
-    motility = RunReverseFlick(speed = [46.5])
+    motility::Motility{N}
     turn_rate_forward::Float64 = 2.3
     turn_rate_backward::Float64 = 1.9
     rotational_diffusivity::Float64 = 0.26
@@ -47,17 +47,8 @@ Default parameters:
     chemotactic_precision::Float64 = 0.0
 end
 
-# needs a different show because it does not have a "turn_rate" field
-function Base.show(io::IO, ::MIME"text/plain", m::Xie{D}) where {D}
-    println(io, "$(typeof(m)) with $(typeof(m.motility)) motility")
-    println(io, "position (μm): $(r2dig.(m.pos)); velocity (μm/s): $(r2dig.(m.vel.*m.speed))")
-    println(io, "average unbiased turn rate (Hz): forward $(r2dig(m.turn_rate_forward)), backward $(r2dig(m.turn_rate_backward))")
-    s = setdiff(fieldnames(typeof(m)), [:id, :pos, :motility, :vel, :turn_rate_forward, :turn_rate_backward])
-    print(io, "other properties: " * join(s, ", "))
-end
-
 function chemotaxis!(microbe::Xie, model; ε=1e-16)
-    Δt = model.timestep
+    Δt = abmtimestep(model)
     Dc = chemoattractant_diffusivity(model)
     c = concentration(position(microbe), model)
     K = microbe.binding_affinity
@@ -65,8 +56,8 @@ function chemotaxis!(microbe::Xie, model; ε=1e-16)
     Π = microbe.chemotactic_precision
     # noisy concentration measurement with Berg-Purcell formula
     σ = CONV_NOISE * Π * sqrt(3 * c / (5 * π * Dc * a * Δt))
-    M = rand(abmrng(model), Normal(c, σ))
-    ϕ = log(1.0 + max(M / K, -1 + ε))
+    M = max(rand(abmrng(model), Normal(c, σ)), zero(c))
+    ϕ = log(1.0 + M / K)
     τ_m = microbe.adaptation_time_m
     τ_z = microbe.adaptation_time_z
     a₀ = (τ_m * τ_z) / (τ_m - τ_z)
@@ -80,20 +71,22 @@ function chemotaxis!(microbe::Xie, model; ε=1e-16)
     return nothing
 end
 
-function tumblebias(microbe::Xie)
-    S = state(microbe)
-    if state(motilepattern(microbe)) == Forward
-        β = microbe.gain_forward
-    else
-        β = microbe.gain_backward
+bias(microbe::Xie{D,N}) where {D,N} = bias_forward(microbe)
+function bias(microbe::Xie{D,4}) where {D}
+    motile_state_index = state(motilepattern(microbe))
+    if motile_state_index == 1
+        return bias_forward(microbe)
+    elseif motile_state_index == 3
+        return bias_backward(microbe)
     end
-    return (1 + β*S)
 end
-
-function turnrate(microbe::Xie)
-    if state(motilepattern(microbe)) == Forward
-        return microbe.turn_rate_forward
-    else
-        return microbe.turn_rate_backward
-    end
+function bias_forward(microbe::Xie)
+    S = state(microbe)
+    β = microbe.gain_forward
+    return 1 + β*S
+end
+function bias_backward(microbe::Xie)
+    S = state(microbe)
+    β = microbe.gain_backward
+    return 1 + β*S
 end
