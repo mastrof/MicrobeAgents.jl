@@ -78,16 +78,14 @@ properties = Dict(
         concentration_field, concentration_gradient
     )
 )
-model = StandardABM(Celani{2}, space, Δt; properties)
+model = StandardABM(BrownBerg{2,2}, space, Δt; properties)
 n = 100 # number of microbes
 for i in 1:n
     p0 = spacesize(model) ./ 2
     delta = rand(abmrng(model), SVector{2}) .* 10
     pos = p0 .+ delta # random scatter around center
-    motility = RunTumble(0.67, [30.0], 0.2)
-    add_agent!(pos, model;
-        motility, chemotactic_precision=36
-    )
+    motility = RunTumble(0.67, [30.0], 0.1)
+    add_agent!(pos, model; motility)
 end
 model
 
