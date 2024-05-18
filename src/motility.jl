@@ -7,8 +7,8 @@ export Arccos # from Agents
     @kwdef struct RunState
         duration
         speed
-        polar = [zero(duration)]
-        azimuthal = [zero(duration)]
+        polar = nothing
+        azimuthal = nothing
     end
     @kwdef struct TurnState
         duration
