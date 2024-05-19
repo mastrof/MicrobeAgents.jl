@@ -15,8 +15,13 @@ space = ContinuousSpace((L,L,L))
 
 model = StandardABM(Microbe{3}, space, Δt; container=Vector)
 n = 200
-for Motility in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
-    add_agent!(model; turn_rate, motility=Motility(speed=[U]))
+for Mot in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
+    if Mot == RunTumble
+        motility = RunTumble(τ_run, [U], 0.0)
+    else
+        motility = Mot(τ_run, [U], τ_run, [U])
+    end
+    add_agent!(model; motility)
 end
 # keep track of ids of each motile strategy
 ids_runtumble = 1:n
@@ -24,7 +29,7 @@ ids_runreverse = (1:n) .+ n
 ids_runrevflick = (1:n) .+ 2n
 
 nsteps = round(Int, 100τ_run / Δt)
-adata = [velocity]
+adata = [direction]
 adf, = run!(model, nsteps; adata)
 
 # separate the dataframes by motile strategy
@@ -36,7 +41,7 @@ adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
 # evaluate the autocorrelation functions
 using StatsBase: mean
 t = range(0, (nsteps-1)*Δt; step=Δt)
-Φ = hcat([mean(Analysis.acf(a, :velocity; normalize=true)) for a in adfs]...)
+Φ = hcat([mean(Analysis.acf(a, :direction; normalize=true)) for a in adfs]...)
 
 # from Taktikos et al.
 Φ_theoretical = hcat([
@@ -56,4 +61,4 @@ plot!(t, Φ_theoretical, lw=2, lc=[1 2 3],
 # show simulation values only at selected lags for better visualization
 lags = range(0, length(t)-1; step=20)
 scatter!(t[lags.+1], Φ[lags.+1,:], m=:x, mc=[1 2 3], msw=2, label=false)
-hline!([0.0], lw=0.8, ls=:dash, lc=:black, lab=false)</code></pre><img src="317299e2.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../run_distribution/">« Run-length distribution</a><a class="docs-footer-nextpage" href="../../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Monday 13 May 2024 06:16">Monday 13 May 2024</span>. Using Julia version 1.10.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+hline!([0.0], lw=0.8, ls=:dash, lc=:black, lab=false)</code></pre><img src="a587fbf1.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../run_distribution/">« Run-length distribution</a><a class="docs-footer-nextpage" href="../../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.4.1 on <span class="colophon-date" title="Sunday 19 May 2024 23:06">Sunday 19 May 2024</span>. Using Julia version 1.10.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
