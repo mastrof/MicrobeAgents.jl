@@ -37,7 +37,7 @@ Flick(duration::Real, polar=(+π/2,-π/2), azimuthal=Arccos()) =
 Stop(duration::Real) =
     TurnState(; duration, polar=[zero(duration)], azimuthal=[zero(duration)])
 
-TransitionWeights{N,T} = ProbabilityWeights{T,T,SVector{N,T}}
+TransitionWeights{N,T} = ProbabilityWeights{T,T,MVector{N,T}}
 
 mutable struct Motility{N}
     current_state::Int
@@ -82,7 +82,7 @@ function Motility(motile_states::NTuple{N,MotileState}, rates...) where N
         transition_matrix[i,j] = p
     end
     transition_probabilites = SVector{N}(map(
-        row -> ProbabilityWeights(SVector{N}(row)),
+        row -> ProbabilityWeights(MVector{N}(row)),
         eachrow(transition_matrix)
     ))
     Motility{N}(1, motile_states, transition_probabilites)
