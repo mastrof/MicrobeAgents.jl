@@ -66,7 +66,7 @@ add_agent!(Celani{3}, model; motility=RunTumble(1.0, [0]), gain=4,
 )
 
 nsteps = round(Int, T/dt)
-adata = [MicrobeAgents.bias]
+adata = [bias]
 adf, = run!(model, nsteps; adata)
 
 S = Analysis.adf_to_matrix(adf, :bias)

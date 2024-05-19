@@ -12,7 +12,7 @@ in the concentration of a chemoattractant.
 The response to the stimulus can be measured by observing modulations
 in the instantaneous tumbling rate.
 For each of the implemented microbe types, MicrobeAgents provides a
-`tumblebias` function which returns the instantaneous bias
+`bias` function which returns the instantaneous bias
 in the tumbling rate, evaluated from the internal state of the microbe.
 Monitoring the time evolution of the tumble bias under teporal stimuli
 then allows us to access the response function of the microbe.
@@ -73,14 +73,14 @@ add_agent!(model; motility=RunReverseFlick(0.0, [0], Inf, [0]))
 model[2].motility.current_state = 3 # manually set to backward run state
 
 #=
-In addition to the `tumblebias`, we will also monitor two other quantities
+In addition to the `bias`, we will also monitor two other quantities
 `state_m` and `state_z` which are internal variables of the `Xie` model
 which represent the methylation and dephosphorylation processes which
 together control the chemotactic response of the bacterium.
 =#
 
 nsteps = round(Int, T/dt)
-adata = [MicrobeAgents.bias, :state_m, :state_z]
+adata = [bias, :state_m, :state_z]
 adf, = run!(model, nsteps; adata)
 
 S = Analysis.adf_to_matrix(adf, :bias)

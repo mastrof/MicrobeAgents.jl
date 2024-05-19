@@ -41,7 +41,7 @@ for _ in 1:300
 end
 
 nsteps = 1500
-adata = [position, MicrobeAgents.bias]
+adata = [position, bias]
 adf, = run!(model, nsteps; adata)
 
 traj = Analysis.adf_to_matrix(adf, :position)
