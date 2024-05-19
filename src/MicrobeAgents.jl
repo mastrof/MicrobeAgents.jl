@@ -6,12 +6,13 @@ export ABM, StandardABM, ContinuousSpace
 export add_agent!, add_agent_own_pos!
 export move_agent!, walk!, run!
 
-using CellListMap.PeriodicSystems
 using Distributions
 using LinearAlgebra
+using MixedStructTypes
 using Random
 using Quaternions
 using StaticArrays
+using StatsBase
 export SVector
 
 
@@ -34,13 +35,12 @@ All microbe types *must* have at least the following fields:
 - `radius::Real` equivalent spherical radius of the microbe
 - `state::Real` generic variable for a scalar internal state
 """
-abstract type AbstractMicrobe{D} <: AbstractAgent where {D} end
+abstract type AbstractMicrobe{D,N} <: AbstractAgent where {D,N} end
 
 include("api.jl")
 include("utils.jl")
 include("motility.jl")
 include("rotations.jl")
-include("neighborlists.jl")
 include("fields.jl")
 
 include("microbes.jl")

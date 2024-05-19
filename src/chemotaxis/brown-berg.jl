@@ -5,8 +5,7 @@ export BrownBerg
 Model of chemotactic E.coli from 'Brown and Berg (1974) PNAS'
 
 Default parameters:
-- `motility = RunTumble()`
-- `turn_rate = 1.49` Hz frequency of reorientations
+- `motility = RunTumble(0.67, [30.0], 0.1)`
 - `rotational_diffusivity = 0.035` rad²/s coefficient of brownian rotational diffusion
 - `radius = 0.5` μm equivalent spherical radius of the microbe
 - `state = 0.0` corresponds to 'weighted dPb/dt' in the paper
@@ -14,10 +13,9 @@ Default parameters:
 - `receptor_binding_constant = 100` μM
 - `memory = 1` s
 """
-@agent struct BrownBerg{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
+@agent struct BrownBerg{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
     speed::Float64
-    motility = RunTumble()
-    turn_rate::Float64 = 1 / 0.67
+    motility::Motility{N} = RunTumble(0.67, [30.0], 0.1)
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
     state::Float64 = 0.0
@@ -27,7 +25,7 @@ Default parameters:
 end
 
 function chemotaxis!(microbe::BrownBerg, model)
-    Δt = model.timestep
+    Δt = abmtimestep(model)
     τₘ = microbe.memory
     β = exp(-Δt / τₘ) # memory loss factor
     KD = microbe.receptor_binding_constant
@@ -43,7 +41,7 @@ function chemotaxis!(microbe::BrownBerg, model)
     return nothing
 end # function
 
-function tumblebias(microbe::BrownBerg)
+function bias(microbe::BrownBerg)
     g = microbe.gain
     S = state(microbe)
     return exp(-g*S)

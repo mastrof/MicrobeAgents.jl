@@ -25,7 +25,7 @@ timestep = 0.1 # s
 extent = ntuple(_ -> 1000.0, 2) # μm
 space = ContinuousSpace(extent; periodic=false)
 p₀ = extent./2 # μm
-C = 1.0 # μM
+C = 20.0 # μM
 σ = 100.0 # μm
 properties = Dict(
     :chemoattractant => GenericChemoattractant{2,Float64}(; concentration_field),
@@ -34,11 +34,17 @@ properties = Dict(
     :p₀ => p₀,
 )
 
-model = StandardABM(Celani{2}, space, timestep; properties)
-foreach(_ -> add_agent!(model; chemotactic_precision=6.0), 1:300)
+model = StandardABM(Celani{2,2}, space, timestep; properties)
+motility = RunTumble(0.67, [30.0], 0.1)
 
-nsteps = 5000
-adata = [position]
+for _ in 1:300
+    add_agent!(model; motility,
+        chemotactic_precision=6.0, rotational_diffusivity=0.1
+    )
+end
+
+nsteps = 1500
+adata = [position, bias]
 adf, = run!(model, nsteps; adata)
 
 traj = Analysis.adf_to_matrix(adf, :position)
@@ -46,11 +52,11 @@ xmesh = range(0, first(spacesize(model)); length=100)
 ymesh = range(0, last(spacesize(model)); length=100)
 c = [concentration_field(p, p₀, C, σ) for p in Iterators.product(xmesh, ymesh)]
 heatmap(xmesh, ymesh, c', cbar=false, ratio=1, c=:bone, axis=false)
-x = getindex.(traj,1)[end-100:4:end, :]
-y = getindex.(traj,2)[end-100:4:end, :]
+x = getindex.(traj,1)[end-300:2:end, :]
+y = getindex.(traj,2)[end-300:2:end, :]
 a = axes(x,1) ./ size(x,1)
 plot!(x, y,
-    lab=false, lims=(0,1000), lw=1, alpha=a
+    lab=false, lims=(0,1000), lw=a.^2, alpha=a,
 )
 ````
 

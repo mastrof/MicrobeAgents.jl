@@ -29,9 +29,10 @@ for D in dimensions
 end
 ==#
 
-filename = "benchmarks.md"
+version = Pkg.project().version
+filename = "benchmarks_$(version).md"
 open(filename, "w") do io
-    @printf io "# MicrobeAgents.jl benchmarks - %s \n\n" Pkg.project().version
+    @printf io "# MicrobeAgents.jl benchmarks - %s \n\n" version
 end
 
 ## Setup
@@ -47,8 +48,14 @@ open(filename, "a") do io
         for D in dimensions
             space = ContinuousSpace(ntuple(_ -> 10.0, D))
             dt = 0.1
-            model = StandardABM(T{D}, space, dt; container=Vector)
-            add_agent!(model; turn_rate = 1/dt) # reorients at each step
+            if T == Brumley
+                model = StandardABM(T{D,4}, space, dt; container=Vector)
+                motility = RunReverseFlick(0.0, [10.0], 0.0, [10.0])
+            else
+                model = StandardABM(T{D,2}, space, dt; container=Vector)
+                motility = RunTumble(0.0, [10.0], 0)
+            end
+            add_agent!(model; motility)
             nsteps = 1000
             b = @benchmark run!($model, $(nsteps))
             type = string(T{D})

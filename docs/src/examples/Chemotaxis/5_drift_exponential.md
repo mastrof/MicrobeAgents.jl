@@ -70,7 +70,7 @@ properties = Dict(
     :C0 => C0,
     :λ => λ,
 )
-model = StandardABM(Brumley{3}, space, dt; properties, container=Vector)
+model = StandardABM(Brumley{3,4}, space, dt; properties, container=Vector)
 
 # add n bacteria for each value of Π
 # all of them initialized at x = 0
@@ -79,7 +79,8 @@ n = 200
 for Π in Πs
     for i in 1:n
         pos = SVector{3}(0.0, rand()*Ly, rand()*Lz)
-        add_agent!(pos, model; chemotactic_precision=Π)
+        motility = RunReverseFlick(0.45, [46.5], 0.45, [46.5])
+        add_agent!(pos, model; chemotactic_precision=Π, motility)
     end
 end
 

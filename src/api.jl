@@ -28,11 +28,6 @@ Return the motile pattern of the microbe.
 """
 motilepattern(m::AbstractMicrobe) = m.motility
 """
-    turnrate(m::AbstractMicrobe)
-Return the unbiased turn rate of the microbe.
-"""
-turnrate(m::AbstractMicrobe) = m.turn_rate
-"""
     rotational_diffusivity(m::AbstractMicrobe)
 Return the rotational diffusivity of the microbe.
 """
@@ -47,6 +42,8 @@ radius(m::AbstractMicrobe) = m.radius
 Return the internal state of the microbe.
 """
 state(m::AbstractMicrobe) = m.state
+
+abmtimestep(model::AgentBasedModel) = model.timestep
 
 """
     distance(a, b, model)

@@ -7,8 +7,7 @@ The model is optimized for simulation of marine bacteria and accounts
 for the presence of (gaussian) sensing noise in the chemotactic pathway.
 
 Default parameters:
-- `motility = RunReverseFlick(speed = [46.5])`
-- `turn_rate = 2.22` Hz → '1/τ₀'
+- `motility = RunReverseFlick(0.45, [46.5], 0.45, [46.5])`
 - `state = 0.0` → 'S'
 - `rotational_diffusivity = 0.035` rad²/s
 - `memory = 1.3` s → 'τₘ'
@@ -17,10 +16,9 @@ Default parameters:
 - `chemotactic_precision = 6.0` → 'Π'
 - `radius = 0.5` μm → 'a'
 """
-@agent struct Brumley{D}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D}
+@agent struct Brumley{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
     speed::Float64
-    motility = RunReverseFlick(speed = [46.5])
-    turn_rate::Float64 = 1 / 0.45
+    motility::Motility{N} = RunReverseFlick(0.45, [46.5], 0.45, [46.5])
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
     state::Float64 = 0.0
@@ -31,7 +29,7 @@ Default parameters:
 end
 
 function chemotaxis!(microbe::Brumley, model)
-    Δt = model.timestep
+    Δt = abmtimestep(model)
     Dc = chemoattractant_diffusivity(model)
     τₘ = microbe.memory
     α = exp(-Δt / τₘ) # memory persistence factor
@@ -53,7 +51,7 @@ function chemotaxis!(microbe::Brumley, model)
     return nothing
 end # function
 
-function tumblebias(microbe::Brumley)
+function bias(microbe::Brumley)
     Γ = microbe.gain
     S = state(microbe)
     return (1 + exp(-Γ*S))/2
