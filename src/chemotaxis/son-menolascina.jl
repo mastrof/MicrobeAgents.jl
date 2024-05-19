@@ -20,7 +20,7 @@ export SonMenolascina
     vT::Float64 = 18.88 # μm/s
     θ::Float64 = 1.0 # s
     cT::Float64 = 0.05 # μM
-    chemokinesis_on::Bool = false
+    chemokinesis_on::Bool = false # turned on when local c > cT
     chemokinetic_factor::Float64 = 1.3
 end
 
@@ -54,6 +54,7 @@ function chemotaxis!(microbe::SonMenolascina, model)
     return nothing
 end # function
 
+# speed-dependent flick probability if 4-state motility is used
 function update_motilestate!(microbe::SonMenolascina{D,4}, model::AgentBasedModel) where D
     motility = motilepattern(microbe)
     i = state(motility)
