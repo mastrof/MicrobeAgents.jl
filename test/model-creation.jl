@@ -45,7 +45,7 @@ using Random
     end
 
     @testset "Chemotactic Microbe types" begin
-        for T in [BrownBerg, Celani, Brumley], D in 1:3
+        for T in [BrownBerg, Celani, Brumley, Xie], D in 1:3
             @testset "$(T{D})" begin
                 timestep = 1
                 space = ContinuousSpace(ones(SVector{D}))
@@ -80,6 +80,7 @@ using Random
                     m = model_c[1]
                     λ = 1 / m.memory
                     @test m.state == 0.0
+                    # now the microbe should be initialized from adapted state
                     @test m.markovian_variables == [C/λ, C/λ^2, 2C/λ^3]
                 end
             end
