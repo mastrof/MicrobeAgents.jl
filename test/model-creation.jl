@@ -45,7 +45,7 @@ using Random
     end
 
     @testset "Chemotactic Microbe types" begin
-        for T in [BrownBerg, Celani, Brumley, Xie], D in 1:3
+        for T in [BrownBerg, Celani, Brumley, Xie, SonMenolascina], D in 1:3
             @testset "$(T{D})" begin
                 timestep = 1
                 space = ContinuousSpace(ones(SVector{D}))

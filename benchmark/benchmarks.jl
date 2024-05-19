@@ -36,7 +36,7 @@ open(filename, "w") do io
 end
 
 ## Setup
-microbe_types = [Microbe, BrownBerg, Brumley, Celani]
+microbe_types = [Microbe, BrownBerg, Brumley, Celani, SonMenolascina]
 dimensions = [1, 2, 3]
 
 ##
@@ -48,7 +48,7 @@ open(filename, "a") do io
         for D in dimensions
             space = ContinuousSpace(ntuple(_ -> 10.0, D))
             dt = 0.1
-            if T == Brumley
+            if T == Brumley || T == SonMenolascina
                 model = StandardABM(T{D,4}, space, dt; container=Vector)
                 motility = RunReverseFlick(0.0, [10.0], 0.0, [10.0])
             else

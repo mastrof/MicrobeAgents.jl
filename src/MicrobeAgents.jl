@@ -57,6 +57,7 @@ include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
 include("chemotaxis/celani.jl")
 include("chemotaxis/xie.jl")
+include("chemotaxis/son-menolascina.jl")
 
 # obstacles, encounters, pathfinding...
 using GeometryBasics: HyperSphere, Point
