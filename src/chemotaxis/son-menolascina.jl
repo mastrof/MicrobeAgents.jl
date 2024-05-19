@@ -54,6 +54,23 @@ function chemotaxis!(microbe::SonMenolascina, model)
     return nothing
 end # function
 
+function update_motilestate!(microbe::SonMenolascina{D,4}, model::AgentBasedModel) where D
+    motility = motilepattern(microbe)
+    i = state(motility)
+    w = transition_weights(motility, i)
+    if i == 3 # backward run
+        p_flick = flick_probability(microbe, model)
+        w[2] = 1-p_flick
+        w[4] = p_flick
+    end
+    j = sample(abmrng(model), eachindex(w), w)
+    update_motilestate!(motility, j)
+end
+# turn hard-coded values from paper into parameters?
+function flick_probability(microbe::SonMenolascina, model)
+    0.055 + 0.72 / (1 + exp(-0.25*(speed(microbe)-36.0)))
+end
+
 function switching_probability(microbe::SonMenolascina, model)
     dt = abmtimestep(model)
     M = motilestate(microbe)
