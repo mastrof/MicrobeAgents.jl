@@ -74,8 +74,7 @@ makedocs(
 
 if CI
     deploydocs(;
-        repo = "github.com/mastrof/MicrobeAgents.jl",
-        target = "build",
+        repo = "github.com/mastrof/MicrobeAgents.jl.git",
         push_preview = true
     )
 end
