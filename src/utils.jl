@@ -9,7 +9,7 @@ function random_velocity(model::AgentBasedModel{<:ContinuousSpace{D}}) where D
     random_velocity(abmrng(model), D)
 end
 function random_velocity(rng::AbstractRNG, D::Int)
-    v = rand(rng, SVector{D}) .* 2 .- 1
+    v = randn(rng, SVector{D})
     mag = sqrt(dot(v,v))
     return v ./ mag
 end
