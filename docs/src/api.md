@@ -1,5 +1,6 @@
 # API
 
+## [Microbes](@id Microbes)
 ```@docs
 position
 direction
@@ -9,14 +10,31 @@ motilepattern
 rotational_diffusivity
 radius
 state
-```
-
-## [Utils](@id Utils)
-```@docs
+motilestate
+states
+transition_weights
+duration
+polar
+azimuthal
 distance
 distancevector
 random_speed
 random_velocity
+```
+
+## [Chemoattractants](@id Chemoattractants)
+```@docs
+AbstractChemoattractant
+GenericChemoattractant
+chemoattractant
+concentration
+gradient
+time_derivative
+chemoattractant_diffusivity
+```
+
+## [Utils](@id Utils)
+```@docs
 Analysis.adf_to_matrix
 Analysis.adf_to_vectors
 Analysis.unfold
