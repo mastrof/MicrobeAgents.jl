@@ -24,8 +24,10 @@ DataFrames = "1"
 Distributions = "0.25"
 GeometryBasics = "0.4"
 MeanSquaredDisplacement = "0.2"
+MixedStructTypes = "0.2"
 Quaternions = "0.7"
 StaticArrays = "1"
+StatsBase = "0.34"
 julia = "1"
 
 [extras]
