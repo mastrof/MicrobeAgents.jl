@@ -1,6 +1,7 @@
 export position, direction, speed, velocity, motilepattern,
     turnrate, rotational_diffusivity, radius, state,
     distance, distancevector
+export abmtimestep
 
 """
     position(m::AbstractMicrobe)
