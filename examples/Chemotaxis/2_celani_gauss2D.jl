@@ -40,17 +40,17 @@ for _ in 1:300
     )
 end
 
-nsteps = 1500
+nsteps = 600
 adata = [position, bias]
 adf, = run!(model, nsteps; adata)
 
 traj = Analysis.adf_to_matrix(adf, :position)
-xmesh = range(0, first(spacesize(model)); length=100)
-ymesh = range(0, last(spacesize(model)); length=100)
+xmesh = range(0, first(spacesize(model)); length=80)
+ymesh = range(0, last(spacesize(model)); length=80)
 c = [concentration_field(p, p₀, C, σ) for p in Iterators.product(xmesh, ymesh)]
 heatmap(xmesh, ymesh, c', cbar=false, ratio=1, c=:bone, axis=false)
-x = getindex.(traj,1)[end-300:2:end, :]
-y = getindex.(traj,2)[end-300:2:end, :]
+x = getindex.(traj,1)[end-400:5:end, :]
+y = getindex.(traj,2)[end-400:5:end, :]
 a = axes(x,1) ./ size(x,1)
 plot!(x, y,
     lab=false, lims=(0,1000), lw=a.^2, alpha=a,

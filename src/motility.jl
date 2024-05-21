@@ -1,6 +1,8 @@
 export MotileState, RunState, TurnState, Run, Tumble, Reverse, Flick, Stop
 export Motility, RunTumble, RunReverse, RunReverseFlick, RunStop
-export update_motilestate!, motilestate, state, states, transition_weights, duration
+export update_motilestate!
+export motilepattern, motilestate, state, states, transition_weights
+export duration, speed, polar, azimuthal
 export Arccos # from Agents
 
 @compact_structs MotileState begin
@@ -141,6 +143,11 @@ function RunStop(run_duration, run_speed, stop_duration)
 end
 
 # API
+"""
+    update_motilestate!(microbe, model)
+Update the motile state of `microbe` by randomly sampling the next state
+according to the prescribed transition weights.
+"""
 function update_motilestate!(microbe::AbstractMicrobe, model::AgentBasedModel)
     update_motilestate!(motilepattern(microbe), model)
 end
@@ -152,21 +159,61 @@ function update_motilestate!(motility::Motility, model::AgentBasedModel)
 end
 update_motilestate!(motility::Motility, j::Int) = (motility.current_state = j)
 
+"""
+    update_speed!(microbe, model)
+Update the speed of `microbe` by randomly sampling from the
+speed distribution of the current motile state.
+"""
 function update_speed!(microbe::AbstractMicrobe, model::AgentBasedModel)
     microbe.speed = rand(abmrng(model), speed(motilestate(microbe)))
 end
 
+"""
+    motilestate(microbe)
+Return the current motile state of `microbe`.
+"""
 function motilestate(microbe::AbstractMicrobe)
     m = motilepattern(microbe)
     states(m)[state(m)]
 end
+"""
+    state(motility::Motility)
+Return the index of active motile state.
+"""
 state(m::Motility) = m.current_state
+"""
+    state(motility::Motility)
+Return the list of all motile states.
+"""
 states(m::Motility) = m.motile_states
 transition_weights(m::Motility) = m.transition_probabilities
+"""
+    transition_weights(motility::Motility, i::Integer)
+Return the transition weights from the state with index `i`
+towards the other motile states.
+"""
 transition_weights(m::Motility, i::Integer) = transition_weights(m)[i]
+"""
+    duration(motility::Motility)
+Return the average unbiased duration of the current motile state.
+"""
 duration(m::Motility) = duration(states(m)[state(m)])
+"""
+    speed(motility::Motility)
+Return the speed distribution of the current motile state.
+"""
 speed(m::Motility) = speed(states(m)[state(m)])
+"""
+    polar(motility::Motility)
+Return the distribution of polar reorientation angles of the
+current motile state.
+"""
 polar(m::Motility) = polar(states(m)[state(m)])
+"""
+    azimuthal(motility::Motility)
+Return the distribution of azimuthal reorientation angles of the
+current motile state.
+"""
 azimuthal(m::Motility) = azimuthal(states(m)[state(m)])
 duration(s::MotileState) = s.duration
 speed(s::MotileState) = s.speed

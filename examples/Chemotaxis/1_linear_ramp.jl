@@ -112,8 +112,8 @@ ts = unique(adf.time) .* Δt
 lw = eachindex(ts) ./ length(ts) .* 3
 xmesh = range(0,Lx,length=100)
 ymesh = range(0,Ly,length=100)
-xn = @view x[:,1:15]
-yn = @view y[:,1:15]
+xn = @view x[1:4:end,1:15]
+yn = @view y[1:4:end,1:15]
 c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
 heatmap(xmesh, ymesh, c', cbar=false, c=:bone,
     ratio=1, axis=false, grid=false, xlims=(0,Lx), ylims=(0,Ly)

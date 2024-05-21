@@ -1,4 +1,4 @@
-export microbe_step!, microbe_pathfinder_step!
+export microbe_step!, microbe_pathfinder_step!, switching_probability
 
 """
     microbe_step!(microbe, model)
