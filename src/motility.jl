@@ -21,7 +21,7 @@ export Arccos # from Agents
 end
 
 @dispatch biased(::RunState) = true
-@dispatch biased(::TurnState) = true
+@dispatch biased(::TurnState) = false
 
 # Base motile states
 Run(duration::Real, speed) = RunState(; duration, speed)
