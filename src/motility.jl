@@ -20,13 +20,8 @@ export Arccos # from Agents
     end
 end
 
-function biased(s::MotileState)
-    if kindof(s) === :RunState
-        return true
-    else # TurnState
-        return false
-    end
-end
+@dispatch biased(::RunState) = true
+@dispatch biased(::TurnState) = true
 
 # Base motile states
 Run(duration::Real, speed) = RunState(; duration, speed)
