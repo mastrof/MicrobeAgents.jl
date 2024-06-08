@@ -5,7 +5,7 @@ export motilepattern, motilestate, state, states, transition_weights
 export duration, speed, polar, azimuthal
 export Arccos # from Agents
 
-@compact_structs MotileState begin
+@sum_structs MotileState begin
     @kwdef struct RunState
         duration
         speed
