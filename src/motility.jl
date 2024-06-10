@@ -5,7 +5,7 @@ export motilepattern, motilestate, state, states, transition_weights
 export duration, speed, polar, azimuthal
 export Arccos # from Agents
 
-@compact_structs MotileState begin
+@sum_structs MotileState begin
     @kwdef struct RunState
         duration
         speed
@@ -20,13 +20,8 @@ export Arccos # from Agents
     end
 end
 
-function biased(s::MotileState)
-    if kindof(s) === :RunState
-        return true
-    else # TurnState
-        return false
-    end
-end
+@pattern biased(::RunState) = true
+@pattern biased(::TurnState) = false
 
 # Base motile states
 Run(duration::Real, speed) = RunState(; duration, speed)
