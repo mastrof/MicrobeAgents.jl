@@ -7,8 +7,8 @@ export add_agent!, add_agent_own_pos!
 export move_agent!, walk!, run!
 
 using Distributions
+using LightSumTypes
 using LinearAlgebra
-using MixedStructTypes
 using Random
 using Quaternions
 using StaticArrays
