@@ -7,7 +7,7 @@ export add_agent!, add_agent_own_pos!
 export move_agent!, walk!, run!
 
 using Distributions
-using DynamicSumTypes
+using LightSumTypes
 using LinearAlgebra
 using Random
 using Quaternions
