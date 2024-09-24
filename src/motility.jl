@@ -30,7 +30,7 @@ end
 
 # Base motile states
 Run(duration::Real, speed) = RunState(; duration, speed)
-Tumble(duration::Real, angle=Spherical(-π/2, π/2)) = TurnState(; duration, angle)
+Tumble(duration::Real, angle) = TurnState(; duration, angle)
 Reverse(duration::Real, angle=(π,)) = TurnState(; duration, angle)
 Flick(duration::Real, angle=(-π/2, π/2)) = TurnState(; duration, angle)
 Stop(duration::Real) =
@@ -89,8 +89,8 @@ end
 
 # Base motility patterns
 function RunTumble(
-    run_duration, run_speed,
-    tumble_duration=0, angle=Spherical(-π/2, π/2)
+    run_duration, run_speed, angle,
+    tumble_duration=0,
 )
     Motility(
         (Run(run_duration, run_speed), Tumble(tumble_duration, angle)),
