@@ -12,7 +12,7 @@ where ``v`` is the microbe velocity, and ``\tilde{\tau} = \tau/(1-\cos\theta)``
 is the correlation-corrected effective run length.
 
 To test this, we will simulate run-tumble motility with different distributions
-of `polar` reorientation angles and evaluate their MSDs.
+of reorientation angles and evaluate their MSDs.
 For simplicity, since only the average angle matters rather than the entire
 distribution, we will only allow microbes to perform rotations of angle `θ`
 (and `-θ` for symmetry).
@@ -36,7 +36,7 @@ U = 30.0 # μm/s
 models = map(_ -> StandardABM(Microbe{3}, space, dt; container=Vector), θs)
 nmicrobes = 100
 for (i,θ) in enumerate(θs)
-    motility = RunTumble(τ, [U], 0.0, [θ,-θ])
+    motility = RunTumble(τ, [U], [θ,-θ])
     foreach(_ -> add_agent!(models[i]; motility), 1:nmicrobes)
 end
 

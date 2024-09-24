@@ -32,7 +32,7 @@ properties = Dict(
 )
 
 model = StandardABM(Celani{2,2}, space, timestep; properties)
-motility = RunTumble(0.67, [30.0], 0.1)
+motility = RunTumble(0.67, [30.0], Isotropic(2), 0.1)
 
 for _ in 1:300
     add_agent!(model; motility,

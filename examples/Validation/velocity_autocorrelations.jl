@@ -32,7 +32,7 @@ model = StandardABM(Microbe{3}, space, Δt; container=Vector)
 n = 200
 for Mot in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
     if Mot == RunTumble
-        motility = RunTumble(τ_run, [U], 0.0)
+        motility = RunTumble(τ_run, [U], Isotropic(3), 0.0)
     else
         motility = Mot(τ_run, [U], τ_run, [U])
     end
