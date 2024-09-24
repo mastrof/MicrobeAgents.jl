@@ -5,7 +5,7 @@ export BrownBerg
 Model of chemotactic E.coli from 'Brown and Berg (1974) PNAS'
 
 Default parameters:
-- `motility = RunTumble(0.67, [30.0], 0.1)`
+- `motility = RunTumble(0.67, [30.0], Isotropic(D), 0.1)`
 - `rotational_diffusivity = 0.035` rad²/s coefficient of brownian rotational diffusion
 - `radius = 0.5` μm equivalent spherical radius of the microbe
 - `state = 0.0` corresponds to 'weighted dPb/dt' in the paper
@@ -15,7 +15,7 @@ Default parameters:
 """
 @agent struct BrownBerg{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
     speed::Float64
-    motility::Motility{N} = RunTumble(0.67, [30.0], 0.1)
+    motility::Motility{N} = RunTumble(0.67, [30.0], Isotropic(D), 0.1)
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
     state::Float64 = 0.0

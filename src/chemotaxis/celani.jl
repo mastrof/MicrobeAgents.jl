@@ -11,7 +11,7 @@ tuned through a `chemotactic_precision` factor inspired by
 'Brumley et al. (2019) PNAS' (defaults to 0, i.e. no noise).
 
 Default parameters:
-- `motility = RunTumble(0.67, [30.0], 0.1)
+- `motility = RunTumble(0.67, [30.0], Isotropic(D), 0.1)
 - `state = 0`
 - `rotational_diffusivity = 0.26` rad²/s
 - `gain = 50.0`
@@ -20,7 +20,7 @@ Default parameters:
 """
 @agent struct Celani{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
     speed::Float64
-    motility::Motility{N} = RunTumble(0.67, [30.0], 0.1)
+    motility::Motility{N} = RunTumble(0.67, [30.0], Isotropic(D), 0.1)
     rotational_diffusivity::Float64 = 0.26
     radius::Float64 = 0.5
     state::Float64 = 0.0
