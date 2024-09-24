@@ -59,12 +59,13 @@ It is not necessary to indicate impossible transitions; any pair
 transition probability `p=0`.
 
 For example, if we want to define a 3-state motility, composed by a
-slow but long run, a tumble, and a fast but short run, where the two runs
+slow but long run, an instantaneous tumble with some `angle_pdf`,
+and a fast but short run, where the two runs
 can only transition towards the tumble, but the tumble can transition
 with probability 30% towards the slow run and 70% towards the fast run,
 we will call:
 
-    Motility((Run(10.0, 2.0), Tumble(), Run(60.0, 0.5)),
+    Motility((Run(10.0, 2.0), Tumble(0.0, angle_pdf), Run(60.0, 0.5)),
         (1 => 2, 1.0),
         (2 => 1, 0.3), (2 => 3, 0.7),
         (3 => 2, 1.0)

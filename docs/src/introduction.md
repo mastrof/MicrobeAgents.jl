@@ -69,16 +69,18 @@ model = StandardABM(Microbe{1}, space, dt)
 Now, with the `add_agent!` function we will populate the model with microbes of
 the specified type (`Microbe{1}`).
 The only argument we must *always* specify for `add_agent!` is the motility of the microbe, via the `motility` keyword. An overview of the motility interface is given later;
-For now we will just use a Run-Tumble motility with an average run duration of 1 second
-and a constant swimming speed of 20 micron / second.
+For now we will just use a Run-Tumble motility with an average run duration of 1 second and a constant swimming speed of 20 micron / second.
+The third required argument to the call is the distribution of reorientation
+angles, but it is irrelevant in 1-dimensional systems so we can just pass
+an empty array.
 If unspecified, position, direction and speed of the microbe will be assigned randomly;
 all the other fields will be assigned default values from the constructor (unless specified).
 To select a position, it can be passed as the first argument to the `add_agent!` call,
 and any other bacterial parameter can be defined via keyword arguments.
 All of the following are valid calls
 ```
-motility = RunTumble(1.0, [20.0])
-# a Microbe with large radius and low tumble rate
+motility = RunTumble(1.0, [20.0], [])
+# a Microbe with large radius
 add_agent!(model; motility, radius=10.0)
 # a Microbe with custom position and high coefficient of rotational diffusion
 add_agent!((53.2,), model; motility, rotational_diffusivity=0.5)
