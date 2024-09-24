@@ -39,6 +39,7 @@ abstract type AbstractMicrobe{D,N} <: AbstractAgent where {D,N} end
 
 include("api.jl")
 include("utils.jl")
+include("spherical_distribution.jl")
 include("motility.jl")
 include("rotations.jl")
 include("fields.jl")
