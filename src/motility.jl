@@ -2,21 +2,21 @@ export MotileState, RunState, TurnState, Run, Tumble, Reverse, Flick, Stop
 export Motility, RunTumble, RunReverse, RunReverseFlick, RunStop
 export update_motilestate!
 export motilepattern, motilestate, state, states, transition_weights
-export duration, speed, polar, azimuthal
+export duration, speed, angle
 export Arccos # from Agents
 
 @compact_structs MotileState begin
     @kwdef struct RunState
         duration
         speed
-        polar = nothing
+        angle = nothing
         azimuthal = nothing
     end
     @kwdef struct TurnState
         duration
         speed = [zero(duration)]
-        polar
-        azimuthal
+        angle
+        azimuthal = Uniform(-π, π)
     end
 end
 
@@ -30,14 +30,11 @@ end
 
 # Base motile states
 Run(duration::Real, speed) = RunState(; duration, speed)
-Tumble(duration::Real, polar=Uniform(-π,+π),  azimuthal=Arccos()) =
-    TurnState(; duration, polar, azimuthal)
-Reverse(duration::Real, polar=(π,), azimuthal=Arccos()) =
-    TurnState(; duration, polar, azimuthal)
-Flick(duration::Real, polar=(+π/2,-π/2), azimuthal=Arccos()) =
-    TurnState(; duration, polar, azimuthal)
+Tumble(duration::Real, angle=Spherical(-π/2, π/2)) = TurnState(; duration, angle)
+Reverse(duration::Real, angle=(π,)) = TurnState(; duration, angle)
+Flick(duration::Real, angle=(-π/2, π/2)) = TurnState(; duration, angle)
 Stop(duration::Real) =
-    TurnState(; duration, polar=[zero(duration)], azimuthal=[zero(duration)])
+    TurnState(; duration, angle=[zero(duration)], azimuthal=[zero(duration)])
 
 TransitionWeights{N,T} = ProbabilityWeights{T,T,MVector{N,T}}
 
@@ -93,10 +90,10 @@ end
 # Base motility patterns
 function RunTumble(
     run_duration, run_speed,
-    tumble_duration=0, polar=Uniform(-π, +π), azimuthal=Arccos()
+    tumble_duration=0, angle=Spherical(-π/2, π/2)
 )
     Motility(
-        (Run(run_duration, run_speed), Tumble(tumble_duration, polar, azimuthal)),
+        (Run(run_duration, run_speed), Tumble(tumble_duration, angle)),
         (1 => 2, 1.0), (2 => 1, 1.0)
     )
 end
@@ -104,14 +101,14 @@ end
 function RunReverse(
     run_duration_forward, run_speed_forward,
     run_duration_backward, run_speed_backward,
-    reverse_duration=0.0, polar=(π,), azimuthal=Arccos()
+    reverse_duration=0.0, angle=(π,)
 )
     Motility(
         (
             Run(run_duration_forward, run_speed_forward),
-            Reverse(reverse_duration, polar, azimuthal),
+            Reverse(reverse_duration, angle),
             Run(run_duration_backward, run_speed_backward),
-            Reverse(reverse_duration, polar, azimuthal),
+            Reverse(reverse_duration, angle),
         ),
         (1 => 2, 1.0), (2 => 3, 1.0), (3 => 4, 1.0), (4 => 1, 1.0)
     )
@@ -121,15 +118,14 @@ function RunReverseFlick(
     run_duration_forward, run_speed_forward,
     run_duration_backward, run_speed_backward,
     reverse_duration=0, flick_duration=0,
-    polar_reverse=(π,), azimuthal_reverse=Arccos(),
-    polar_flick=(-π/2,+π/2), azimuthal_flick=Arccos(),
+    angle_reverse=(π,), angle_flick=(-π/2,+π/2),
 )
     Motility(
         (
             Run(run_duration_forward, run_speed_forward),
-            Reverse(reverse_duration, polar_reverse, azimuthal_reverse),
+            Reverse(reverse_duration, angle_reverse),
             Run(run_duration_backward, run_speed_backward),
-            Flick(flick_duration, polar_flick, azimuthal_flick)
+            Flick(flick_duration, angle_flick)
         ),
         (1 => 2, 1.0), (2 => 3, 1.0), (3 => 4, 1.0), (4 => 1, 1.0)
     )
@@ -204,11 +200,11 @@ Return the speed distribution of the current motile state.
 """
 speed(m::Motility) = speed(states(m)[state(m)])
 """
-    polar(motility::Motility)
+    angle(motility::Motility)
 Return the distribution of polar reorientation angles of the
 current motile state.
 """
-polar(m::Motility) = polar(states(m)[state(m)])
+angle(m::Motility) = angle(states(m)[state(m)])
 """
     azimuthal(motility::Motility)
 Return the distribution of azimuthal reorientation angles of the
@@ -217,5 +213,5 @@ current motile state.
 azimuthal(m::Motility) = azimuthal(states(m)[state(m)])
 duration(s::MotileState) = s.duration
 speed(s::MotileState) = s.speed
-polar(s::MotileState) = s.polar
+angle(s::MotileState) = s.angle
 azimuthal(s::MotileState) = s.azimuthal
