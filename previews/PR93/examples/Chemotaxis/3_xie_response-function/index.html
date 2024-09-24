@@ -34,15 +34,35 @@ model = StandardABM(Xie{3,4}, space, dt; properties)</code></pre><pre class="doc
  agents container: Dict
  space: periodic continuous space with [500.0, 500.0, 500.0] extent and spacing=25.0
  scheduler: fastest
- properties: chemoattractant, affect!, C₀, t₁, t₂, C₁, timestep</code></pre><p>A peculiarity of the <code>Xie</code> model is that the chemotactic properties of the microbe differ between the forward and backward motile states, so we can probe the response function in both the forward and backward motile state by initializing two distinct microbes in the two states. To keep the microbes in these motile states for the entire experiment duration, we suppress their tumbles, and (just for total consistency with experiments) we also set their speed to 0.</p><pre><code class="language- hljs">add_agent!(model; motility=RunReverseFlick(Inf, [0], 0.0, [0]))
+ properties: chemoattractant, affect!, C₀, t₁, t₂, C₁, timestep</code></pre><p>A peculiarity of the <code>Xie</code> model is that the chemotactic properties of the microbe differ between the forward and backward motile states, so we can probe the response function in both the forward and backward motile state by initializing two distinct microbes in the two states. To keep the microbes in these motile states for the entire experiment duration, we suppress their tumbles, and (just for total consistency with experiments) we also set their speed to 0.</p><pre><code class="language-julia hljs">add_agent!(model; motility=RunReverseFlick(Inf, [0], 0.0, [0]))
 add_agent!(model; motility=RunReverseFlick(0.0, [0], Inf, [0]))
-model[2].motility.current_state = 3 # manually set to backward run state</code></pre><p>In addition to the <code>bias</code>, we will also monitor two other quantities <code>state_m</code> and <code>state_z</code> which are internal variables of the <code>Xie</code> model which represent the methylation and dephosphorylation processes which together control the chemotactic response of the bacterium.</p><pre><code class="language- hljs">nsteps = round(Int, T/dt)
+model[2].motility.current_state = 3 # manually set to backward run state</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3</code></pre><p>In addition to the <code>bias</code>, we will also monitor two other quantities <code>state_m</code> and <code>state_z</code> which are internal variables of the <code>Xie</code> model which represent the methylation and dephosphorylation processes which together control the chemotactic response of the bacterium.</p><pre><code class="language-julia hljs">nsteps = round(Int, T/dt)
 adata = [bias, :state_m, :state_z]
 adf, = run!(model, nsteps; adata)
 
 S = Analysis.adf_to_matrix(adf, :bias)
 m = (Analysis.adf_to_matrix(adf, :state_m))[:,1] # take only fw
-z = (Analysis.adf_to_matrix(adf, :state_z))[:,1] # take only fw</code></pre><p>We first look at the response function in the forward and backward motile state: when the concentration increases we have a sharp negative response (the tumble bias decreases), then the bacterium adapts to the new concentration level, and when it drops back to the basal level we observe a sharp positive response (the tumble bisa increases) before adapting again to the new concentration level.</p><pre><code class="language- hljs">_green = palette(:default)[3]
+z = (Analysis.adf_to_matrix(adf, :state_z))[:,1] # take only fw</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">501-element Vector{Float64}:
+ 0.0
+ 0.0025317807984289787
+ 0.004159354168847608
+ 0.0052056513355452985
+ 0.0058782709427081
+ 0.006310669261598472
+ 0.006588639609456568
+ 0.0067673348330796294
+ 0.00688221033398017
+ 0.0069560588702733735
+ ⋮
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142</code></pre><p>We first look at the response function in the forward and backward motile state: when the concentration increases we have a sharp negative response (the tumble bias decreases), then the bacterium adapts to the new concentration level, and when it drops back to the basal level we observe a sharp positive response (the tumble bisa increases) before adapting again to the new concentration level.</p><pre><code class="language-julia hljs">_green = palette(:default)[3]
 plot()
 x = (0:dt:T) .- t₁
 plot!(
@@ -55,7 +75,7 @@ plot!(twinx(),
     ls=:dash, lw=1.5, lc=_green, lab=false,
     tickfontcolor=_green,
     ylab=&quot;C (μM)&quot;, guidefontcolor=_green
-)</code></pre><p>By analysing the methylation and dephosphorylation processes, we can understand how the chemotactic response arises. First, when the concentration increases, both <code>m</code> and <code>z</code> increase and converge to a new steady-state value, but since they respond on different timescales, the response (defined by the difference between these two quantities), shows a sharp decrease followed by a slower relaxation. The same occurs for the negative stimulus.</p><pre><code class="language- hljs">x = (0:dt:T) .- t₁
+)</code></pre><img src="0c356d01.svg" alt="Example block output"/><p>By analysing the methylation and dephosphorylation processes, we can understand how the chemotactic response arises. First, when the concentration increases, both <code>m</code> and <code>z</code> increase and converge to a new steady-state value, but since they respond on different timescales, the response (defined by the difference between these two quantities), shows a sharp decrease followed by a slower relaxation. The same occurs for the negative stimulus.</p><pre><code class="language-julia hljs">x = (0:dt:T) .- t₁
 τ_m = model[1].adaptation_time_m
 τ_z = model[1].adaptation_time_z
 M = m ./ τ_m
@@ -66,4 +86,4 @@ plot(
     lw=2,
     lab=[&quot;m/τ_m&quot; &quot;z/τ_z&quot; &quot;m/τ_m - z/τ_z&quot;],
     xlab=&quot;time (s)&quot;
-)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2_celani_gauss2D/">« Noisy chemotaxis towards Gaussian source</a><a class="docs-footer-nextpage" href="../4_response_functions/">Comparison of chemotactic response functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Tuesday 24 September 2024 22:57">Tuesday 24 September 2024</span>. Using Julia version 1.10.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+)</code></pre><img src="1e816e19.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2_celani_gauss2D/">« Noisy chemotaxis towards Gaussian source</a><a class="docs-footer-nextpage" href="../4_response_functions/">Comparison of chemotactic response functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Tuesday 24 September 2024 23:08">Tuesday 24 September 2024</span>. Using Julia version 1.10.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
