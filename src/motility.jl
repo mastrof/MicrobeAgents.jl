@@ -8,21 +8,21 @@ export Arccos # from Agents
 struct RunState
     duration
     speed
-    polar
+    angle
     azimuthal
 end
 struct TurnState
     duration
     speed
-    polar
+    angle
     azimuthal
 end
 @sumtype MotileState(RunState, TurnState)
-function RunState(; duration, speed, polar=nothing, azimuthal=nothing)
-    MotileState(RunState(duration, speed, polar, azimuthal))
+function RunState(; duration, speed, angle=nothing, azimuthal=nothing)
+    MotileState(RunState(duration, speed, angle, azimuthal))
 end
-function TurnState(; duration, speed=[zero(duration)], polar, azimuthal)
-    MotileState(TurnState(duration, speed, polar, azimuthal))
+function TurnState(; duration, angle, speed=[zero(duration)], azimuthal=Uniform(-π,π))
+    MotileState(TurnState(duration, speed, angle, azimuthal))
 end
 
 biased(s::MotileState) = biased(variant(s))
