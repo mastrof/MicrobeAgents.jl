@@ -1,4 +1,4 @@
-export Spherical
+export Spherical, Isotropic, Isotropic2D, Isotropic3D
 
 struct Spherical{T<:Real} <: ContinuousUnivariateDistribution
     θmin::T
@@ -20,3 +20,15 @@ function Base.rand(rng::AbstractRNG, d::Spherical)
     d.θmin + ((d.θmax-d.θmin) / π) * acos(u)
 end
 
+"""
+    Isotropic2D = Uniform(-π, π)
+Isotropic distribution of reorientation angles in two spatial dimensions.
+"""
+global const Isotropic2D = Uniform(-π, π)
+"""
+    Isotropic3D = Spherical(0, π)
+Isotropic distribution of reorientation angles in three spatial dimensions.
+"""
+global const Isotropic3D = Spherical(0, π)
+
+Isotropic(D::Integer) = (D == 3 ? Isotropic3D : Isotropic2D) # D=1 doesnt matter
