@@ -22,17 +22,23 @@ model = StandardABM(Microbe{2}, space, dt)
 We will now add microbes individually, choosing different properties for each.
 The motile pattern can be customized through the `motility` keyword.
 
-The `RunTumble` motility consists of straight runs interspersed with isotropic
+The `RunTumble` motility consists of straight runs interspersed with
 reorientations (tumbles).
 With the first argument, we set the average duration of tumbles, 1 s in this case.
 We can then define the speed to follow a a `Normal` distribution
 (from Distributions.jl) with mean 30 μm/s and standard deviation 6 μm/s.
 This means that, after every tumble, the microbe will change its speed following
 this distribution.
-Further, we can set tumbles to also have a finite duration, let's say 0.1 s.
+We should then specify the distribution of angular reorientations.
+For convenience, MicrobeAgents implements an `Isotropic` function
+which produces the appropriate distribution to have isotropic reorientations
+in a space with given dimensionality.
+In this case, using `Isotropic(2)` produces a `Uniform` distribution
+of angles between -π and +π.
+Finally, we can set tumbles to also have a finite duration, let's say 0.1 s.
 
 ````@example 2_randomwalk2D_motilepatterns
-add_agent!(model; motility=RunTumble(1.0, Normal(30,6), 0.1))
+add_agent!(model; motility=RunTumble(1.0, Normal(30,6), Isotropic(2), 0.1))
 ````
 
 The `RunReverse` motility consists of alternating straight runs and 180-degree reversals.
