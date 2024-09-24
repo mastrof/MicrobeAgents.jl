@@ -72,5 +72,5 @@ end
 
 function can_turn(microbe)
     m = motilestate(microbe)
-    !isnothing(polar(m))
+    !isnothing(angle(m))
 end
