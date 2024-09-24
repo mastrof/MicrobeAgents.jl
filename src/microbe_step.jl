@@ -24,7 +24,7 @@ function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
         # if the new motile state is a TurnState with duration 0
         # immediately turn and transition to another state
         new_motilestate = motilestate(microbe)
-        if kindof(new_motilestate) === :TurnState && iszero(duration(new_motilestate))
+        if variantof(new_motilestate) === TurnState && iszero(duration(new_motilestate))
             turn!(microbe, model)
             update_motilestate!(microbe, model)
         end
@@ -53,7 +53,7 @@ function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedMod
         # if the new motile state is a TurnState with duration 0
         # immediately turn and transition to another state
         new_motilestate = motilestate(microbe)
-        if kindof(new_motilestate) === :TurnState && iszero(duration(new_motilestate))
+        if variantof(new_motilestate) === TurnState && iszero(duration(new_motilestate))
             turn!(microbe, model)
             update_motilestate!(microbe, model)
         end

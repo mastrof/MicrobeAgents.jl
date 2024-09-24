@@ -5,28 +5,29 @@ export motilepattern, motilestate, state, states, transition_weights
 export duration, speed, angle
 export Arccos # from Agents
 
-@compact_structs MotileState begin
-    @kwdef struct RunState
-        duration
-        speed
-        angle = nothing
-        azimuthal = nothing
-    end
-    @kwdef struct TurnState
-        duration
-        speed = [zero(duration)]
-        angle
-        azimuthal = Uniform(-π, π)
-    end
+struct RunState
+    duration
+    speed
+    polar
+    azimuthal
+end
+struct TurnState
+    duration
+    speed
+    polar
+    azimuthal
+end
+@sumtype MotileState(RunState, TurnState)
+function RunState(; duration, speed, polar=nothing, azimuthal=nothing)
+    MotileState(RunState(duration, speed, polar, azimuthal))
+end
+function TurnState(; duration, speed=[zero(duration)], polar, azimuthal)
+    MotileState(TurnState(duration, speed, polar, azimuthal))
 end
 
-function biased(s::MotileState)
-    if kindof(s) === :RunState
-        return true
-    else # TurnState
-        return false
-    end
-end
+biased(s::MotileState) = biased(variant(s))
+biased(::RunState) = true
+biased(::TurnState) = false
 
 # Base motile states
 Run(duration::Real, speed) = RunState(; duration, speed)
