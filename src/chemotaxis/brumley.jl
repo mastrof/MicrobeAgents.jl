@@ -18,7 +18,10 @@ Default parameters:
 """
 @agent struct Brumley{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
     speed::Float64
-    motility::Motility{N} = RunReverseFlick(0.45, [46.5], 0.45, [46.5])
+    motility::Motility{N} = RunReverseFlick(;
+        run_speed_forward=[46.5], run_duration_forward=0.45,
+        run_speed_backward=[46.5], run_duration_backward=0.45,
+    )
     rotational_diffusivity::Float64 = 0.035
     radius::Float64 = 0.5
     state::Float64 = 0.0

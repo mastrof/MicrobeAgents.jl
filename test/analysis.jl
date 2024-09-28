@@ -11,7 +11,7 @@ using LinearAlgebra: norm
         pos = zero(SVector{D})
         U = 1
         turn_rate = 0
-        motility = RunTumble(1/turn_rate, [U], Isotropic(D), 0.0)
+        motility = RunTumble([U], 1/turn_rate, Isotropic(D))
         vel = fill(1/√D, SVector{D})
         model = StandardABM(Microbe{D}, space, dt)
         add_agent!(pos, model; vel, motility)
@@ -73,7 +73,7 @@ using LinearAlgebra: norm
             space = ContinuousSpace(extent)
             rng = Xoshiro(35)
             model_periodic = StandardABM(Microbe{D}, space, dt; rng)
-            motility = RunTumble(1.0, [30.0], Isotropic(D), 0.0)
+            motility = RunTumble([30.0], 1.0, Isotropic(D))
             add_agent!(model_periodic; motility)
             adf_periodic, = run!(model_periodic, nsteps; adata)
             rng = Xoshiro(35)
@@ -102,7 +102,7 @@ using LinearAlgebra: norm
             model = StandardABM(Microbe{D}, space, dt)
             turn_rate = 0 # ballistic motion
             U = 30.0
-            motility = RunTumble(1/turn_rate, [U], Isotropic(D), 0.0)
+            motility = RunTumble([U], 1/turn_rate, Isotropic(D))
             add_agent!(model; motility)
             nsteps = 50
             adata = [position]
@@ -122,7 +122,7 @@ using LinearAlgebra: norm
                 model = StandardABM(Microbe{D}, space, dt)
                 turn_rate = 0 # ballistic motion
                 U = 30.0
-                motility = RunTumble(1/turn_rate, [U], Isotropic(D), 0.0)
+                motility = RunTumble([U], 1/turn_rate, Isotropic(D))
                 add_agent!(model; motility)
                 nsteps = 50
                 adata = [position]
@@ -134,7 +134,7 @@ using LinearAlgebra: norm
             end
 
             turn_rate = Inf # reversal at each step
-            motility = RunReverse(1/turn_rate, [U], 1/turn_rate, [U])
+            motility = RunReverse([U], 1/turn_rate, [U], 1/turn_rate)
             model = StandardABM(Microbe{D}, space, dt)
             add_agent!(extent./2, model; motility)
             nsteps = 3

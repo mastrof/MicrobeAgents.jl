@@ -11,11 +11,16 @@ using LinearAlgebra: norm
             space = ContinuousSpace(extent)
             model = StandardABM(Microbe{D}, space, dt; rng, container)
             pos = extent ./ 2
-            m1 = RunTumble(Inf, [30.0], Isotropic(D)) # infinite run
+            m1 = RunTumble(
+                run_duration=Inf, run_speed=[30.0], angle=Isotropic(D)
+            ) # infinite run
             vel1 = random_velocity(model)
             speed1 = rand(rng, speed(m1))
             add_agent!(pos, model; vel=vel1, speed=speed1, motility=m1)
-            m2 = RunReverse(0, [10.0], 0, [10.0]) # switching every step
+            m2 = RunReverse(
+                run_duration_forward=0, run_speed_forward=[10.0],
+                run_duration_backward=0, run_speed_backward=[10.0]
+            ) # switching every step
             vel2 = random_velocity(model)
             speed2 = rand(rng, speed(m2))
             add_agent!(pos, model; vel=vel2, speed=speed2, motility=m2)
@@ -33,7 +38,10 @@ using LinearAlgebra: norm
             affect!(microbe::Microbe{D}, model) where D = (microbe.state -= D)
             properties = Dict(:affect! => affect!)
             model = StandardABM(Microbe{D}, space, dt; container, properties)
-            motility = RunTumble(1.0, [30.0], Isotropic(D), 0.0)
+            motility = RunTumble(
+                run_duration=1.0, run_speed=[30.0],
+                angle=Isotropic(D), tumble_duration=0.0
+            )
             add_agent!(model; motility)
             run!(model, 1)
             @test model[1].state == -D
@@ -55,11 +63,19 @@ using LinearAlgebra: norm
             space = ContinuousSpace(extent)
             model = StandardABM(Microbe{D}, space, dt; rng, container)
             pos = extent ./ 2
-            m1 = RunTumble(Inf, [30.0], Isotropic(D), 0.1) # infinite run
+            m1 = RunTumble(;
+                run_duration=Inf, run_speed=[30.0],
+                angle=Isotropic(D), tumble_duration=0.1
+            ) # infinite run
             vel1 = random_velocity(model)
             speed1 = rand(rng, speed(m1))
             add_agent!(pos, model; vel=vel1, speed=speed1, motility=m1)
-            m2 = RunReverse(0, [10.0], 0, [10.0], 0.1, 0.1) # switching every step
+            m2 = RunReverse(;
+                run_duration_forward=0, run_speed_forward=[10.0],
+                run_duration_backward=0, run_speed_backward=[10.0],
+                reverse_duration = 0.1,
+
+            ) # switching every step
             vel2 = random_velocity(model)
             speed2 = rand(rng, speed(m2))
             add_agent!(pos, model; vel=vel2, speed=speed2, motility=m2)
@@ -77,7 +93,10 @@ using LinearAlgebra: norm
             affect!(microbe::Microbe{D}, model) where D = (microbe.state -= D)
             properties = Dict(:affect! => affect!)
             model = StandardABM(Microbe{D}, space, dt; container, properties)
-            motility = RunTumble(1.0, [30.0], Isotropic(D), 0.0)
+            motility = RunTumble(;
+                run_duration=1.0, run_speed=[30.0],
+                angle=Isotropic(D), tumble_duration=0.0
+            )
             add_agent!(model; motility)
             run!(model, 1)
             @test model[1].state == -D
