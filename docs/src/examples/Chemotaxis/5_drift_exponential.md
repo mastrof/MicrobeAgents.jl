@@ -79,7 +79,7 @@ n = 200
 for Π in Πs
     for i in 1:n
         pos = SVector{3}(0.0, rand()*Ly, rand()*Lz)
-        motility = RunReverseFlick(0.45, [46.5], 0.45, [46.5])
+        motility = RunReverseFlick([46.5], 0.45, [46.5], 0.45)
         add_agent!(pos, model; chemotactic_precision=Π, motility)
     end
 end

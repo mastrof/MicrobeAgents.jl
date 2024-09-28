@@ -61,11 +61,11 @@ properties = Dict(
 
 model = StandardABM(Union{BrownBerg{3},Celani{3}}, space, dt; properties)
 
-add_agent!(BrownBerg{3}, model; motility=RunTumble(1.0, [0], Isotropic(3)),
+add_agent!(BrownBerg{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)),
     memory=1,
 )
-add_agent!(Celani{3}, model; motility=RunTumble(1.0, [0], Isotropic(3)), gain=4)
-add_agent!(Celani{3}, model; motility=RunTumble(1.0, [0], Isotropic(3)), gain=4,
+add_agent!(Celani{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)), gain=4)
+add_agent!(Celani{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)), gain=4,
     chemotactic_precision=50.0
 )
 

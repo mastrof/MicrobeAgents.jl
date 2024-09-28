@@ -24,11 +24,11 @@ The motile pattern can be customized through the `motility` keyword.
 
 The `RunTumble` motility consists of straight runs interspersed with
 reorientations (tumbles).
-With the first argument, we set the average duration of tumbles, 1 s in this case.
-We can then define the speed to follow a a `Normal` distribution
+With the first argument, we set the speed to follow a a `Normal` distribution
 (from Distributions.jl) with mean 30 μm/s and standard deviation 6 μm/s.
 This means that, after every tumble, the microbe will change its speed following
 this distribution.
+With the second argument, we set the average duration of tumbles, 1 s in this case.
 We should then specify the distribution of angular reorientations.
 For convenience, MicrobeAgents implements an `Isotropic` function
 which produces the appropriate distribution to have isotropic reorientations
@@ -38,7 +38,7 @@ of angles between -π and +π.
 Finally, we can set tumbles to also have a finite duration, let's say 0.1 s.
 
 ````@example 2_randomwalk2D_motilepatterns
-add_agent!(model; motility=RunTumble(1.0, Normal(30,6), Isotropic(2), 0.1))
+add_agent!(model; motility=RunTumble(Normal(30,6), 1.0, Isotropic(2); tumble_duration=0.1))
 ````
 
 The `RunReverse` motility consists of alternating straight runs and 180-degree reversals.
@@ -53,7 +53,7 @@ rotational diffusion, the run reverse motility is pathologically incapable of
 exploring space efficiently.
 
 ````@example 2_randomwalk2D_motilepatterns
-add_agent!(model; motility=RunReverse(1.0, [30.0], 0.7, [20.0]), rotational_diffusivity=0.2)
+add_agent!(model; motility=RunReverse([30.0], 1.0, [20.0], 0.7), rotational_diffusivity=0.2)
 ````
 
 The `RunReverseFlick` motility consists of a straight run, a 180-degree reversal, then another
@@ -64,7 +64,7 @@ Again, we will set only run durations and speeds.
 We also set the rotational diffusivity to 0.1 rad²/s.
 
 ````@example 2_randomwalk2D_motilepatterns
-add_agent!(model; motility=RunReverseFlick(2.0, [25.0], 0.5, [25.0]), rotational_diffusivity=0.1)
+add_agent!(model; motility=RunReverseFlick([25.0], 2.0, [25.0], 0.5), rotational_diffusivity=0.1)
 ````
 
 Now we can run (collecting the microbe positions at each timestep), unfold the trajectories,
