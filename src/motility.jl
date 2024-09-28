@@ -90,6 +90,9 @@ function Motility(motile_states::NTuple{N,MotileState}, rates...) where N
 end
 
 # Base motility patterns
+"""
+    RunTumble(run_speed, run_duration, angle; tumble_duration=0.0)
+"""
 RunTumble(
     run_speed, run_duration, angle; kwargs...
 ) = RunTumble(;
@@ -105,6 +108,12 @@ function RunTumble(;
     )
 end
 
+"""
+    RunReverse(
+        run_speed_forward, run_duration_forward,
+        run_speed_backward, run_duration_backward;
+        angle=(π,), reverse_duration=0.0,
+"""
 RunReverse(
     run_speed_forward, run_duration_forward,
     run_speed_backward, run_duration_backward,
@@ -130,6 +139,14 @@ function RunReverse(;
     )
 end
 
+"""
+    RunReverseFlick(
+        run_speed_forward, run_duration_forward,
+        run_speed_backward, run_duration_backward;
+        reverse_angle=(π,) flick_angle=(-π/2, +π/2),
+        reverse_duration=0.0, flick_duration=0.0,
+    )
+"""
 RunReverseFlick(
     run_speed_forward, run_duration_forward,
     run_speed_backward, run_duration_backward;
@@ -156,6 +173,9 @@ function RunReverseFlick(;
     )
 end
 
+"""
+    RunStop(run_speed, run_duration, stop_duration)
+"""
 RunStop(
     run_speed, run_duration, stop_duration
 ) = RunStop(;
