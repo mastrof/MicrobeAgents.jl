@@ -88,7 +88,7 @@ for i in 1:n
     p0 = spacesize(model) ./ 2
     delta = rand(abmrng(model), SVector{2}) .* 10
     pos = p0 .+ delta # random scatter around center
-    motility = RunTumble(0.67, [30.0], 0.1)
+    motility = RunTumble(0.67, [30.0], Isotropic(2), 0.1)
     add_agent!(pos, model; motility)
 end
 model

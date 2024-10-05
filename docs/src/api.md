@@ -14,8 +14,7 @@ motilestate
 states
 transition_weights
 duration
-polar
-azimuthal
+angle
 distance
 distancevector
 random_speed

@@ -10,9 +10,8 @@ using LinearAlgebra: norm
         space = ContinuousSpace(extent)
         pos = zero(SVector{D})
         U = 1
-        #motility = RunTumble(speed=[U])
         turn_rate = 0
-        motility = RunTumble(1/turn_rate, [U], 0.0)
+        motility = RunTumble(1/turn_rate, [U], Isotropic(D), 0.0)
         vel = fill(1/√D, SVector{D})
         model = StandardABM(Microbe{D}, space, dt)
         add_agent!(pos, model; vel, motility)
@@ -74,7 +73,7 @@ using LinearAlgebra: norm
             space = ContinuousSpace(extent)
             rng = Xoshiro(35)
             model_periodic = StandardABM(Microbe{D}, space, dt; rng)
-            motility = RunTumble(1.0, [30.0], 0.0)
+            motility = RunTumble(1.0, [30.0], Isotropic(D), 0.0)
             add_agent!(model_periodic; motility)
             adf_periodic, = run!(model_periodic, nsteps; adata)
             rng = Xoshiro(35)
@@ -103,7 +102,7 @@ using LinearAlgebra: norm
             model = StandardABM(Microbe{D}, space, dt)
             turn_rate = 0 # ballistic motion
             U = 30.0
-            motility = RunTumble(1/turn_rate, [U], 0.0)
+            motility = RunTumble(1/turn_rate, [U], Isotropic(D), 0.0)
             add_agent!(model; motility)
             nsteps = 50
             adata = [position]
@@ -123,7 +122,7 @@ using LinearAlgebra: norm
                 model = StandardABM(Microbe{D}, space, dt)
                 turn_rate = 0 # ballistic motion
                 U = 30.0
-                motility = RunTumble(1/turn_rate, [U], 0.0)
+                motility = RunTumble(1/turn_rate, [U], Isotropic(D), 0.0)
                 add_agent!(model; motility)
                 nsteps = 50
                 adata = [position]

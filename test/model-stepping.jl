@@ -11,7 +11,7 @@ using LinearAlgebra: norm
             space = ContinuousSpace(extent)
             model = StandardABM(Microbe{D}, space, dt; rng, container)
             pos = extent ./ 2
-            m1 = RunTumble(Inf, [30.0]) # infinite run
+            m1 = RunTumble(Inf, [30.0], Isotropic(D)) # infinite run
             vel1 = random_velocity(model)
             speed1 = rand(rng, speed(m1))
             add_agent!(pos, model; vel=vel1, speed=speed1, motility=m1)
@@ -33,7 +33,7 @@ using LinearAlgebra: norm
             affect!(microbe::Microbe{D}, model) where D = (microbe.state -= D)
             properties = Dict(:affect! => affect!)
             model = StandardABM(Microbe{D}, space, dt; container, properties)
-            motility = RunTumble(1.0, [30.0], 0.0)
+            motility = RunTumble(1.0, [30.0], Isotropic(D), 0.0)
             add_agent!(model; motility)
             run!(model, 1)
             @test model[1].state == -D
@@ -55,7 +55,7 @@ using LinearAlgebra: norm
             space = ContinuousSpace(extent)
             model = StandardABM(Microbe{D}, space, dt; rng, container)
             pos = extent ./ 2
-            m1 = RunTumble(Inf, [30.0], 0.1) # infinite run
+            m1 = RunTumble(Inf, [30.0], Isotropic(D), 0.1) # infinite run
             vel1 = random_velocity(model)
             speed1 = rand(rng, speed(m1))
             add_agent!(pos, model; vel=vel1, speed=speed1, motility=m1)
@@ -77,7 +77,7 @@ using LinearAlgebra: norm
             affect!(microbe::Microbe{D}, model) where D = (microbe.state -= D)
             properties = Dict(:affect! => affect!)
             model = StandardABM(Microbe{D}, space, dt; container, properties)
-            motility = RunTumble(1.0, [30.0], 0.0)
+            motility = RunTumble(1.0, [30.0], Isotropic(D), 0.0)
             add_agent!(model; motility)
             run!(model, 1)
             @test model[1].state == -D

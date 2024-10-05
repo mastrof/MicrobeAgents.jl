@@ -34,18 +34,22 @@ from position `(0,)`.
 
 Moreover, it's always required to specify the motility of the microbes via
 the keyword argument `motility`.
-For example, `RunTumble` needs as inputs the average duration of runs
-and the distribution of run speeds. Passing a one-element vector `[U]`
+For example, `RunTumble` needs as inputs the average duration of runs,
+the distribution of run speeds and the distribution of reorientation angles.
+The latter is irrelevant in 1D, since the bacterium can only revert its
+direction along the line, but we still have to pass it.
+We can just use an empty vector.
+Passing a one-element vector `[U]` as the speed distribution
 means that all runs will have the same velocity `U`.
 We could have also specified the average duration of tumbles
-(equal to reversals in 1 dimension) via an optional 3rd argument (try it! e.g. 0.5);
+(equal to reversals in 1 dimension) via an optional 4th argument (try it! e.g. 0.5);
 when unspecified, the tumbles are taken to be instantaneous.
 =#
 
 n = 10 # number of microbes to add
 τ_run = 1.0 # average run duration in s
 U = 30.0 # swimming speed in μm/s
-motility = RunTumble(τ_run, [U], 0.5)
+motility = RunTumble(τ_run, [U], [], 0.5)
 foreach(_ -> add_agent!((0,), model; motility), 1:n)
 
 #=

@@ -4,12 +4,14 @@ using LinearAlgebra: norm
 
 @testset "Motility" begin
     @test Run(0.0, [30.0]) isa MotileState
-    @test Tumble(0.0) isa MotileState
+    @test Tumble(0.0, Isotropic2D) isa MotileState
     @test Reverse(0.0) isa MotileState
     @test Flick(0.0) isa MotileState
     @test Stop(1.0) isa MotileState
+    @test Isotropic(2) === Uniform(-π, π)
+    @test Isotropic(3) === Spherical(0, π)
 
-    motile_states = (Run(1.0, [30.0]), Tumble(0.1))
+    motile_states = (Run(1.0, [30.0]), Tumble(0.1, Isotropic2D))
     rates = [(1=>2, 1.0), (2=>1, 0.9), (2=>2, 0.1)]
     m = Motility(motile_states, rates...)
     @test m isa Motility{2}
@@ -17,7 +19,7 @@ using LinearAlgebra: norm
     @test w[1] == [0.0, 1.0]
     @test w[2] == [0.9, 0.1]
 
-    rt = RunTumble(1.0, Normal(50, 5.0), 0.13)
+    rt = RunTumble(1.0, Normal(50, 5.0), Isotropic2D, 0.13)
     @test rt isa Motility{2}
     @test transition_weights(rt, 1) == [0.0, 1.0]
     @test transition_weights(rt, 2) == [1.0, 0.0]

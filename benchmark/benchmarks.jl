@@ -53,7 +53,7 @@ open(filename, "a") do io
                 motility = RunReverseFlick(0.0, [10.0], 0.0, [10.0])
             else
                 model = StandardABM(T{D,2}, space, dt; container=Vector)
-                motility = RunTumble(0.0, [10.0], 0)
+                motility = RunTumble(0.0, [10.0], Isotropic(D), 0)
             end
             add_agent!(model; motility)
             nsteps = 1000
