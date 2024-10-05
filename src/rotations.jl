@@ -1,3 +1,6 @@
+function turn!(microbe::AbstractMicrobe{1}, model)
+    microbe.vel = rotate(direction(microbe))
+end
 function turn!(microbe::AbstractMicrobe, model)
     e = direction(microbe)
     θ = rand(abmrng(model), angle(motilepattern(microbe)))

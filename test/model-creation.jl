@@ -22,7 +22,7 @@ using Random
             model = StandardABM(Microbe{D}, space, timestep; rng=Xoshiro(123))
             # add agent with default constructor
             # random pos and vel, random speed from motility pattern
-            motility = RunTumble(1.3, [25.0, 35.0], 0.1)
+            motility = RunTumble([25.0, 35.0], 1.3, 0.1)
             add_agent!(model; motility)
             rng = Xoshiro(123)
             pos = rand(rng, SVector{D})
@@ -51,7 +51,7 @@ using Random
                 space = ContinuousSpace(ones(SVector{D}))
                 model = StandardABM(T{D}, space, timestep; rng=Xoshiro(987))
                 rng = Xoshiro(987)
-                motility = RunTumble(1.0, [30.0], 0.0)
+                motility = RunTumble([30.0], 1.0, 0.0)
                 add_agent!(model; motility)
                 m = model[1]
                 @test m isa T{D}
@@ -75,7 +75,7 @@ using Random
                     properties = Dict(:chemoattractant => chemo)
                     s = ContinuousSpace(ones(SVector{D}))
                     model_c = StandardABM(Celani{D}, s, 1.0; properties)
-                    motility = RunTumble(0.67, [30.0], 0.1)
+                    motility = RunTumble([30.0], 0.67, 0.1)
                     add_agent!(model_c; motility)
                     m = model_c[1]
                     λ = 1 / m.memory

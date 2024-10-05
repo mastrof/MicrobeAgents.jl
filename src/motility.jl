@@ -30,11 +30,11 @@ biased(::RunState) = true
 biased(::TurnState) = false
 
 # Base motile states
-Run(duration::Real, speed) = RunState(; duration, speed)
-Tumble(duration::Real, angle) = TurnState(; duration, angle)
-Reverse(duration::Real, angle=(π,)) = TurnState(; duration, angle)
-Flick(duration::Real, angle=(-π/2, π/2)) = TurnState(; duration, angle)
-Stop(duration::Real) =
+Run(speed, duration) = RunState(; duration, speed)
+Tumble(angle, duration=0.0) = TurnState(; duration, angle)
+Reverse(angle=(π,), duration=0.0) = TurnState(; duration, angle)
+Flick(angle=(-π/2, π/2), duration=0.0) = TurnState(; duration, angle)
+Stop(duration) =
     TurnState(; duration, angle=[zero(duration)], azimuthal=[zero(duration)])
 
 TransitionWeights{N,T} = ProbabilityWeights{T,T,MVector{N,T}}
@@ -90,52 +90,100 @@ function Motility(motile_states::NTuple{N,MotileState}, rates...) where N
 end
 
 # Base motility patterns
-function RunTumble(
-    run_duration, run_speed, angle,
-    tumble_duration=0,
+"""
+    RunTumble(run_speed, run_duration, angle; tumble_duration=0.0)
+"""
+RunTumble(
+    run_speed, run_duration, angle; kwargs...
+) = RunTumble(;
+    run_speed, run_duration, angle, kwargs...
+)
+function RunTumble(;
+    run_speed, run_duration,
+    angle, tumble_duration=0.0,
 )
     Motility(
-        (Run(run_duration, run_speed), Tumble(tumble_duration, angle)),
+        (Run(run_speed, run_duration), Tumble(angle, tumble_duration)),
         (1 => 2, 1.0), (2 => 1, 1.0)
     )
 end
 
-function RunReverse(
-    run_duration_forward, run_speed_forward,
-    run_duration_backward, run_speed_backward,
-    reverse_duration=0.0, angle=(π,)
+"""
+    RunReverse(
+        run_speed_forward, run_duration_forward,
+        run_speed_backward, run_duration_backward;
+        angle=(π,), reverse_duration=0.0,
+"""
+RunReverse(
+    run_speed_forward, run_duration_forward,
+    run_speed_backward, run_duration_backward,
+    kwargs...
+) = RunReverse(;
+    run_speed_forward, run_duration_forward,
+    run_speed_backward, run_duration_backward,
+    kwargs...
+)
+function RunReverse(;
+    run_speed_forward, run_duration_forward,
+    run_speed_backward, run_duration_backward,
+    angle=(π,), reverse_duration=0.0,
 )
     Motility(
         (
-            Run(run_duration_forward, run_speed_forward),
-            Reverse(reverse_duration, angle),
-            Run(run_duration_backward, run_speed_backward),
-            Reverse(reverse_duration, angle),
+            Run(run_speed_forward, run_duration_forward),
+            Reverse(angle, reverse_duration),
+            Run(run_speed_backward, run_duration_backward),
+            Reverse(angle, reverse_duration),
         ),
         (1 => 2, 1.0), (2 => 3, 1.0), (3 => 4, 1.0), (4 => 1, 1.0)
     )
 end
 
-function RunReverseFlick(
-    run_duration_forward, run_speed_forward,
-    run_duration_backward, run_speed_backward,
+"""
+    RunReverseFlick(
+        run_speed_forward, run_duration_forward,
+        run_speed_backward, run_duration_backward;
+        reverse_angle=(π,) flick_angle=(-π/2, +π/2),
+        reverse_duration=0.0, flick_duration=0.0,
+    )
+"""
+RunReverseFlick(
+    run_speed_forward, run_duration_forward,
+    run_speed_backward, run_duration_backward;
+    kwargs...
+) = RunReverseFlick(;
+    run_speed_forward, run_duration_forward,
+    run_speed_backward, run_duration_backward,
+    kwargs...
+)
+function RunReverseFlick(;
+    run_speed_forward, run_duration_forward,
+    run_speed_backward, run_duration_backward,
+    reverse_angle=(π,), flick_angle=(-π/2,+π/2),
     reverse_duration=0, flick_duration=0,
-    angle_reverse=(π,), angle_flick=(-π/2,+π/2),
 )
     Motility(
         (
-            Run(run_duration_forward, run_speed_forward),
-            Reverse(reverse_duration, angle_reverse),
-            Run(run_duration_backward, run_speed_backward),
-            Flick(flick_duration, angle_flick)
+            Run(run_speed_forward, run_duration_forward),
+            Reverse(reverse_angle, reverse_duration),
+            Run(run_speed_backward, run_duration_backward),
+            Flick(flick_angle, flick_duration)
         ),
         (1 => 2, 1.0), (2 => 3, 1.0), (3 => 4, 1.0), (4 => 1, 1.0)
     )
 end
 
-function RunStop(run_duration, run_speed, stop_duration)
+"""
+    RunStop(run_speed, run_duration, stop_duration)
+"""
+RunStop(
+    run_speed, run_duration, stop_duration
+) = RunStop(;
+    run_speed, run_duration, stop_duration
+)
+function RunStop(; run_speed, run_duration, stop_duration)
     Motility(
-        (Run(run_duration, run_speed), Stop(stop_duration)),
+        (Run(run_speed, run_duration), Stop(stop_duration)),
         (1 => 2, 1.0), (2 => 1, 1.0)
     )
 end

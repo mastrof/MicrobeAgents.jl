@@ -39,7 +39,7 @@ U = 30.0 # μm/s
 models = map(_ -> StandardABM(Microbe{3}, space, dt; container=Vector), θs)
 nmicrobes = 100
 for (i,θ) in enumerate(θs)
-    motility = RunTumble(τ, [U], [θ,-θ])
+    motility = RunTumble([U], τ, [θ,-θ])
     foreach(_ -> add_agent!(models[i]; motility), 1:nmicrobes)
 end
 

@@ -73,8 +73,8 @@ we suppress their tumbles, and (just for total consistency with experiments)
 we also set their speed to 0.
 
 ````@example 3_xie_response-function
-add_agent!(model; motility=RunReverseFlick(Inf, [0], 0.0, [0]))
-add_agent!(model; motility=RunReverseFlick(0.0, [0], Inf, [0]))
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0))
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0))
 model[2].motility.current_state = 3 # manually set to backward run state
 ````
 

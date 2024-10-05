@@ -16,9 +16,9 @@ space = ContinuousSpace((L,L,L))
 dt = 0.1
 model = StandardABM(Microbe{3}, space, dt)
 
-add_agent!(model; motility=RunReverse(1.0, [55], 1.0, [55]), rotational_diffusivity=0.2)
-add_agent!(model; motility=RunTumble(2.0, Normal(30,6), Isotropic(3)))
-add_agent!(model; motility=RunReverseFlick(1.0, [30], 1.0, [6]), rotational_diffusivity=0.1)
+add_agent!(model; motility=RunReverse([55], 1.0, [55], 1.0), rotational_diffusivity=0.2)
+add_agent!(model; motility=RunTumble(Normal(30,6), 2.0, Isotropic(3)))
+add_agent!(model; motility=RunReverseFlick([30], 1.0, [6], 1.0), rotational_diffusivity=0.1)
 
 nsteps = 600
 adata = [position]

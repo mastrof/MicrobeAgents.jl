@@ -18,7 +18,7 @@ using Random
             for T1 in MicrobeTypes, T2 in MicrobeTypes
                 space = ContinuousSpace(ntuple(_ -> 100, D); periodic=true)
                 model = StandardABM(Union{T1,T2}, space, 0.1)
-                motility = RunTumble(0.67, [30.0], 0.0)
+                motility = RunTumble([30.0], 0.67, 0.0)
                 add_agent!(T1, model; motility)
                 add_agent!(position(model[1]), T2, model; motility)
                 delta = SVector{D}(randn(D) .* 5)
