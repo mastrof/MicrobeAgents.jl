@@ -56,7 +56,7 @@ end
 
 
 function Agents.add_agent!(
-    pos::Agents.ValidPos,
+    pos,
     A::Type{<:AbstractMicrobe{D}},
     model::AgentBasedModel,
     properties...;
@@ -84,7 +84,7 @@ otherwise default values from the constructor will be used.
 If unspecified, a random velocity vector and a random speed are generated.
 """
 function Agents.add_agent!(
-    pos::Agents.ValidPos,
+    pos,
     A::Type{<:AbstractMicrobe{D,N}},
     model::AgentBasedModel,
     properties...;
