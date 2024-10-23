@@ -60,7 +60,7 @@ end
 # to initialize the markovian variables at steady state
 # depending on the concentration field at the agent position
 function Agents.add_agent!(
-    pos::Agents.ValidPos,
+    pos::Any,
     A::Type{<:Celani{D}},
     model::AgentBasedModel,
     properties...;
@@ -74,7 +74,7 @@ function Agents.add_agent!(
 end
 
 function Agents.add_agent!(
-    pos::Agents.ValidPos,
+    pos::Any,
     A::Type{Celani{D,N}},
     model::AgentBasedModel,
     properties...;
