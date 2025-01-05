@@ -14,12 +14,19 @@ Reorient `microbe` due to brownian rotational diffusion.
 In 1-dimensional models, this functions does nothing.
 """
 rotational_diffusion!(microbe::AbstractMicrobe{1}, model) = nothing
-function rotational_diffusion!(microbe::AbstractMicrobe, model)
+function rotational_diffusion!(microbe::AbstractMicrobe{2}, model)
+    dt = model.timestep
+    D_rot = rotational_diffusivity(microbe)
+    σ = sqrt(2*D_rot*dt)
+    θ = rand(abmrng(model), Normal(0, σ))
+    microbe.vel = rotate(direction(microbe), θ)
+end
+function rotational_diffusion!(microbe::AbstractMicrobe{3}, model)
     dt = model.timestep
     D_rot = rotational_diffusivity(microbe)
     σ = sqrt(2*D_rot*dt)
     θ = rand(abmrng(model), Normal(0,σ))
-    ϕ = rand(abmrng(model), Arccos())
+    φ = rand(abmrng(model), Uniform(-π, +π))
     microbe.vel = rotate(direction(microbe), θ, ϕ)
     nothing
 end
