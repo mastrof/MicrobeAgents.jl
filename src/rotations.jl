@@ -27,7 +27,7 @@ function rotational_diffusion!(microbe::AbstractMicrobe{3}, model)
     σ = sqrt(2*D_rot*dt)
     θ = rand(abmrng(model), Normal(0,σ))
     φ = rand(abmrng(model), Uniform(-π, +π))
-    microbe.vel = rotate(direction(microbe), θ, ϕ)
+    microbe.vel = rotate(direction(microbe), θ, φ)
     nothing
 end
 
