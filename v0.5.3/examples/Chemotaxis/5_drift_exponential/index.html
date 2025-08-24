@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Chemotactic drift in exponential ramp with noisy sensing · MicrobeAgents.jl</title><meta name="title" content="Chemotactic drift in exponential ramp with noisy sensing · MicrobeAgents.jl"/><meta property="og:title" content="Chemotactic drift in exponential ramp with noisy sensing · MicrobeAgents.jl"/><meta property="twitter:title" content="Chemotactic drift in exponential ramp with noisy sensing · MicrobeAgents.jl"/><meta name="description" content="Documentation for MicrobeAgents.jl."/><meta property="og:description" content="Documentation for MicrobeAgents.jl."/><meta property="twitter:description" content="Documentation for MicrobeAgents.jl."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">MicrobeAgents.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../../introduction/">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-3-1" type="checkbox"/><label class="tocitem" for="menuitem-3-1"><span class="docs-label">Random walks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../RandomWalks/1_randomwalk1D/">1D Random walk</a></li><li><a class="tocitem" href="../../RandomWalks/2_randomwalk2D_motilepatterns/">2D Random walk and motile patterns</a></li><li><a class="tocitem" href="../../RandomWalks/3_randomwalk3D/">3D Random walk</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox" checked/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Chemotaxis</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../1_linear_ramp/">Linear concentration ramp</a></li><li><a class="tocitem" href="../2_celani_gauss2D/">Noisy chemotaxis towards Gaussian source</a></li><li><a class="tocitem" href="../3_xie_response-function/">Response function (Xie)</a></li><li><a class="tocitem" href="../4_response_functions/">Comparison of chemotactic response functions</a></li><li class="is-active"><a class="tocitem" href>Chemotactic drift in exponential ramp with noisy sensing</a></li></ul></li></ul></li><li><span class="tocitem">Validation</span><ul><li><a class="tocitem" href="../../../validation/msd_runtumble/">Mean squared displacement</a></li><li><a class="tocitem" href="../../../validation/run_distribution/">Run-length distribution</a></li><li><a class="tocitem" href="../../../validation/velocity_autocorrelations/">Velocity autocorrelation functions</a></li></ul></li><li><a class="tocitem" href="../../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Chemotaxis</a></li><li class="is-active"><a href>Chemotactic drift in exponential ramp with noisy sensing</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Chemotactic drift in exponential ramp with noisy sensing</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl/blob/main/examples/Chemotaxis/5_drift_exponential.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Chemotactic-drift-in-exponential-ramp-with-noisy-sensing"><a class="docs-heading-anchor" href="#Chemotactic-drift-in-exponential-ramp-with-noisy-sensing">Chemotactic drift in exponential ramp with noisy sensing</a><a id="Chemotactic-drift-in-exponential-ramp-with-noisy-sensing-1"></a><a class="docs-heading-anchor-permalink" href="#Chemotactic-drift-in-exponential-ramp-with-noisy-sensing" title="Permalink"></a></h1><p>We will peform simulations of chemotaxis in an exponential concentration ramp using the <code>Brumley</code> model of chemotaxis and measure their drift velocity along the gradient. The concentration field has the form</p><p class="math-container">\[C(x) = C_0\exp(x/λ)\]</p><p>and its gradient is</p><p class="math-container">\[\nabla C(x) = \dfrac{C_0}{\lambda}\exp(x/\lambda)\hat{\mathbf{x}}.\]</p><p>In the <code>Brumley</code> model, the microbe estimates the local gradient in the form of the convective derivative of the concentration field (<span>$U\nabla C$</span>). The measurement is affected by noise, represented by an intrinsic noise term <span>$\sigma = \sqrt{3C/(\pi a D_c T^3)}$</span> (Mora &amp; Wingreen (Phys Rev Lett 2010), where <span>$a$</span> is the microbe radius, <span>$T$</span> the chemotactic sensory timescale and <span>$D_c$</span> the thermal diffusivity of the chemoattractant compound) and a pre-factor <span>$\Pi$</span> which represents the &quot;chemotactic precision&quot;. Higher values of <span>$\Pi$</span> imply higher levels of noise in chemotaxis pathway.</p><p>Therefore, with each measurement the bacterium samples from a Normal distribution with mean <span>$U\nabla C$</span> and standard deviation <span>$\Pi\sigma$</span>. The measurement, <span>$\mathcal{M}$</span>, determines the evolution of an internal state <span>$S$</span> which obeys an excitation-relaxation dynamics:</p><p class="math-container">\[\dot{S} = \kappa M -\dfrac{S}{\tau_M}.\]</p><p>This internal state, in turn, determines the tumbling rate.</p><p>We will study how <span>$\Pi$</span> affects the drift velocity of bacteria.</p><pre><code class="language-julia hljs">using MicrobeAgents
+
+function concentration_field(pos, model)
+    x = first(pos)
+    C0 = model.C0
+    λ = model.λ
+    concentration_field(x, C0, λ)
+end
+concentration_field(x, C0, λ) = C0*exp(x/λ)
+
+function concentration_gradient(pos, model)
+    x = first(pos)
+    C0 = model.C0
+    λ = model.λ
+    concentration_gradient(x, C0, λ)
+end
+concentration_gradient(x, C0, λ) = SVector{3}(i==1 ? C0/λ*exp(x/λ) : 0.0 for i in 1:3)
+
+# wide rectangular channel confined in the z direction
+Lx, Ly, Lz = 6000, 3000, 100
+space = ContinuousSpace((Lx,Ly,Lz); periodic=false)
+dt = 0.1
+
+C0 = 10.0
+λ = Lx/2
+properties = Dict(
+    :chemoattractant =&gt; GenericChemoattractant{3,Float64}(;
+        concentration_field,
+        concentration_gradient
+    ),
+    :C0 =&gt; C0,
+    :λ =&gt; λ,
+)
+model = StandardABM(Brumley{3,4}, space, dt; properties, container=Vector)
+
+# add n bacteria for each value of Π
+# all of them initialized at x = 0
+Πs = [1.0, 2.0, 5.0, 10.0, 25.0]
+n = 200
+for Π in Πs
+    for i in 1:n
+        pos = SVector{3}(0.0, rand()*Ly, rand()*Lz)
+        motility = RunReverseFlick([46.5], 0.45, [46.5], 0.45)
+        add_agent!(pos, model; chemotactic_precision=Π, motility)
+    end
+end
+
+# also store Π for grouping later
+adata = [position, velocity, :chemotactic_precision]
+nsteps = 2000
+adf, = run!(model, nsteps; adata)
+
+# evaluate drift velocity along x direction
+target_direction = SVector(1.0, 0.0, 0.0)
+Analysis.driftvelocity_direction!(adf, target_direction)
+
+# we now want to first average the drift velocities in each group of Π values
+# and then average each group over time to obtain a mean drift
+# the calculation is much easier to perform with the DataFrames package
+using DataFrames, StatsBase
+gdf = groupby(adf, :chemotactic_precision)
+drift_velocities = zeros(1+nsteps, length(Πs))
+for (i,g) in enumerate(gdf)
+    for h in groupby(g, :id)
+        drift_velocities[:,i] .+= h.drift_direction
+    end
+    drift_velocities[:,i] ./= n
+end
+avg_drift = vec(mean(drift_velocities; dims=1))
+
+# we apply a smoothing function to remove some noise for better visualization
+function moving_average(y::AbstractVector, m::Integer)
+    @assert isodd(m)
+    out = similar(y)
+    R = CartesianIndices(y)
+    Ifirst, Ilast = first(R), last(R)
+    I1 = m÷2 * oneunit(Ifirst)
+    for I in R
+        n, s = 0, zero(eltype(out))
+        for J in max(Ifirst, I-I1):min(Ilast, I+I1)
+            s += y[J]
+            n += 1
+        end
+        out[I] = s/n
+    end
+    return out
+end
+smoothing_window = 51
+smooth_drift_velocities = mapslices(
+    y -&gt; moving_average(y, smoothing_window), drift_velocities;
+    dims = 1
+)
+
+using Plots
+t = axes(smooth_drift_velocities, 1) .* dt
+plot(layout=(1,2), size=(760,440),
+    plot(t, smooth_drift_velocities, lab=Πs&#39;,
+        xlab=&quot;t (s)&quot;, ylab=&quot;drift (μm/s)&quot;
+    ),
+    plot(Πs, avg_drift, lw=4, m=:c, ms=8, lab=false,
+        xlab=&quot;Π&quot;, ylab=&quot;avg drift (μm/s)&quot;
+    )
+)</code></pre><img src="df223713.svg" alt="Example block output"/><p>Increasing Π significantly reduces the ability of bacteria to drift along the gradient.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../4_response_functions/">« Comparison of chemotactic response functions</a><a class="docs-footer-nextpage" href="../../../validation/msd_runtumble/">Mean squared displacement »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Sunday 24 August 2025 15:57">Sunday 24 August 2025</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
