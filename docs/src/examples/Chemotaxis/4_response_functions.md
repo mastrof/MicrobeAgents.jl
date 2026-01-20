@@ -9,14 +9,18 @@ and `BrownBerg` model to an impulse stimulus of chemoattractant.
 
 While `Celani` only needs the `concentration_field` to determine the
 chemotactic response, `BrownBerg` also needs the the time derivative (`concentration_ramp`)
-to be defined explicitly (also the `concentration_gradient` but it's not relevant in this specific study).
+to be defined explicitly
+(also the `concentration_gradient` but it's not relevant in this specific study).
+
+Note that even though the field does not depend on the microbe position
+the functions should still have signature `(microbe, model)`.
 
 ````@example 4_response_functions
 using MicrobeAgents
 using Plots
 
 θ(a,b) = a>b ? 1.0 : 0.0 # Heaviside theta function
-function concentration_field(pos, model)
+function concentration_field(microbe, model)
     C₀ = model.C₀
     C₁ = model.C₁
     t₁ = model.t₁
@@ -28,7 +32,7 @@ end
 concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
 
 δ(t,dt) = 0 <= t <= dt ? 1.0/dt : 0.0 # discrete approximation to Dirac delta
-function concentration_ramp(pos, model)
+function concentration_ramp(microbe, model)
     C₀ = model.C₀
     C₁ = model.C₁
     t₁ = model.t₁
@@ -49,7 +53,7 @@ dt = 0.1 # s
 t₁ = 10.0 # s
 t₂ = 30.0 # s
 properties = Dict(
-    :chemoattractant => GenericChemoattractant{3,Float64}(;
+    :chemoattractant => GenericChemoattractant{3}(;
         concentration_field,
         concentration_ramp
     ),
