@@ -30,7 +30,7 @@ using MicrobeAgents
 using Plots
 
 θ(a,b) = a>b ? 1.0 : 0.0 # heaviside theta function
-function concentration_field(pos, model)
+function concentration_field(microbe, model)
     C₀ = model.C₀
     C₁ = model.C₁
     t₁ = model.t₁
@@ -49,7 +49,7 @@ T = 50.0 # s
 t₁ = 15.0 # s
 t₂ = 35.0 # s
 properties = Dict(
-    :chemoattractant => GenericChemoattractant{3,Float64}(; concentration_field),
+    :chemoattractant => GenericChemoattractant{3}(; concentration_field),
     :C₀ => C₀,
     :C₁ => C₁,
     :t₁ => t₁,

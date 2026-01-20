@@ -10,10 +10,11 @@ at the source becomes stronger with decreasing noise (decreasing chemotactic pre
 using MicrobeAgents
 using Plots
 
-function concentration_field(pos, model)
+function concentration_field(microbe, model)
     C = model.C
     σ = model.σ
     p₀ = model.p₀
+    pos = position(microbe)
     concentration_field(pos, p₀, C, σ)
 end
 concentration_field(pos, p₀, C, σ) = C * exp(-sum(abs2.(pos.-p₀))/(2*σ^2))
@@ -25,7 +26,7 @@ p₀ = extent./2 # μm
 C = 20.0 # μM
 σ = 100.0 # μm
 properties = Dict(
-    :chemoattractant => GenericChemoattractant{2,Float64}(; concentration_field),
+    :chemoattractant => GenericChemoattractant{2}(; concentration_field),
     :C => C,
     :σ => σ,
     :p₀ => p₀,

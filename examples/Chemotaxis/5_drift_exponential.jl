@@ -36,16 +36,16 @@ We will study how ``\Pi`` affects the drift velocity of bacteria.
 
 using MicrobeAgents
 
-function concentration_field(pos, model)
-    x = first(pos)
+function concentration_field(microbe, model)
+    x = first(position(microbe))
     C0 = model.C0
     λ = model.λ
     concentration_field(x, C0, λ)
 end
 concentration_field(x, C0, λ) = C0*exp(x/λ)
 
-function concentration_gradient(pos, model)
-    x = first(pos)
+function concentration_gradient(microbe, model)
+    x = first(position(microbe))
     C0 = model.C0
     λ = model.λ
     concentration_gradient(x, C0, λ)
@@ -60,7 +60,7 @@ dt = 0.1
 C0 = 10.0
 λ = Lx/2
 properties = Dict(
-    :chemoattractant => GenericChemoattractant{3,Float64}(;
+    :chemoattractant => GenericChemoattractant{3}(;
         concentration_field,
         concentration_gradient
     ),
