@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Response function (Xie) · MicrobeAgents.jl</title><meta name="title" content="Response function (Xie) · MicrobeAgents.jl"/><meta property="og:title" content="Response function (Xie) · MicrobeAgents.jl"/><meta property="twitter:title" content="Response function (Xie) · MicrobeAgents.jl"/><meta name="description" content="Documentation for MicrobeAgents.jl."/><meta property="og:description" content="Documentation for MicrobeAgents.jl."/><meta property="twitter:description" content="Documentation for MicrobeAgents.jl."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">MicrobeAgents.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../../introduction/">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-3-1" type="checkbox"/><label class="tocitem" for="menuitem-3-1"><span class="docs-label">Random walks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../RandomWalks/1_randomwalk1D/">1D Random walk</a></li><li><a class="tocitem" href="../../RandomWalks/2_randomwalk2D_motilepatterns/">2D Random walk and motile patterns</a></li><li><a class="tocitem" href="../../RandomWalks/3_randomwalk3D/">3D Random walk</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox" checked/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Chemotaxis</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../1_linear_ramp/">Linear concentration ramp</a></li><li><a class="tocitem" href="../2_celani_gauss2D/">Noisy chemotaxis towards Gaussian source</a></li><li class="is-active"><a class="tocitem" href>Response function (Xie)</a></li><li><a class="tocitem" href="../4_response_functions/">Comparison of chemotactic response functions</a></li><li><a class="tocitem" href="../5_drift_exponential/">Chemotactic drift in exponential ramp with noisy sensing</a></li></ul></li></ul></li><li><span class="tocitem">Validation</span><ul><li><a class="tocitem" href="../../../validation/msd_runtumble/">Mean squared displacement</a></li><li><a class="tocitem" href="../../../validation/velocity_autocorrelations/">Velocity autocorrelation functions</a></li></ul></li><li><a class="tocitem" href="../../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Chemotaxis</a></li><li class="is-active"><a href>Response function (Xie)</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Response function (Xie)</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl/blob/main/examples/Chemotaxis/3_xie_response-function.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Response-function-(Xie)"><a class="docs-heading-anchor" href="#Response-function-(Xie)">Response function (Xie)</a><a id="Response-function-(Xie)-1"></a><a class="docs-heading-anchor-permalink" href="#Response-function-(Xie)" title="Permalink"></a></h1><p>In this example we will probe the response function implemented in the <code>Xie</code> model of chemotaxis. The impulse response function is the &quot;output&quot; of the bacterial chemotaxis pathway when presented with an input signal`.</p><p>To do this, we will emulate another classical laboratory assay, where the bacterium is tethered to a wall, and it is exposed to a temporal change in the concentration of a chemoattractant. The response to the stimulus can be measured by observing modulations in the instantaneous tumbling rate. For each of the implemented microbe types, MicrobeAgents provides a <code>bias</code> function which returns the instantaneous bias in the tumbling rate, evaluated from the internal state of the microbe. Monitoring the time evolution of the tumble bias under teporal stimuli then allows us to access the response function of the microbe.</p><p>In the <code>Xie</code> model, chemotaxis is implemented by direct samplings of the <code>concentration_field</code>, thus we don&#39;t need to explicitly define neither a <code>concentration_gradient</code> nor a <code>concentration_time_derivative</code>. We will represent our temporal stimuli in the form of square waves which instantaneously switch from a baseline value <code>C₀</code> to a peak value <code>C₁+C₀</code> homogeneously over space. The excitation will occur at a time <code>t₁</code> and go back to baseline levels at a time <code>t₂</code>.</p><pre><code class="language-julia hljs">using MicrobeAgents
+using Plots
+
+θ(a,b) = a&gt;b ? 1.0 : 0.0 # heaviside theta function
+function concentration_field(microbe, model)
+    C₀ = model.C₀
+    C₁ = model.C₁
+    t₁ = model.t₁
+    t₂ = model.t₂
+    dt = model.timestep
+    t = abmtime(model) * dt
+    # notice the time dependence!
+    concentration_field(t, C₀, C₁, t₁, t₂)
+end
+concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
+
+space = ContinuousSpace(ntuple(_ -&gt; 500.0, 3)) # μm
+C₀ = 0.01 # μM
+C₁ = 5.0-C₀ # μM
+T = 50.0 # s
+t₁ = 15.0 # s
+t₂ = 35.0 # s
+properties = Dict(
+    :chemoattractant =&gt; GenericChemoattractant{3}(; concentration_field),
+    :C₀ =&gt; C₀,
+    :C₁ =&gt; C₁,
+    :t₁ =&gt; t₁,
+    :t₂ =&gt; t₂,
+)
+
+dt = 0.1 # s
+model = StandardABM(Xie{3,4}, space, dt; properties)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">StandardABM with 0 agents of type Xie
+ agents container: Dict
+ space: periodic continuous space with [500.0, 500.0, 500.0] extent and spacing=25.0
+ scheduler: fastest
+ properties: chemoattractant, affect!, C₀, t₁, t₂, C₁, timestep</code></pre><p>A peculiarity of the <code>Xie</code> model is that the chemotactic properties of the microbe differ between the forward and backward motile states, so we can probe the response function in both the forward and backward motile state by initializing two distinct microbes in the two states. To keep the microbes in these motile states for the entire experiment duration, we suppress their tumbles, and (just for total consistency with experiments) we also set their speed to 0.</p><pre><code class="language-julia hljs">add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0))
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0))
+model[2].motility.current_state = 3 # manually set to backward run state</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3</code></pre><p>In addition to the <code>bias</code>, we will also monitor two other quantities <code>state_m</code> and <code>state_z</code> which are internal variables of the <code>Xie</code> model which represent the methylation and dephosphorylation processes which together control the chemotactic response of the bacterium.</p><pre><code class="language-julia hljs">nsteps = round(Int, T/dt)
+adata = [bias, :state_m, :state_z]
+adf, = run!(model, nsteps; adata)
+
+S = Analysis.adf_to_matrix(adf, :bias)
+m = (Analysis.adf_to_matrix(adf, :state_m))[:,1] # take only fw
+z = (Analysis.adf_to_matrix(adf, :state_z))[:,1] # take only fw</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">501-element Vector{Float64}:
+ 0.0
+ 0.0025317807984289787
+ 0.004159354168847608
+ 0.0052056513355452985
+ 0.0058782709427081
+ 0.006310669261598472
+ 0.006588639609456568
+ 0.0067673348330796294
+ 0.00688221033398017
+ 0.0069560588702733735
+ ⋮
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142
+ 0.007088986235601142</code></pre><p>We first look at the response function in the forward and backward motile state: when the concentration increases we have a sharp negative response (the tumble bias decreases), then the bacterium adapts to the new concentration level, and when it drops back to the basal level we observe a sharp positive response (the tumble bisa increases) before adapting again to the new concentration level.</p><pre><code class="language-julia hljs">_green = palette(:default)[3]
+plot()
+x = (0:dt:T) .- t₁
+plot!(
+    x, S,
+    lw=1.5, lab=[&quot;Forward&quot; &quot;Backward&quot;]
+)
+plot!(ylims=(-0.1,2.6), ylab=&quot;Response&quot;, xlab=&quot;time (s)&quot;)
+plot!(twinx(),
+    x, t -&gt; concentration_field(t.+t₁,C₀,C₁,t₁,t₂),
+    ls=:dash, lw=1.5, lc=_green, lab=false,
+    tickfontcolor=_green,
+    ylab=&quot;C (μM)&quot;, guidefontcolor=_green
+)</code></pre><img src="224cc85f.svg" alt="Example block output"/><p>By analysing the methylation and dephosphorylation processes, we can understand how the chemotactic response arises. First, when the concentration increases, both <code>m</code> and <code>z</code> increase and converge to a new steady-state value, but since they respond on different timescales, the response (defined by the difference between these two quantities), shows a sharp decrease followed by a slower relaxation. The same occurs for the negative stimulus.</p><pre><code class="language-julia hljs">x = (0:dt:T) .- t₁
+τ_m = model[1].adaptation_time_m
+τ_z = model[1].adaptation_time_z
+M = m ./ τ_m
+Z = z ./ τ_z
+R = M .- Z
+plot(
+    x, [M Z R],
+    lw=2,
+    lab=[&quot;m/τ_m&quot; &quot;z/τ_z&quot; &quot;m/τ_m - z/τ_z&quot;],
+    xlab=&quot;time (s)&quot;
+)</code></pre><img src="9df2c7a8.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2_celani_gauss2D/">« Noisy chemotaxis towards Gaussian source</a><a class="docs-footer-nextpage" href="../4_response_functions/">Comparison of chemotactic response functions »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Tuesday 20 January 2026 20:37">Tuesday 20 January 2026</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
