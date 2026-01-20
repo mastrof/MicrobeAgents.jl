@@ -14,7 +14,7 @@ We will then setup the concentration field along the `x` direction and observe
 chemotactic microbes as they drift towards the high-concentration region of the chamber.
 
 The first thing we have to do is define two functions for the `concentration_field` and the
-`concentration_gradient`. They must take as arguments the position of a single microbe,
+`concentration_gradient`. They must take as arguments a single microbe
 and the model (from which we can access other properties of the system).
 Of course, for our convenience we can dispatch these functions on whatever arguments we want,
 as long as they have a method whose signature matches the MicrobeAgents API.
@@ -32,18 +32,20 @@ from the `model`.
 using MicrobeAgents
 using Plots
 
-@inline function concentration_field(pos, model)
+@inline function concentration_field(microbe, model)
     C₀ = model.C₀
     C₁ = model.C₁
     Lx = first(spacesize(model))
+    pos = position(microbe)
     concentration_field(pos,Lx,C₀,C₁)
 end
 @inline concentration_field(pos,Lx,C₀,C₁) = C₀ + (C₁-C₀)*pos[1]/Lx
 
-@inline function concentration_gradient(pos, model)
+@inline function concentration_gradient(microbe, model)
     C₀ = model.C₀
     C₁ = model.C₁
     Lx = first(spacesize(model))
+    pos = position(microbe)
     concentration_gradient(pos,Lx,C₀,C₁)
 end
 @inline concentration_gradient(pos,Lx,C₀,C₁) = SVector{length(pos)}(i==1 ? (C₁-C₀)/Lx : 0.0 for i in eachindex(pos))
@@ -55,8 +57,12 @@ This dictionary will contain all the information regarding our concentration fie
 
 Note that the `:C₀` and `:C₁` keys have been defined by us; we could have chosen different
 names for them.
-The `concentration_field` and `concentration_gradient` functions instead **must** be wrapped into an `AbstractChemoattractant` type and attached to the `:chemoattractant` keyword; this is required by MicrobeAgents and assigning these functions to any other key will not produce the desired results.
-In this example, we define the chemoattractant as a `GenericChemoattractant`, a default wrapper which takes `concentration_field` and `concentration_gradient` as keyword arguments. Notice it also takes the model dimensionality and number type as parameters.
+The `concentration_field` and `concentration_gradient` functions instead **must** be wrapped into an `AbstractChemoattractant` type
+and attached to the `:chemoattractant` keyword; this is required by MicrobeAgents and assigning these functions to any other key
+will not produce the desired results.
+In this example, we define the chemoattractant as a `GenericChemoattractant`,
+a default wrapper which takes `concentration_field` and `concentration_gradient` as keyword arguments.
+Notice it also takes the model dimensionality as parameter.
 
 Finally, to observe chemotaxis, we must use a microbe type for which chemotactic behavior is implemented.
 If we used the base `Microbe`, no matter what field we define, we would only observe a random walk
@@ -74,7 +80,7 @@ C₀, C₁ = 0.0, 20.0 # μM
 properties = Dict(
     :C₀ => C₀,
     :C₁ => C₁,
-    :chemoattractant => GenericChemoattractant{2,Float64}(;
+    :chemoattractant => GenericChemoattractant{2}(;
         concentration_field, concentration_gradient
     )
 )

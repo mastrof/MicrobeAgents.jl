@@ -70,8 +70,8 @@ using Random
 
                     # initialize a new model with non-zero concentration field
                     C = 2.0
-                    concentration_field(pos, model) = C
-                    chemo = GenericChemoattractant{D,Float64}(;concentration_field)
+                    concentration_field(microbe, model) = C
+                    chemo = GenericChemoattractant{D}(;concentration_field)
                     properties = Dict(:chemoattractant => chemo)
                     s = ContinuousSpace(ones(SVector{D}))
                     model_c = StandardABM(Celani{D}, s, 1.0; properties)
