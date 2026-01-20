@@ -42,11 +42,10 @@ function chemotaxis!(microbe::SonMenolascina, model)
     β = exp(-Δt / τₘ) # memory loss factor
     KD = microbe.receptor_binding_constant
     S = state(microbe) # weighted dPb/dt at previous step
-    pos = position(microbe)
-    u = concentration(pos, model)
+    u = concentration(microbe, model)
     chemokinesis!(microbe, u) # modify speed based on local concentration
-    ∇u = gradient(pos, model)
-    ∂ₜu = time_derivative(pos, model)
+    ∇u = gradient(microbe, model)
+    ∂ₜu = time_derivative(microbe, model)
     vel = velocity(microbe)
     du_dt = dot(vel, ∇u) + ∂ₜu
     M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement

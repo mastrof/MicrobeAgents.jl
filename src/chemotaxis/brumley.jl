@@ -33,17 +33,16 @@ end
 
 function chemotaxis!(microbe::Brumley, model)
     Δt = abmtimestep(model)
-    Dc = chemoattractant_diffusivity(model)
+    Dc = chemoattractant_diffusivity(microbe, model)
     τₘ = microbe.memory
     α = exp(-Δt / τₘ) # memory persistence factor
     a = microbe.radius
     Π = microbe.chemotactic_precision
     κ = microbe.gain_receptor
-    pos = position(microbe)
     vel = velocity(microbe)
-    u = concentration(pos, model)
-    ∇u = gradient(pos, model)
-    ∂ₜu = time_derivative(pos, model)
+    u = concentration(microbe, model)
+    ∇u = gradient(microbe, model)
+    ∂ₜu = time_derivative(microbe, model)
     # gradient measurement
     μ = dot(vel, ∇u) + ∂ₜu # mean
     σ = CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise

@@ -3,21 +3,21 @@ using LinearAlgebra: norm
 using Random
 
 @testset "Chemotaxis" verbose=true begin
-    function constant_background_concentration(pos, model)
+    function constant_background_concentration(microbe, model)
         2.0
     end
-    function linear_x_concentration(pos, model)
-        pos[1] / 10
+    function linear_x_concentration(microbe, model)
+        position(microbe)[1] / 10
     end
-    function linear_x_gradient(pos::SVector{D}, model) where D
+    function linear_x_gradient(microbe::AbstractMicrobe{D,N}, model) where {D,N}
         SVector{D}(i == 1 ? 1/10 : 0.0 for i in 1:D)
     end
-    function time_impulse_concentration(pos, model)
+    function time_impulse_concentration(microbe, model)
         t = abmtime(model)
         # square pulse for 3 timesteps
         (1 <= t <= 3) ? 1.0 : 0.0
     end
-    function time_impulse_derivative(pos, model)
+    function time_impulse_derivative(microbe, model)
         t = abmtime(model)
         dt = model.timestep
         # positive dirac delta at t=1 and negative at t=3
@@ -35,7 +35,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -52,7 +52,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
@@ -77,7 +77,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = time_impulse_concentration,
             concentration_ramp = time_impulse_derivative,
         )
@@ -109,7 +109,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -124,7 +124,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
@@ -145,7 +145,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -161,7 +161,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
@@ -184,7 +184,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -202,7 +202,7 @@ using Random
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2,Float64}(;
+        chemo = GenericChemoattractant{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
