@@ -46,7 +46,7 @@ Returns the function `f` that defines the gradient of the concentration field.
 The returned function has signature `f(pos, model)` and returns a `SVector`
 with the same dimensionality as the microbe position `pos`.
 """
-gradient(model::ABM) = concentration(chemoattractant(model))
+gradient(model::ABM) = gradient(chemoattractant(model))
 """
     time_derivative(model)
 Returns the function `f` that defines the time derivative of the concentration field.
