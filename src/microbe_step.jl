@@ -15,7 +15,7 @@ Step 1 and 2 are implemented by `move_step!`.
 Step 3 is implemented by `affect_step!`.
 Step 4 and 5 are implemented by `reorient_step!`.
 """
-function microbe_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
+function microbe_step!(microbe::AbstractMicrobe, model::ABM)
     move_step!(microbe, model)
     affect_step!(microbe, model)
     reorient_step!(microbe, model)
@@ -26,7 +26,7 @@ end
 Identical to `microbe_step!` but motion is constrained by the pathfinder
 (`model.pathfinder`) which defines inaccessible regions of space.
 """
-function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedModel)
+function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::ABM)
     move_step_pathfinder!(microbe, model)
     affect_step!(microbe, model)
     reorient_step!(microbe, model)
@@ -40,7 +40,7 @@ Propagate the microbe forward one step according to its velocity vector
 This function respects the space size.
 """
 function Agents.move_agent!(microbe::AbstractMicrobe, model::ABM{<:ContinuousSpace}, dt::Real)
-    abmspace(model).update_vel!(agent, model)
+    abmspace(model).update_vel!(microbe, model)
     walk!(microbe, velocity(microbe).*dt, model)
 end
 
