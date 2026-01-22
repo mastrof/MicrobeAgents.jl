@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Velocity autocorrelation functions · MicrobeAgents.jl</title><meta name="title" content="Velocity autocorrelation functions · MicrobeAgents.jl"/><meta property="og:title" content="Velocity autocorrelation functions · MicrobeAgents.jl"/><meta property="twitter:title" content="Velocity autocorrelation functions · MicrobeAgents.jl"/><meta name="description" content="Documentation for MicrobeAgents.jl."/><meta property="og:description" content="Documentation for MicrobeAgents.jl."/><meta property="twitter:description" content="Documentation for MicrobeAgents.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MicrobeAgents.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><a class="tocitem" href="../../introduction/">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-3-1" type="checkbox"/><label class="tocitem" for="menuitem-3-1"><span class="docs-label">Random walks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../examples/RandomWalks/1_randomwalk1D/">1D Random walk</a></li><li><a class="tocitem" href="../../examples/RandomWalks/2_randomwalk2D_motilepatterns/">2D Random walk and motile patterns</a></li><li><a class="tocitem" href="../../examples/RandomWalks/3_randomwalk3D/">3D Random walk</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox"/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Chemotaxis</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../examples/Chemotaxis/1_linear_ramp/">Linear concentration ramp</a></li><li><a class="tocitem" href="../../examples/Chemotaxis/2_celani_gauss2D/">Noisy chemotaxis towards Gaussian source</a></li><li><a class="tocitem" href="../../examples/Chemotaxis/3_xie_response-function/">Response function (Xie)</a></li><li><a class="tocitem" href="../../examples/Chemotaxis/4_response_functions/">Comparison of chemotactic response functions</a></li><li><a class="tocitem" href="../../examples/Chemotaxis/5_drift_exponential/">Chemotactic drift in exponential ramp with noisy sensing</a></li></ul></li></ul></li><li><span class="tocitem">Validation</span><ul><li><a class="tocitem" href="../msd_runtumble/">Mean squared displacement</a></li><li class="is-active"><a class="tocitem" href>Velocity autocorrelation functions</a></li></ul></li><li><a class="tocitem" href="../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Validation</a></li><li class="is-active"><a href>Velocity autocorrelation functions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Velocity autocorrelation functions</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl/blob/main/examples/Validation/velocity_autocorrelations.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Velocity-autocorrelation-functions"><a class="docs-heading-anchor" href="#Velocity-autocorrelation-functions">Velocity autocorrelation functions</a><a id="Velocity-autocorrelation-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-autocorrelation-functions" title="Permalink"></a></h1><p>Orientational correlations in the microbe&#39;s motion can be probed through velocity autocorrelation functions. Each motility pattern is characterized by a specific form of the velocity autocorrelation function, which have been analytically evaluated by Taktikos <em>et al</em> (PLoS ONE 2012). We will compare the velocity autocorrelation functions of run-tumble, run-reverse and run-reverse-flick motility, in the absence of rotational diffusion, to the analytical calculations:</p><p class="math-container">\[\phi(t) = \begin{cases}
+    \exp(-t/\tau), &amp; \text{run-tumble} \\
+    \exp(-2t/\tau), &amp; \text{run-reverse} \\
+    (1 - t/2\tau)\exp(-t/\tau), &amp; \text{run-reverse-flick}
+\end{cases}\]</p><pre><code class="language-julia hljs">using MicrobeAgents
+using Plots
+
+U = 30.0 # μm/s
+τ_run = 1.0 # s
+turn_rate = 1 / τ_run # 1/s
+Δt = 0.01 # s
+L = 1e4 # μm
+space = ContinuousSpace((L,L,L))
+
+model = StandardABM(Microbe{3}, space, Δt; container=Vector)
+n = 200
+for Mot in (RunTumble, RunReverse, RunReverseFlick), i in 1:n
+    if Mot == RunTumble
+        motility = RunTumble([U], τ_run, Isotropic(3))
+    else
+        motility = Mot([U], τ_run, [U], τ_run)
+    end
+    add_agent!(model; motility)
+end
+# keep track of ids of each motile strategy
+ids_runtumble = 1:n
+ids_runreverse = (1:n) .+ n
+ids_runrevflick = (1:n) .+ 2n
+
+nsteps = round(Int, 100τ_run / Δt)
+adata = [direction]
+adf, = run!(model, nsteps; adata)
+
+# separate the dataframes by motile strategy
+adf_runtumble = filter(:id =&gt; id -&gt; id in ids_runtumble, adf; view=true)
+adf_runrev = filter(:id =&gt; id -&gt; id in ids_runreverse, adf; view=true)
+adf_runrevflick = filter(:id =&gt; id -&gt; id in ids_runrevflick, adf; view=true)
+adfs = [adf_runtumble, adf_runrev, adf_runrevflick]
+
+# evaluate the autocorrelation functions
+using StatsBase: mean
+t = range(0, (nsteps-1)*Δt; step=Δt)
+Φ = hcat([mean(Analysis.acf(a, :direction; normalize=true)) for a in adfs]...)
+
+# from Taktikos et al.
+Φ_theoretical = hcat([
+    exp.(-t ./ τ_run),
+    exp.(-t ./ (τ_run / 2)),
+    (1 .- t ./ (2τ_run)) .* exp.(-t ./ τ_run),
+]...)
+
+plot(
+    xlims=(0,6τ_run), ylims=(-0.1, 1.05),
+    xlab=&quot;Δt / τ&quot;,
+    ylab=&quot;velocity autocorrelation&quot;,
+)
+plot!(t, Φ_theoretical, lw=2, lc=[1 2 3],
+    label=[&quot;Run-Tumble&quot; &quot;Run-Reverse&quot; &quot;Run-Reverse-Flick&quot;]
+)
+# show simulation values only at selected lags for better visualization
+lags = range(0, length(t)-1; step=20)
+scatter!(t[lags.+1], Φ[lags.+1,:], m=:x, mc=[1 2 3], msw=2, label=false)
+hline!([0.0], lw=0.8, ls=:dash, lc=:black, lab=false)</code></pre><img src="c975bcec.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../msd_runtumble/">« Mean squared displacement</a><a class="docs-footer-nextpage" href="../../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Thursday 22 January 2026 20:17">Thursday 22 January 2026</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
