@@ -20,7 +20,7 @@ as a standalone, but it is generally recommended to use it in combination with
 Agents.jl for extra goodies.
 
 ## Space
-MicrobAgents.jl only supports continuous spaces with dimensions 1, 2 or 3.
+MicrobeAgents.jl only supports continuous spaces with dimensions 1, 2 or 3.
 Spaces can be created with the `ContinuousSpace` function (reexported from Agents.jl).
 The extent of the space must be given as a tuple or `SVector`, and periodicity is set with
 the `periodic` kwarg (defaults to true).
@@ -123,6 +123,22 @@ By default, the `microbe_step!` function performs, in order:
 - perform reorientation events following Poissonian statistics
 The `model_step!` function instead defaults to a dummy function which does nothing.
 Any custom behavior can be implemented by simply modifying these two functions.
+
+The `microbe_step!` function is split into 3
+subroutines, corresponding to movement, internal state changes, and active reorientations, applied in this order:
+
+```@docs
+move_step!
+affect_step!
+reorient_step!
+```
+
+All of them are exported and may be overwritten with user-specified
+behavior, or their order within `microbe_step!` changed
+(e.g. to perform internal state updates before movement),
+which is generally more convenient than fully rewriting
+`microbe_step!` in case modifications need to be applied.
+
 
 Any type of external parameter that should be used during the simulation should be
 passed to `StandardABM` through the `properties` dictionary.
