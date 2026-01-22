@@ -1,16 +1,27 @@
-function turn!(microbe::AbstractMicrobe{1}, model)
-    microbe.vel = rotate(direction(microbe))
-end
+export turn!, rotational_diffusion!
+
+
+"""
+    turn!(microbe::AbstractMicrobe, model::ABM)
+Reorient microbe into a new direction sampled according
+to the angle distributions defined by its motile state.
+"""
 function turn!(microbe::AbstractMicrobe, model)
     e = direction(microbe)
     θ = rand(abmrng(model), angle(motilepattern(microbe)))
     φ = rand(abmrng(model), azimuthal(motilepattern(microbe)))
     microbe.vel = rotate(e, θ, φ)
 end
+function turn!(microbe::AbstractMicrobe{1}, model)
+    microbe.vel = rotate(direction(microbe))
+end
 
 """
     rotational_diffusion!(microbe, model)
 Reorient `microbe` due to brownian rotational diffusion.
+The amplitude of the reorientation is sampled from a
+Normal distribution with null mean and standard deviation
+σ = √(2*Dr*dt) where Dr is the rotational diffusivity.
 In 1-dimensional models, this functions does nothing.
 """
 rotational_diffusion!(microbe::AbstractMicrobe{1}, model) = nothing
