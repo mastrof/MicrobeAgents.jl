@@ -1,6 +1,8 @@
-export MotileState, RunState, TurnState, Run, Tumble, Reverse, Flick, Stop
+export MotileState, RunState, TurnState
+export biased
+export Run, Tumble, Reverse, Flick, Stop
 export Motility, RunTumble, RunReverse, RunReverseFlick, RunStop
-export update_motilestate!
+export update_motilestate!, update_speed!
 export motilepattern, motilestate, state, states, transition_weights
 export duration, speed, angle
 export Arccos # from Agents
@@ -25,6 +27,16 @@ function TurnState(; duration, angle, speed=[zero(duration)], azimuthal=Uniform(
     MotileState(TurnState(duration, speed, angle, azimuthal))
 end
 
+"""
+    biased(s::MotileState)
+Check whether a motile state can have its duration biased
+by an internal state.
+
+MicrobeAgents implements two motile state types:
+`RunState` and `TurnState`.
+`RunState` is biased (i.e., this function returns `true`),
+`TurnState` is not.
+"""
 biased(s::MotileState) = biased(variant(s))
 biased(::RunState) = true
 biased(::TurnState) = false

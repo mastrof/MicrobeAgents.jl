@@ -27,7 +27,24 @@ and the default parameters
 end
 
 # fallback functions for default random behavior
+"""
+    chemotaxis!(microbe::AbstractMicrobe)
+Modify the internal state of the microbe using chemotaxis.
+Each microbe type with chemotactic capabilities has a distinct
+implementation of this function, corresponding to different
+models of chemotaxis.
+For the base `Microbe` type, this does nothing.
+"""
 chemotaxis!(microbe::AbstractMicrobe, model) = nothing
+"""
+    bias(microbe::AbstractMicrobe)
+Return the current bias in the switching probability of the microbe
+(see `switching_probability`).
+For the base, non-chemotactic `Microbe` type, this is just 1.
+For other microbe types, the bias is evaluated based on the
+specifics of the chemotactic model.
+A bias>1 indicates higher likelihood to switch motile state.
+"""
 bias(microbe::AbstractMicrobe) = 1.0
 
 
