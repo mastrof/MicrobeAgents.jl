@@ -1,4 +1,4 @@
-export random_velocity, random_speed
+export random_velocity, random_speed, random_position_pathfinder
 
 """
     random_velocity(model)
@@ -20,4 +20,16 @@ Generate a random speed from the motile pattern of `microbe`.
 """
 function random_speed(microbe::AbstractMicrobe, model::AgentBasedModel)
     rand(abmrng(model), speed(motilepattern(microbe)))
+end
+
+"""
+    random_position_pathfinder(model::ABM{<:ContinuousSpace})
+Return a random position in the model space that lies within
+acessible areas of the pathfinder walkmap.
+"""
+function random_position_pathfinder(model::ABM{<:ContinuousSpace})
+    pos = map(dim -> rand(abmrng(model)) * dim, spacesize(model))
+    wm = abmproperties(model)[:pathfinder].walkmap
+    pos_idx = rand(abmrng(model), findall(wm))
+    (pos_idx.I ./ size(wm)) .* spacesize(model)
 end

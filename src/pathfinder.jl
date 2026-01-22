@@ -1,35 +1,17 @@
-export pathfinder!, initialise_pathfinder, pathfinder_step!
-
-function pathfinder!(model::AgentBasedModel, walkmap::BitArray)
-    pathfinder = initialise_pathfinder(abmspace(model), walkmap)
-    abmproperties(model)[:pathfinder] = pathfinder
-end
-
-function initialise_pathfinder(
-    extent::Real, periodic::Bool,
-    walkmap::BitArray{D}
-) where D
-    initialise_pathfinder(SVector{D}(extent for _ in 1:D), periodic, walkmap)
-end
-function initialise_pathfinder(
-    extent::NTuple{D,<:Real}, periodic::Bool,
-    walkmap::BitArray{D}
-) where D
-    space = ContinuousSpace(extent; periodic)
-    AStar(space; walkmap)
-end
-function initialise_pathfinder(space::ContinuousSpace{D}, walkmap::BitArray{D}) where D
-    AStar(space; walkmap)
-end
+export AStar # re-export from Agents.Pathfinding
+export pathfinder_step!
 
 """
-    pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedModel, dt::Real)
+    pathfinder_step!(microbe::AbstractMicrobe, model::ABM, dt::Real)
 Perform an integration step for `microbe` motion with pathfinding
 (`model.pathfinder`).
 """
-function pathfinder_step!(microbe::AbstractMicrobe, model::AgentBasedModel, dt::Real)
-    U = microbe.speed
-    target_position = @. microbe.pos + U*microbe.vel*dt
+function pathfinder_step!(microbe::AbstractMicrobe, model::ABM, dt::Real)
+    U = speed(microbe)
+    target_position = normalize_position(
+        position(microbe) .+ velocity(microbe).*dt,
+        model
+    )
     plan_route!(microbe, target_position, model.pathfinder)
     move_along_route!(microbe, model, model.pathfinder, U, dt)
 end
