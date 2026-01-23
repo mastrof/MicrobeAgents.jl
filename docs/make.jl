@@ -8,7 +8,7 @@ using Plots
 
 # use Literate to compile examples
 indir_base = joinpath(@__DIR__, "..", "examples")
-sections = ("RandomWalks", "Chemotaxis")
+sections = ("RandomWalks", "Chemotaxis", "Pathfinder")
 outdir_base = joinpath(@__DIR__, "src", "examples")
 indir = Dict(
     section => joinpath(indir_base, section)
