@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Comparison of chemotactic response functions · MicrobeAgents.jl</title><meta name="title" content="Comparison of chemotactic response functions · MicrobeAgents.jl"/><meta property="og:title" content="Comparison of chemotactic response functions · MicrobeAgents.jl"/><meta property="twitter:title" content="Comparison of chemotactic response functions · MicrobeAgents.jl"/><meta name="description" content="Documentation for MicrobeAgents.jl."/><meta property="og:description" content="Documentation for MicrobeAgents.jl."/><meta property="twitter:description" content="Documentation for MicrobeAgents.jl."/><script data-outdated-warner src="../../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../search_index.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../../">MicrobeAgents.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../../introduction/">Introduction</a></li><li><span class="tocitem">Examples</span><ul><li><input class="collapse-toggle" id="menuitem-3-1" type="checkbox"/><label class="tocitem" for="menuitem-3-1"><span class="docs-label">Random walks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../RandomWalks/1_randomwalk1D/">1D Random walk</a></li><li><a class="tocitem" href="../../RandomWalks/2_randomwalk2D_motilepatterns/">2D Random walk and motile patterns</a></li><li><a class="tocitem" href="../../RandomWalks/3_randomwalk3D/">3D Random walk</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox" checked/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Chemotaxis</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../2_celani_gauss2D/">Noisy chemotaxis towards Gaussian source</a></li><li><a class="tocitem" href="../3_xie_response-function/">Response function (Xie)</a></li><li class="is-active"><a class="tocitem" href>Comparison of chemotactic response functions</a></li><li><a class="tocitem" href="../5_drift_exponential/">Chemotactic drift in exponential ramp with noisy sensing</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-3" type="checkbox"/><label class="tocitem" for="menuitem-3-3"><span class="docs-label">Pathfinder</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../Pathfinder/1_randomwalk/">Random walk in porous medium</a></li><li><a class="tocitem" href="../../Pathfinder/2_chemotaxis/">Linear concentration ramp with obstacle</a></li></ul></li></ul></li><li><span class="tocitem">Validation</span><ul><li><a class="tocitem" href="../../../validation/msd_runtumble/">Mean squared displacement</a></li><li><a class="tocitem" href="../../../validation/velocity_autocorrelations/">Velocity autocorrelation functions</a></li></ul></li><li><a class="tocitem" href="../../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Chemotaxis</a></li><li class="is-active"><a href>Comparison of chemotactic response functions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Comparison of chemotactic response functions</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/mastrof/MicrobeAgents.jl/blob/main/examples/Chemotaxis/4_response_functions.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Comparison-of-chemotactic-response-functions"><a class="docs-heading-anchor" href="#Comparison-of-chemotactic-response-functions">Comparison of chemotactic response functions</a><a id="Comparison-of-chemotactic-response-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Comparison-of-chemotactic-response-functions" title="Permalink"></a></h1><p>Here we will compare the chemotactic response function of the <code>Celani</code> and <code>BrownBerg</code> model to an impulse stimulus of chemoattractant.</p><p>While <code>Celani</code> only needs the <code>concentration_field</code> to determine the chemotactic response, <code>BrownBerg</code> also needs the the time derivative (<code>concentration_ramp</code>) to be defined explicitly (also the <code>concentration_gradient</code> but it&#39;s not relevant in this specific study).</p><p>Note that even though the field does not depend on the microbe position the functions should still have signature <code>(microbe, model)</code>.</p><pre><code class="language-julia hljs">using MicrobeAgents
+using Plots
+
+θ(a,b) = a&gt;b ? 1.0 : 0.0 # Heaviside theta function
+function concentration_field(microbe, model)
+    C₀ = model.C₀
+    C₁ = model.C₁
+    t₁ = model.t₁
+    t₂ = model.t₂
+    dt = model.timestep
+    t = abmtime(model) * dt
+    concentration_field(t, C₀, C₁, t₁, t₂)
+end
+concentration_field(t,C₀,C₁,t₁,t₂) = C₀+C₁*θ(t,t₁)*(1-θ(t,t₂))
+
+δ(t,dt) = 0 &lt;= t &lt;= dt ? 1.0/dt : 0.0 # discrete approximation to Dirac delta
+function concentration_ramp(microbe, model)
+    C₀ = model.C₀
+    C₁ = model.C₁
+    t₁ = model.t₁
+    t₂ = model.t₂
+    dt = model.timestep
+    t = abmtime(model) * dt
+    concentration_ramp(t, C₀, C₁, t₁, t₂, dt)
+end
+function concentration_ramp(t, C₀, C₁, t₁, t₂, dt)
+    C₁*(δ(t-t₁, dt) - δ(t-t₂, dt))
+end
+
+space = ContinuousSpace(ntuple(_ -&gt; 500.0, 3)) # μm
+C₀ = 1.0 # μM
+C₁ = 2.0-C₀ # μM
+T = 50.0 # s
+dt = 0.1 # s
+t₁ = 10.0 # s
+t₂ = 30.0 # s
+properties = Dict(
+    :chemoattractant =&gt; GenericChemoattractant{3}(;
+        concentration_field,
+        concentration_ramp
+    ),
+    :C₀ =&gt; C₀,
+    :C₁ =&gt; C₁,
+    :t₁ =&gt; t₁,
+    :t₂ =&gt; t₂,
+)
+
+model = StandardABM(Union{BrownBerg{3},Celani{3}}, space, dt; properties)
+
+add_agent!(BrownBerg{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)),
+    memory=1,
+)
+add_agent!(Celani{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)), gain=4)
+add_agent!(Celani{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)), gain=4,
+    chemotactic_precision=50.0
+)
+
+nsteps = round(Int, T/dt)
+adata = [bias]
+adf, = run!(model, nsteps; adata)
+
+S = Analysis.adf_to_matrix(adf, :bias)
+
+_pink = palette(:default)[4]
+plot()
+x = (0:dt:T) .- t₁
+plot!(
+    x, S,
+    lw=1.5, lab=[&quot;BrownBerg&quot; &quot;Celani&quot; &quot;Celani + Noise&quot;]
+)
+plot!(ylims=(-0.1,2.1), ylab=&quot;Response&quot;, xlab=&quot;time (s)&quot;)
+plot!(twinx(),
+    x, t -&gt; concentration_field(t.+t₁,C₀,C₁,t₁,t₂),
+    ls=:dash, lw=1.5, lc=_pink, lab=false,
+    tickfontcolor=_pink,
+    ylab=&quot;C (μM)&quot;, guidefontcolor=_pink
+)</code></pre><img src="6b1245f5.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../3_xie_response-function/">« Response function (Xie)</a><a class="docs-footer-nextpage" href="../5_drift_exponential/">Chemotactic drift in exponential ramp with noisy sensing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Monday 2 February 2026 14:05">Monday 2 February 2026</span>. Using Julia version 1.10.10.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
