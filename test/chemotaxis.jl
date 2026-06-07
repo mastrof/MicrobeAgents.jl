@@ -40,7 +40,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(BrownBerg{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         add_agent!(model; motility, gain=600, receptor_binding_constant=100, memory=1)
         add_agent!(model; motility, gain=100, receptor_binding_constant=100, memory=1)
         add_agent!(model; motility, gain=600, receptor_binding_constant=10, memory=1)
@@ -58,7 +58,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(BrownBerg{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         pos = spacesize(model) ./ 2 # initialize at the center of domain
         vel = SVector(1.0, 0.0) # align on gradient direction
         add_agent!(pos, model; vel, motility, gain=600, receptor_binding_constant=100, memory=1)
@@ -83,7 +83,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(BrownBerg{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         pos = spacesize(model) ./ 2 # initialize at the center of domain
         vel = SVector(1.0, 0.0) # align on gradient direction
         add_agent!(model; motility, memory=1)
@@ -114,7 +114,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(Brumley{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         add_agent!(model; motility, gain=5, memory=1, chemotactic_precision=0)
         add_agent!(model; motility, gain=1, memory=1, chemotactic_precision=0)
         run!(model, 1)
@@ -130,7 +130,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(Brumley{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         pos = spacesize(model) ./ 2 # initialize at the center of domain
         vel = SVector(1.0, 0.0) # align on gradient direction
         add_agent!(pos, model; vel, motility, gain=0.2, memory=1, chemotactic_precision=0)
@@ -150,7 +150,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(Celani{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         add_agent!(model; motility, gain=5, memory=1)
         add_agent!(model; motility, gain=1, memory=1)
         add_agent!(model; motility, gain=5, memory=2)
@@ -167,7 +167,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(Celani{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         pos = spacesize(model) ./ 2 # initialize at the center of domain
         vel = SVector(1.0, 0.0) # align on gradient direction
         add_agent!(pos, model; vel, motility, gain=5, memory=1)
@@ -189,7 +189,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(SonMenolascina{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         add_agent!(model; motility, gain=600, memory=1)
         add_agent!(model; motility, gain=100, memory=1)
         add_agent!(model; motility, gain=600, memory=2)
@@ -208,7 +208,7 @@ using Random
         )
         properties = Dict(:chemoattractant => chemo)
         model = StandardABM(SonMenolascina{2,2}, space, dt; properties)
-        motility = RunTumble(Inf, [20.0])
+        motility = RunTumble([20.0], Inf, Isotropic2D)
         pos = spacesize(model) ./ 2 # initialize at the center of domain
         vel = SVector(1.0, 0.0) # align on gradient direction
         add_agent!(pos, model; vel, motility, gain=600, memory=1)
