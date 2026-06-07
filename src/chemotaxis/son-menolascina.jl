@@ -67,11 +67,11 @@ function update_motilestate!(microbe::SonMenolascina{D,4}, model::AgentBasedMode
     update_motilestate!(motility, j)
 end
 # turn hard-coded values from paper into parameters?
-function flick_probability(microbe::SonMenolascina, model)
+function flick_probability(microbe::SonMenolascina, model::ABM)
     0.055 + 0.72 / (1 + exp(-0.25*(speed(microbe)-36.0)))
 end
 
-function switching_probability(microbe::SonMenolascina, model)
+function switching_probability(microbe::SonMenolascina, model::ABM)
     dt = abmtimestep(model)
     M = motilestate(microbe)
     τ = duration(M)
