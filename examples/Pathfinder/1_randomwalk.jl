@@ -28,7 +28,6 @@ this approach is not suitable.
 =#
 
 using MicrobeAgents
-using DelimitedFiles
 using Distributions
 using BubbleBath
 using LinearAlgebra

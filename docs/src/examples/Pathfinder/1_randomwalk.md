@@ -31,7 +31,6 @@ this approach is not suitable.
 
 ````@example 1_randomwalk
 using MicrobeAgents
-using DelimitedFiles
 using Distributions
 using BubbleBath
 using LinearAlgebra
