@@ -60,9 +60,7 @@ include("chemotaxis/celani.jl")
 include("chemotaxis/xie.jl")
 include("chemotaxis/son-menolascina.jl")
 
-# obstacles, encounters, pathfinding...
-using GeometryBasics: HyperSphere, Point
-include("bodies/spheres.jl")
+# pathfinding
 using Agents.Pathfinding
 include("pathfinder.jl")
 
