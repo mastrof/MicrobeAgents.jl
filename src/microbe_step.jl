@@ -50,6 +50,7 @@ Subroutine to perform one step of translation followed by
 reorientation due to rotational diffusion.
 """
 function move_step!(microbe::AbstractMicrobe, model::ABM)
+    invalidate_field_cache!(model)
     dt = abmtimestep(model)
     move_agent!(microbe, model, dt) # translation
     rotational_diffusion!(microbe, model) # angular noise
@@ -62,6 +63,7 @@ by `model.pathfinder`, followed by reorientation due to
 rotational diffusion.
 """
 function move_step_pathfinder!(microbe::AbstractMicrobe, model::ABM)
+    invalidate_field_cache!(model)
     dt = abmtimestep(model)
     pathfinder_step!(microbe, model, dt) # translation
     rotational_diffusion!(microbe, model) # angular noise
@@ -69,9 +71,10 @@ end
 
 """
     affect_step!(microbe::AbstractMicrobe, model::ABM)
-Subroutine calling `affect!` for each behavior of the microbe, in order.
+Resets the per-step cache of field quantities, then calls `affect!` for each behavior of the microbe, in order.
 """
 function affect_step!(microbe::AbstractMicrobe, model::ABM)
+    reset_field_cache!(model, microbe)
     _foreach(b -> affect!(b, microbe, model), values(behaviors(microbe)))
 end
 
@@ -98,6 +101,8 @@ function reorient_step!(microbe::AbstractMicrobe, model::ABM)
         # sample new speed
         update_speed!(microbe, model)
     end
+    invalidate_field_cache!(model)
+    return nothing
 end
 
 """

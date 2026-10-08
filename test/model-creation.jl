@@ -10,7 +10,8 @@ using Random
         @test model isa StandardABM
         @test Set(keys(abmproperties(model))) == Set((
             :timestep,
-            :chemoattractant
+            :chemoattractant,
+            :field_cache
         ))
     end
 

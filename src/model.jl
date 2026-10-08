@@ -23,7 +23,8 @@ When a model is created, a default set of properties is included in the model
 (`MicrobeAgents.default_ABM_properties`):
 ```
 DEFAULT_ABM_PROPERTIES = Dict(
-    :chemoattractant => GenericChemoattractant{D}()
+    :chemoattractant => GenericChemoattractant{D}(),
+    :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
 )
 ```
 By including these default properties, we make sure that chemotactic behaviors
@@ -113,5 +114,6 @@ function Agents.add_agent!(
 end
 
 make_default_abm_properties(D) = Dict(
-    :chemoattractant => GenericChemoattractant{D}()
+    :chemoattractant => GenericChemoattractant{D}(),
+    :field_cache => FieldCache{D}()
 )
