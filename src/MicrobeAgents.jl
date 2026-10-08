@@ -51,17 +51,13 @@ include("microbes.jl")
 include("microbe_step.jl")
 include("model.jl")
 
-# implementations of chemotactic models
-"""
-Conversion factor (1/√(number of molecules) --> 1/√(moles)) used
-in the evaluation of chemotactic sensing noise.
-"""
-global const CONV_NOISE::Float64 = 0.04075
-# include("chemotaxis/brown-berg.jl") # re-enabled as behaviors in later tasks
-# include("chemotaxis/brumley.jl") # re-enabled as behaviors in later tasks
-# include("chemotaxis/celani.jl") # re-enabled as behaviors in later tasks
-# include("chemotaxis/xie.jl") # re-enabled as behaviors in later tasks
-# include("chemotaxis/son-menolascina.jl") # re-enabled as behaviors in later tasks
+# implementations of chemotactic models as behaviors
+include("chemotaxis/sensing.jl")
+include("chemotaxis/brown-berg.jl")
+include("chemotaxis/brumley.jl")
+# include("chemotaxis/celani.jl") # re-enabled in later tasks
+# include("chemotaxis/xie.jl")
+# include("chemotaxis/son-menolascina.jl")
 
 # pathfinding
 using Agents.Pathfinding

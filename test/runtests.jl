@@ -5,9 +5,10 @@ using Test
     include("utils.jl")
     include("behaviors.jl")
     include("field-cache.jl")
+    include("regression.jl")
     include("motility.jl")
     include("model-creation.jl")
     include("model-stepping.jl")
-    # include("chemotaxis.jl") # re-enabled as behaviors in later tasks
+    include("chemotaxis.jl")
     include("analysis.jl")
 end

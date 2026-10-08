@@ -1,50 +1,36 @@
 export BrownBerg
 
 """
-    BrownBerg{D} <: AbstractMicrobe{D}
-Model of chemotactic E.coli from 'Brown and Berg (1974) PNAS'
+    BrownBerg(; gain=660, receptor_binding_constant=100, memory=1)
+Chemotaxis behavior from 'Brown and Berg (1974) PNAS'.
 
-Default parameters:
-- `motility = RunTumble(0.67, [30.0], Isotropic(D), 0.1)`
-- `rotational_diffusivity = 0.035` rad²/s coefficient of brownian rotational diffusion
-- `radius = 0.5` μm equivalent spherical radius of the microbe
-- `state = 0.0` corresponds to 'weighted dPb/dt' in the paper
+Parameters:
 - `gain = 660` s
 - `receptor_binding_constant = 100` μM
 - `memory = 1` s
+Internal state: `state`, the weighted dPb/dt of the paper.
 """
-@agent struct BrownBerg{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
-    speed::Float64
-    motility::Motility{N} = RunTumble(;
-        run_speed=[30.0], run_duration=0.67,
-        angle=Isotropic(D), tumble_duration=0.1
-    )
-    rotational_diffusivity::Float64 = 0.035
-    radius::Float64 = 0.5
-    state::Float64 = 0.0
+@kwdef mutable struct BrownBerg
     gain::Float64 = 660.0
     receptor_binding_constant::Float64 = 100.0
     memory::Float64 = 1.0
+    state::Float64 = 0.0
 end
 
-function chemotaxis!(microbe::BrownBerg, model)
+function affect!(b::BrownBerg, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    τₘ = microbe.memory
+    τₘ = b.memory
     β = exp(-Δt / τₘ) # memory loss factor
-    KD = microbe.receptor_binding_constant
-    S = state(microbe) # weighted dPb/dt at previous step
+    KD = b.receptor_binding_constant
+    S = b.state # weighted dPb/dt at previous step
     vel = velocity(microbe)
     u = concentration(microbe, model)
     ∇u = gradient(microbe, model)
     ∂ₜu = time_derivative(microbe, model)
     du_dt = dot(vel, ∇u) + ∂ₜu
     M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement
-    microbe.state = (1 - β) * M + S * β # new weighted dPb/dt
+    b.state = (1 - β) * M + S * β # new weighted dPb/dt
     return nothing
-end # function
-
-function bias(microbe::BrownBerg)
-    g = microbe.gain
-    S = state(microbe)
-    return exp(-g*S)
 end
+
+bias(b::BrownBerg, microbe, model) = exp(-b.gain * b.state)
