@@ -7,7 +7,7 @@ keyword argument `container = Vector` for better performance.
 See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 
 **Arguments**
-- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
+- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`.
 - `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial properties of the simulation domain.
 - `timestep`: the integration timestep of the simulation.
 
@@ -20,14 +20,14 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 **Default `properties`**
 
 When a model is created, a default set of properties is included in the model
-(`MicrobeAgents.default_ABM_properties`):
+(`chemoattractant` and `field_cache`):
 ```
-DEFAULT_ABM_PROPERTIES = Dict(
-    :chemoattractant => GenericChemoattractant{D}()
-    :affect! => chemotaxis!
+Dict(
+    :chemoattractant => GenericChemoattractant{D}(),
+    :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
 )
 ```
-By including these default properties, we make sure that all the chemotaxis models
+By including these default properties, we make sure that chemotactic behaviors
 will work even without extra user intervention.
 All these properties can be overwritten by simply passing an equivalent key
 to the `properties` dictionary when creating the model.
@@ -43,6 +43,7 @@ function Agents.StandardABM(
     agents_first = true,
     warn = true,
 ) where {D,A<:AbstractMicrobe{D}}
+    _check_properties(properties)
     properties = (;
         make_default_abm_properties(D)...,
         properties...,
@@ -54,6 +55,14 @@ function Agents.StandardABM(
     )
 end
 
+
+function _check_properties(properties)
+    has = properties isa AbstractDict ? haskey(properties, :affect!) :
+        hasproperty(properties, :affect!)
+    has && throw(ArgumentError(
+        "the `:affect!` model property was removed; per-step logic is now passed " *
+        "per agent as `add_agent!(model; ..., behaviors = (f,))` (see the Behaviors docs)"))
+end
 
 function Agents.add_agent!(
     pos,
@@ -81,6 +90,9 @@ If not specified, `pos` will be assigned randomly in the model domain.
 
 Keywords can be used to specify default values to pass to the microbe constructor,
 otherwise default values from the constructor will be used.
+`behaviors` (a `Tuple` or `NamedTuple`) is copied for each agent (functions and
+`Behavior`s are shared), and `initialize!` is called on each behavior before
+the microbe is placed in the model.
 If unspecified, a random velocity vector and a random speed are generated.
 """
 function Agents.add_agent!(
@@ -97,14 +109,20 @@ function Agents.add_agent!(
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
-        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
+        kw = haskey(kwproperties, :behaviors) ?
+            merge(values(kwproperties), (behaviors = copybehaviors(kwproperties[:behaviors]),)) :
+            kwproperties
+        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kw...)
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
+    # initialize before placement: a throwing initialize! leaves the model untouched
+    initialize_behaviors!(microbe, model)
     Agents.add_agent_own_pos!(microbe, model) # not public API!
+    return microbe
 end
 
 make_default_abm_properties(D) = Dict(
     :chemoattractant => GenericChemoattractant{D}(),
-    :affect! => chemotaxis!
+    :field_cache => FieldCache{D}()
 )

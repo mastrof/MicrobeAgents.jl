@@ -16,17 +16,64 @@ The interface is defined by five core functions:
 """
 abstract type AbstractChemoattractant{D} end
 
+# per-step memoization of field quantities for the microbe being stepped;
+# `id == 0` means no microbe is being stepped
+mutable struct FieldCache{D}
+    id::Int
+    concentration::Union{Nothing,Float64}
+    gradient::Union{Nothing,SVector{D,Float64}}
+    time_derivative::Union{Nothing,Float64}
+    chemoattractant_diffusivity::Union{Nothing,Float64}
+end
+FieldCache{D}() where {D} = FieldCache{D}(0, nothing, nothing, nothing, nothing)
+
+field_cache(model::ABM) = abmproperties(model).field_cache
+
+function reset_field_cache!(model::ABM, microbe::AbstractMicrobe)
+    c = field_cache(model)
+    c.id = microbe.id
+    c.concentration = nothing
+    c.gradient = nothing
+    c.time_derivative = nothing
+    c.chemoattractant_diffusivity = nothing
+    return nothing
+end
+"""
+    MicrobeAgents.invalidate_field_cache!(model)
+Discard cached field values for the current step. Call it after a behavior
+changes the position of the microbe, so later behaviors see fresh values.
+"""
+invalidate_field_cache!(model::ABM) = (field_cache(model).id = 0; nothing)
+
+@inline function _cached(compute::F, name::Symbol, microbe, model) where {F}
+    cache = field_cache(model)
+    cache.id == microbe.id || return compute()
+    v = getfield(cache, name)
+    v === nothing || return v
+    v = compute()
+    setfield!(cache, name, v)
+    return v
+end
+
 function concentration(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    concentration(chemoattractant(model))(microbe, model)::Float64
+    _cached(:concentration, microbe, model) do
+        concentration(chemoattractant(model))(microbe, model)::Float64
+    end
 end
 function gradient(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    gradient(chemoattractant(model))(microbe, model)::SVector{D,Float64}
+    _cached(:gradient, microbe, model) do
+        gradient(chemoattractant(model))(microbe, model)::SVector{D,Float64}
+    end
 end
 function time_derivative(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    time_derivative(chemoattractant(model))(microbe, model)::Float64
+    _cached(:time_derivative, microbe, model) do
+        time_derivative(chemoattractant(model))(microbe, model)::Float64
+    end
 end
 function chemoattractant_diffusivity(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    chemoattractant_diffusivity(chemoattractant(model))(microbe, model)::Float64
+    _cached(:chemoattractant_diffusivity, microbe, model) do
+        chemoattractant_diffusivity(chemoattractant(model))(microbe, model)::Float64
+    end
 end
 
 """

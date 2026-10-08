@@ -1,60 +1,49 @@
 export Brumley
 
 """
-    Brumley{D} <: AbstractMicrobe{D}
-Model of chemotactic bacterium from 'Brumley et al. (2019) PNAS'.
-The model is optimized for simulation of marine bacteria and accounts
-for the presence of (gaussian) sensing noise in the chemotactic pathway.
+    Brumley(; memory=1.3, gain_receptor=50, gain=50, chemotactic_precision=6)
+Chemotaxis behavior from 'Brumley et al. (2019) PNAS', with gaussian sensing
+noise in the gradient measurement. Requires a microbe `radius > 0` when
+`chemotactic_precision > 0`.
 
-Default parameters:
-- `motility = RunReverseFlick(0.45, [46.5], 0.45, [46.5])`
-- `state = 0.0` → 'S'
-- `rotational_diffusivity = 0.035` rad²/s
+Parameters:
 - `memory = 1.3` s → 'τₘ'
-- `gain_receptor = 50.0` μM⁻¹ → 'κ'
-- `gain = 50.0` → 'Γ'
-- `chemotactic_precision = 6.0` → 'Π'
-- `radius = 0.5` μm → 'a'
+- `gain_receptor = 50` μM⁻¹ → 'κ'
+- `gain = 50` → 'Γ'
+- `chemotactic_precision = 6` → 'Π'
+Internal state: `state` → 'S'.
 """
-@agent struct Brumley{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
-    speed::Float64
-    motility::Motility{N} = RunReverseFlick(;
-        run_speed_forward=[46.5], run_duration_forward=0.45,
-        run_speed_backward=[46.5], run_duration_backward=0.45,
-    )
-    rotational_diffusivity::Float64 = 0.035
-    radius::Float64 = 0.5
-    state::Float64 = 0.0
+@kwdef mutable struct Brumley
     memory::Float64 = 1.3
     gain_receptor::Float64 = 50.0
     gain::Float64 = 50.0
     chemotactic_precision::Float64 = 6.0
+    state::Float64 = 0.0
 end
 
-function chemotaxis!(microbe::Brumley, model)
+initialize!(b::Brumley, microbe, model) =
+    check_sensing_radius(b, b.chemotactic_precision, microbe)
+
+function affect!(b::Brumley, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
     Dc = chemoattractant_diffusivity(microbe, model)
-    τₘ = microbe.memory
+    τₘ = b.memory
     α = exp(-Δt / τₘ) # memory persistence factor
-    a = microbe.radius
-    Π = microbe.chemotactic_precision
-    κ = microbe.gain_receptor
+    a = radius(microbe)
+    Π = b.chemotactic_precision
+    κ = b.gain_receptor
     vel = velocity(microbe)
     u = concentration(microbe, model)
     ∇u = gradient(microbe, model)
     ∂ₜu = time_derivative(microbe, model)
     # gradient measurement
     μ = dot(vel, ∇u) + ∂ₜu # mean
-    σ = CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise
+    σ = iszero(Π) ? 0.0 : CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise
     M = rand(abmrng(model), Normal(μ, σ)) # measurement
     # update internal state
-    S = state(microbe)
-    microbe.state = α * S + (1 - α) * κ * τₘ * M
+    S = b.state
+    b.state = α * S + (1 - α) * κ * τₘ * M
     return nothing
-end # function
-
-function bias(microbe::Brumley)
-    Γ = microbe.gain
-    S = state(microbe)
-    return (1 + exp(-Γ*S))/2
 end
+
+bias(b::Brumley, microbe, model) = (1 + exp(-b.gain * b.state)) / 2

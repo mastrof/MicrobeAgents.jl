@@ -1,5 +1,5 @@
 export position, direction, speed, velocity, motilepattern,
-    turnrate, rotational_diffusivity, radius, state,
+    turnrate, rotational_diffusivity, radius,
     distance, distancevector
 export abmtimestep
 
@@ -15,9 +15,10 @@ Return the direction versor of the microbe.
 direction(m::AbstractMicrobe) = m.vel
 """
     speed(m::AbstractMicrobe)
-Return the speed of the microbe.
+Return the speed of the microbe: the speed sampled from its current motile
+state, times the `speed_factor` of all its behaviors.
 """
-speed(m::AbstractMicrobe) = m.speed
+speed(m::AbstractMicrobe) = m.speed * _prod(b -> speed_factor(b, m), values(behaviors(m)))
 """
     velocity(m::AbstractMicrobe)
 Return the velocity vector of the microbe (direction times speed).
@@ -38,11 +39,6 @@ rotational_diffusivity(m::AbstractMicrobe) = m.rotational_diffusivity
 Return the radius of the microbe.
 """
 radius(m::AbstractMicrobe) = m.radius
-"""
-    state(m::AbstractMicrobe)
-Return the internal state of the microbe.
-"""
-state(m::AbstractMicrobe) = m.state
 
 abmtimestep(model::AgentBasedModel) = model.timestep
 

@@ -11,7 +11,7 @@ using Random
         @test Set(keys(abmproperties(model))) == Set((
             :timestep,
             :chemoattractant,
-            :affect!
+            :field_cache
         ))
     end
 
@@ -36,7 +36,6 @@ using Random
             @test speed(model[1]) == spd
             @test radius(model[1]) == 0.0
             @test rotational_diffusivity(model[1]) == 0.0
-            @test state(model[1]) == 0.0
             # add agent with predefined position
             pos = SVector{D}(i/2D for i in 1:D)
             add_agent!(pos, model; motility)
@@ -44,46 +43,24 @@ using Random
         end
     end
 
-    @testset "Chemotactic Microbe types" begin
-        for T in [BrownBerg, Celani, Brumley, Xie, SonMenolascina], D in 1:3
-            @testset "$(T{D})" begin
-                timestep = 1
-                space = ContinuousSpace(ones(SVector{D}))
-                model = StandardABM(T{D}, space, timestep; rng=Xoshiro(987))
-                rng = Xoshiro(987)
-                motility = RunTumble([30.0], 1.0, 0.0)
-                add_agent!(model; motility)
-                m = model[1]
-                @test m isa T{D}
-                @test position(m) == rand(rng, SVector{D})
-                @test direction(m) == random_velocity(rng, D)
-                @test speed(m) == rand(rng, speed(motilepattern(m)))
-                @test issubset(
-                    (:id, :pos, :vel, :speed, :motility,
-                    :rotational_diffusivity, :radius, :state),
-                    fieldnames(T)
-                )
-
-                if T == Celani
-                    # when no concentration field is set, markovian variables are zero
-                    @test m.markovian_variables == zeros(3)
-
-                    # initialize a new model with non-zero concentration field
-                    C = 2.0
-                    concentration_field(microbe, model) = C
-                    chemo = GenericChemoattractant{D}(;concentration_field)
-                    properties = Dict(:chemoattractant => chemo)
-                    s = ContinuousSpace(ones(SVector{D}))
-                    model_c = StandardABM(Celani{D}, s, 1.0; properties)
-                    motility = RunTumble([30.0], 0.67, 0.1)
-                    add_agent!(model_c; motility)
-                    m = model_c[1]
-                    λ = 1 / m.memory
-                    @test m.state == 0.0
-                    # now the microbe should be initialized from adapted state
-                    @test m.markovian_variables == [C/λ, C/λ^2, 2C/λ^3]
-                end
-            end
+    @testset "Celani initialization at steady state" begin
+        for D in 1:3
+            C = 2.0
+            concentration_field(microbe, model) = C
+            chemo = GenericChemoattractant{D}(; concentration_field)
+            s = ContinuousSpace(ones(SVector{D}))
+            model = StandardABM(Microbe{D}, s, 1.0; properties = Dict(:chemoattractant => chemo))
+            add_agent!(model; motility = RunTumble([30.0], 0.67, 0.1), behaviors = (Celani(),))
+            c = model[1].behaviors[1]
+            λ = 1 / c.memory
+            @test c.state == 0.0
+            @test c.markovian_variables == [C/λ, C/λ^2, 2C/λ^3]
         end
     end
+end
+
+@testset "Removed :affect! property" begin
+    space = ContinuousSpace((10.0, 10.0))
+    @test_throws ArgumentError StandardABM(Microbe{2}, space, 1.0; properties = Dict(:affect! => identity))
+    @test_throws ArgumentError StandardABM(Microbe{2}, space, 1.0; properties = (affect! = identity,))
 end

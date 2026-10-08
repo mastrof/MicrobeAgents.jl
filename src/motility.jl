@@ -204,10 +204,16 @@ end
 """
     update_motilestate!(microbe, model)
 Update the motile state of `microbe` by randomly sampling the next state
-according to the prescribed transition weights.
+according to the transition weights, after the `transition_weights!`
+hooks of its behaviors have been applied to a copy of them.
 """
 function update_motilestate!(microbe::AbstractMicrobe, model::AgentBasedModel)
-    update_motilestate!(motilepattern(microbe), model)
+    motility = motilepattern(microbe)
+    w0 = transition_weights(motility, state(motility))
+    w = ProbabilityWeights(copy(w0.values), sum(w0))
+    _foreach(b -> transition_weights!(w, b, microbe, model), values(behaviors(microbe)))
+    j = sample(abmrng(model), eachindex(w), w)
+    update_motilestate!(motility, j)
 end
 function update_motilestate!(motility::Motility, model::AgentBasedModel)
     i = state(motility)
@@ -219,7 +225,7 @@ update_motilestate!(motility::Motility, j::Int) = (motility.current_state = j)
 
 """
     update_speed!(microbe, model)
-Update the speed of `microbe` by randomly sampling from the
+Update the base speed `microbe.speed` of `microbe` by randomly sampling from the
 speed distribution of the current motile state.
 """
 function update_speed!(microbe::AbstractMicrobe, model::AgentBasedModel)

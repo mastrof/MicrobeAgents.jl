@@ -52,7 +52,7 @@ properties = Dict(
     ),
     :pathfinder => pathfinder
 )
-model = StandardABM(BrownBerg{2,2}, space, Δt;
+model = StandardABM(Microbe{2}, space, Δt;
     properties,
     agent_step! = microbe_pathfinder_step!
 )
@@ -64,7 +64,8 @@ for i in 1:n
     pos = SVector{2,Float64}(x,y)
     motility = RunTumble([30.0], 0.67, Isotropic(2))
     rotational_diffusivity = 0.1
-    add_agent!(pos, model; motility, rotational_diffusivity)
+    add_agent!(pos, model; motility, rotational_diffusivity,
+        behaviors = (chemotaxis = BrownBerg(),))
 end
 model
 

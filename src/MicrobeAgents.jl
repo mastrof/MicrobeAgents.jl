@@ -18,22 +18,25 @@ export SVector
 
 export AbstractMicrobe
 """
-    AbstractMicrobe{D} <: AbstractAgent where {D<:Integer}
+    AbstractMicrobe{D,N} <: AbstractAgent where {D<:Integer,N}
 All microbe types in MicrobeAgents.jl simulations must be instances
 of user-defined types that are subtypes of `AbstractMicrobe`.
-    YourMicrobeType{D} <: AbstractMicrobe{D}
+    YourMicrobeType{D,N} <: AbstractMicrobe{D,N}
 The parameter `D` defines the dimensionality of the space in which the
-microbe type lives (1, 2 and 3 are supported).
+microbe type lives (1, 2 and 3 are supported); `N` is the number of motile
+states of its motility.
 
 All microbe types *must* have at least the following fields:
 - `id::Int` id of the microbe (used internally by Agents.jl)
-- `pos::SVectpr{D,Float64}` position of the microbe
+- `pos::SVector{D,Float64}` position of the microbe
 - `vel::SVector{D,Float64}` velocity of the microbe
-- `motility::AbstractMotility` motile pattern of the microbe
-- `turn_rate::Real` average reorientation rate of the microbe
+- `speed::Real` base speed of the microbe (see `speed`)
+- `motility::Motility{N}` motile pattern of the microbe
 - `rotational_diffusivity::Real` coefficient of brownian rotational diffusion
 - `radius::Real` equivalent spherical radius of the microbe
-- `state::Real` generic variable for a scalar internal state
+
+Optionally, define a method `behaviors(m)` returning a `Tuple` or `NamedTuple`
+of behaviors (default: `()`).
 """
 abstract type AbstractMicrobe{D,N} <: AbstractAgent where {D,N} end
 
@@ -43,17 +46,14 @@ include("spherical_distribution.jl")
 include("motility.jl")
 include("rotations.jl")
 include("fields.jl")
+include("behaviors.jl")
 
 include("microbes.jl")
 include("microbe_step.jl")
 include("model.jl")
 
-# implementations of chemotactic models
-"""
-Conversion factor (1/√(number of molecules) --> 1/√(moles)) used
-in the evaluation of chemotactic sensing noise.
-"""
-global const CONV_NOISE::Float64 = 0.04075
+# implementations of chemotactic models as behaviors
+include("chemotaxis/sensing.jl")
 include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
 include("chemotaxis/celani.jl")

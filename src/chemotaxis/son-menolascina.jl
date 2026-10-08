@@ -1,101 +1,85 @@
-export SonMenolascina
+export SonMenolascina, Chemokinesis, SpeedDependentTurnRate, SpeedDependentFlick
 
-@agent struct SonMenolascina{D,N}(ContinuousAgent{D,Float64}) <: AbstractMicrobe{D,N}
-    speed::Float64
-    motility::Motility{N}
-    rotational_diffusivity::Float64 = 0.035
-    radius::Float64 = 0.5
-    state::Float64 = 0.0
-    gain::Float64 = 660.0
-    receptor_binding_constant::Float64 = 100.0
-    memory::Float64 = 1.0
-    #= values from paper -- not super good and units are wrong
-    eta::Float64 = -0.3942 # s/μm
-    ζ::Float64 = -0.2019 # s/μm
-    vT::Float64 = 18.88 # μm/s
-    θ::Float64 = 0.8452 # s/μm
-    =#
+"""
+    Chemokinesis(; threshold=0.05, factor=1.3)
+Multiply the microbe speed by `factor` while the local concentration is
+at least `threshold` (μM).
+"""
+@kwdef mutable struct Chemokinesis
+    threshold::Float64 = 0.05
+    factor::Float64 = 1.3
+    on::Bool = false
+end
+
+function affect!(b::Chemokinesis, microbe::AbstractMicrobe, model)
+    b.on = concentration(microbe, model) >= b.threshold
+    return nothing
+end
+speed_factor(b::Chemokinesis, microbe) = b.on ? b.factor : 1.0
+
+"""
+    SpeedDependentTurnRate(; eta=-0.55, ζ=-0.35, θ=1.0, vT=18.88)
+Bias the switching rate by `f(v)/f(0)` with
+`f(v) = 1 / (eta / (1 + exp(ζ*(v - vT))) + θ)` and `v = speed(microbe)`
+(from 'Son, Menolascina and Stocker (2016) PNAS').
+"""
+@kwdef struct SpeedDependentTurnRate
     eta::Float64 = -0.55 # s
     ζ::Float64 = -0.35 # s/μm
-    vT::Float64 = 18.88 # μm/s
     θ::Float64 = 1.0 # s
-    cT::Float64 = 0.05 # μM
-    chemokinesis_on::Bool = false # turned on when local c > cT
-    chemokinetic_factor::Float64 = 1.3
+    vT::Float64 = 18.88 # μm/s
 end
 
-function speed(microbe::SonMenolascina)
-    if microbe.chemokinesis_on
-        return microbe.speed * microbe.chemokinetic_factor
-    else
-        return microbe.speed
-    end
-end
-
-function chemokinesis!(microbe::SonMenolascina, c)
-    microbe.chemokinesis_on = (c >= microbe.cT)
-end
-
-function chemotaxis!(microbe::SonMenolascina, model)
-    Δt = abmtimestep(model)
-    τₘ = microbe.memory
-    β = exp(-Δt / τₘ) # memory loss factor
-    KD = microbe.receptor_binding_constant
-    S = state(microbe) # weighted dPb/dt at previous step
-    u = concentration(microbe, model)
-    chemokinesis!(microbe, u) # modify speed based on local concentration
-    ∇u = gradient(microbe, model)
-    ∂ₜu = time_derivative(microbe, model)
-    vel = velocity(microbe)
-    du_dt = dot(vel, ∇u) + ∂ₜu
-    M = KD / (KD + u)^2 * du_dt # dPb/dt from new measurement
-    microbe.state = (1 - β) * M + S * β # new weighted dPb/dt
-    return nothing
-end # function
-
-# speed-dependent flick probability if 4-state motility is used
-function update_motilestate!(microbe::SonMenolascina{D,4}, model::AgentBasedModel) where D
-    motility = motilepattern(microbe)
-    i = state(motility)
-    w = transition_weights(motility, i)
-    if i == 3 # backward run
-        p_flick = flick_probability(microbe, model)
-        w[2] = 1-p_flick
-        w[4] = p_flick
-    end
-    j = sample(abmrng(model), eachindex(w), w)
-    update_motilestate!(motility, j)
-end
-# turn hard-coded values from paper into parameters?
-function flick_probability(microbe::SonMenolascina, model::ABM)
-    0.055 + 0.72 / (1 + exp(-0.25*(speed(microbe)-36.0)))
-end
-
-function switching_probability(microbe::SonMenolascina, model::ABM)
-    dt = abmtimestep(model)
-    M = motilestate(microbe)
-    τ = duration(M)
-    β = biased(M) ? bias(microbe)*speed_dependent_bias(microbe) : 1.0
-    return β * dt / τ
-end
-
-function bias(microbe::SonMenolascina)
-    g = microbe.gain
-    S = state(microbe)
-    return exp(-g*S)
-end
-
-function speed_dependent_bias(microbe::SonMenolascina)
-    n = microbe.eta
-    θ = microbe.θ
-    ζ = microbe.ζ
-    vT = microbe.vT
+_turnrate(v, b::SpeedDependentTurnRate) = 1 / (b.eta / (1 + exp(b.ζ * (v - b.vT))) + b.θ)
+function bias(b::SpeedDependentTurnRate, microbe, model)
     v = speed(microbe)
-    f = speed_dependent_turnrate(v, n, ζ, θ, vT)
-    f0 = speed_dependent_turnrate(zero(v), n, ζ, θ, vT)
-    f / f0
+    return _turnrate(v, b) / _turnrate(zero(v), b)
 end
 
-function speed_dependent_turnrate(v, n, ζ, θ, vT)
-    1 / (n / (1 + exp(ζ*(v-vT))) + θ)
+"""
+    SpeedDependentFlick(; p0=0.055, amplitude=0.72, steepness=0.25, v_half=36.0)
+With a 4-state motility (`RunReverseFlick`), make the probability of flicking
+after a backward run depend on speed:
+`p = p0 + amplitude / (1 + exp(-steepness*(speed - v_half)))`;
+otherwise the run ends in a reversal.
+"""
+@kwdef struct SpeedDependentFlick
+    p0::Float64 = 0.055
+    amplitude::Float64 = 0.72
+    steepness::Float64 = 0.25 # s/μm
+    v_half::Float64 = 36.0 # μm/s
+end
+
+flick_probability(b::SpeedDependentFlick, microbe) =
+    b.p0 + b.amplitude / (1 + exp(-b.steepness * (speed(microbe) - b.v_half)))
+
+function transition_weights!(w, b::SpeedDependentFlick, microbe::AbstractMicrobe{D,N}, model) where {D,N}
+    if N == 4 && state(motilepattern(microbe)) == 3 # backward run
+        p = flick_probability(b, microbe)
+        w[2] = 1 - p
+        w[4] = p
+    end
+    return nothing
+end
+
+"""
+    SonMenolascina(; gain=660, receptor_binding_constant=100, memory=1,
+        eta=-0.55, ζ=-0.35, θ=1.0, vT=18.88, threshold=0.05, factor=1.3)
+Behaviors of the chemotaxis model from 'Son, Menolascina and Stocker (2016) PNAS':
+returns the `NamedTuple`
+`(chemokinesis = Chemokinesis(...), chemotaxis = BrownBerg(...),
+turnrate = SpeedDependentTurnRate(...), flick = SpeedDependentFlick())`,
+to be passed as `behaviors` (use with a `RunReverseFlick` motility).
+"""
+function SonMenolascina(;
+    gain = 660.0, receptor_binding_constant = 100.0, memory = 1.0,
+    eta = -0.55, ζ = -0.35, θ = 1.0, vT = 18.88,
+    threshold = 0.05, factor = 1.3,
+)
+    (
+        chemokinesis = Chemokinesis(; threshold, factor),
+        chemotaxis = BrownBerg(; gain, receptor_binding_constant, memory),
+        turnrate = SpeedDependentTurnRate(; eta, ζ, θ, vT),
+        flick = SpeedDependentFlick(),
+    )
 end

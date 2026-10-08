@@ -1,6 +1,6 @@
 name = "MicrobeAgents"
 uuid = "b17a4bac-8667-4a2d-84f7-1883ae0b8dbb"
-version = "0.7.0"
+version = "1.0.0"
 authors = ["Riccardo Foffi <rfoffi@ethz.ch> and contributors"]
 
 [deps]

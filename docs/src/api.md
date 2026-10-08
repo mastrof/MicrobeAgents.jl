@@ -2,6 +2,7 @@
 
 ## [Microbes](@id Microbes)
 ```@docs
+Microbe
 position
 direction
 speed

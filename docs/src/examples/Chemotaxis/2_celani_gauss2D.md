@@ -5,7 +5,8 @@ EditURL = "../../../../examples/Chemotaxis/2_celani_gauss2D.jl"
 # Noisy chemotaxis towards Gaussian source
 
 In this example we set up a static Gaussian source and observe the chemotactic behavior
-of the `Celani` model, in the presence of sensing noise (via the `chemotactic_precision`).
+of the `Celani` behavior, in the presence of sensing noise (via the `chemotactic_precision`).
+Noisy sensing requires a finite microbe `radius`.
 Playing with the `chemotactic_precision`, it can be seen that the clustering of bacteria
 at the source becomes stronger with decreasing noise (decreasing chemotactic precision).
 
@@ -35,17 +36,19 @@ properties = Dict(
     :p₀ => p₀,
 )
 
-model = StandardABM(Celani{2,2}, space, timestep; properties)
+model = StandardABM(Microbe{2}, space, timestep; properties)
 motility = RunTumble([30.0], 0.67, Isotropic(2); tumble_duration=0.1)
 
 for _ in 1:300
     add_agent!(model; motility,
-        chemotactic_precision=6.0, rotational_diffusivity=0.1
+        rotational_diffusivity=0.1, radius=0.5,
+        behaviors=(chemotaxis=Celani(chemotactic_precision=6.0),)
     )
 end
 
 nsteps = 600
-adata = [position, bias]
+tumblebias(m) = bias(m, model)
+adata = [position, tumblebias]
 adf, = run!(model, nsteps; adata)
 
 traj = Analysis.adf_to_matrix(adf, :position)

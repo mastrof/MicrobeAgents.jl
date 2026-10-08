@@ -2,7 +2,7 @@
 
 #=
 Here we will compare the chemotactic response function of the `Celani`
-and `BrownBerg` model to an impulse stimulus of chemoattractant.
+and `BrownBerg` behaviors to an impulse stimulus of chemoattractant.
 
 While `Celani` only needs the `concentration_field` to determine the
 chemotactic response, `BrownBerg` also needs the the time derivative (`concentration_ramp`)
@@ -59,21 +59,24 @@ properties = Dict(
     :t₂ => t₂,
 )
 
-model = StandardABM(Union{BrownBerg{3},Celani{3}}, space, dt; properties)
+model = StandardABM(Microbe{3}, space, dt; properties)
 
-add_agent!(BrownBerg{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)),
-    memory=1,
+add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)),
+    behaviors=(chemotaxis=BrownBerg(memory=1),),
 )
-add_agent!(Celani{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)), gain=4)
-add_agent!(Celani{3}, model; motility=RunTumble([0], 1.0, Isotropic(3)), gain=4,
-    chemotactic_precision=50.0
+add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)),
+    behaviors=(chemotaxis=Celani(gain=4),),
+)
+add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)), radius=0.5,
+    behaviors=(chemotaxis=Celani(gain=4, chemotactic_precision=50.0),),
 )
 
 nsteps = round(Int, T/dt)
-adata = [bias]
+tumblebias(m) = bias(m, model)
+adata = [tumblebias]
 adf, = run!(model, nsteps; adata)
 
-S = Analysis.adf_to_matrix(adf, :bias)
+S = Analysis.adf_to_matrix(adf, :tumblebias)
 
 _pink = palette(:default)[4]
 plot()

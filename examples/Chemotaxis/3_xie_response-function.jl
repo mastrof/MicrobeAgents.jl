@@ -11,9 +11,9 @@ bacterium is tethered to a wall, and it is exposed to a temporal change
 in the concentration of a chemoattractant.
 The response to the stimulus can be measured by observing modulations
 in the instantaneous tumbling rate.
-For each of the implemented microbe types, MicrobeAgents provides a
+For each chemotaxis behavior, MicrobeAgents provides a
 `bias` function which returns the instantaneous bias
-in the tumbling rate, evaluated from the internal state of the microbe.
+in the tumbling rate, evaluated from the internal state of the behavior.
 Monitoring the time evolution of the tumble bias under teporal stimuli
 then allows us to access the response function of the microbe.
 
@@ -57,7 +57,7 @@ properties = Dict(
 )
 
 dt = 0.1 # s
-model = StandardABM(Xie{3,4}, space, dt; properties)
+model = StandardABM(Microbe{3}, space, dt; properties)
 
 #=
 A peculiarity of the `Xie` model is that the chemotactic properties of the
@@ -68,24 +68,29 @@ To keep the microbes in these motile states for the entire experiment duration,
 we suppress their tumbles, and (just for total consistency with experiments)
 we also set their speed to 0.
 =#
-add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0))
-add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0))
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0),
+    behaviors=(chemotaxis=Xie(),))
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0),
+    behaviors=(chemotaxis=Xie(),))
 model[2].motility.current_state = 3 # manually set to backward run state
 
 #=
 In addition to the `bias`, we will also monitor two other quantities
-`state_m` and `state_z` which are internal variables of the `Xie` model
+`state_m` and `state_z`, which are fields of the `Xie` behavior
 which represent the methylation and dephosphorylation processes which
 together control the chemotactic response of the bacterium.
 =#
 
 nsteps = round(Int, T/dt)
-adata = [bias, :state_m, :state_z]
+tumblebias(m) = bias(m, model)
+xie_m(m) = m.behaviors.chemotaxis.state_m
+xie_z(m) = m.behaviors.chemotaxis.state_z
+adata = [tumblebias, xie_m, xie_z]
 adf, = run!(model, nsteps; adata)
 
-S = Analysis.adf_to_matrix(adf, :bias)
-m = (Analysis.adf_to_matrix(adf, :state_m))[:,1] # take only fw
-z = (Analysis.adf_to_matrix(adf, :state_z))[:,1] # take only fw
+S = Analysis.adf_to_matrix(adf, :tumblebias)
+m = (Analysis.adf_to_matrix(adf, :xie_m))[:,1] # take only fw
+z = (Analysis.adf_to_matrix(adf, :xie_z))[:,1] # take only fw
 
 #=
 We first look at the response function in the forward and backward
@@ -120,8 +125,8 @@ a sharp decrease followed by a slower relaxation.
 The same occurs for the negative stimulus.
 =#
 x = (0:dt:T) .- t₁
-τ_m = model[1].adaptation_time_m
-τ_z = model[1].adaptation_time_z
+τ_m = model[1].behaviors.chemotaxis.adaptation_time_m
+τ_z = model[1].behaviors.chemotaxis.adaptation_time_z
 M = m ./ τ_m
 Z = z ./ τ_z
 R = M .- Z
