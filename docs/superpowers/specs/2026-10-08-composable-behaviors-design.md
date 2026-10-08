@@ -119,7 +119,9 @@ per microbe step, lazily:
 - `concentration(microbe, model)` & co. (existing microbe-level wrappers in
   `fields.jl`) read the cache when valid for this microbe, otherwise compute and
   store. Calls outside a step (e.g. from `adata`) always compute fresh values;
-- the `AbstractChemoattractant` interface (`f(pos, model)` functions) is unchanged;
+- the `AbstractChemoattractant` interface (`f(microbe, model)` functions) is unchanged;
+- the cache is reset in `affect_step!` and invalidated in `move_step!` and at the
+  end of `reorient_step!`, so reordering subroutines never yields stale values;
 - custom expensive quantities (obstacle distance, neighbour searches, extra
   fields) are handled by explicit *sensor* behaviors placed early in the tuple,
   storing the value in their own field; other behaviors read it via the
@@ -139,8 +141,11 @@ Assumes sequential stepping per model (as Agents.jl `StandardABM` does).
   property is removed, the field cache is added. Mixed populations need no
   `Union`: all microbes are `Microbe{D,…}`.
 - `add_agent!(...; motility, behaviors = (), kw...)`: `B` inferred like `N`;
-  behaviors are `deepcopy`'d per agent so state is never shared; `initialize!`
-  is called for each behavior after the agent is added.
+  stateful behaviors are `deepcopy`'d per agent so state is never shared
+  (plain functions and `Behavior` wrappers are shared, not copied); a non-Tuple
+  `behaviors` value raises an `ArgumentError`; `initialize!` is called for each
+  behavior right before the agent is placed in the model, so a throwing
+  `initialize!` leaves the model untouched.
 
 ## Library behaviors (migration of existing models)
 
@@ -157,10 +162,13 @@ only sensing parameters and internal state:
 | `SpeedDependentTurnRate` | `eta, ζ, θ, vT` (SonMenolascina values) | `bias` |
 | `SpeedDependentFlick` | logistic parameters currently hard-coded | `transition_weights!` (only for 4-state motilities, when leaving the backward run, state 3; no-op otherwise, as today) |
 
-- `SonMenolascina(; kw...)` becomes a function returning the tuple
-  `(BrownBerg(...), Chemokinesis(...), SpeedDependentTurnRate(...), SpeedDependentFlick())`
+- `SonMenolascina(; kw...)` becomes a function returning the NamedTuple
+  `(chemokinesis = Chemokinesis(...), chemotaxis = BrownBerg(...),
+  turnrate = SpeedDependentTurnRate(...), flick = SpeedDependentFlick())`
   with SonMenolascina's parameter values; usable as `behaviors = SonMenolascina()`
-  or splatted into a larger tuple.
+  or splatted into a larger tuple. `Chemokinesis` comes first because the original
+  model updated chemokinesis before BrownBerg read the (speed-dependent) velocity.
+- Xie's unused `turn_rate_forward`/`turn_rate_backward` fields are dropped.
 - Physical properties (`rotational_diffusivity`, `radius`) and motility are passed
   to `add_agent!`; per-model defaults (e.g. BrownBerg's 0.035 rad²/s) are dropped.
 - `initialize!` of noisy models throws an informative error if
