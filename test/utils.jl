@@ -7,7 +7,7 @@ using Random
     for D in 1:3
         extent = ones(SVector{D})
         space = ContinuousSpace(extent)
-        model = StandardABM(Microbe{D}, space)
+        model = StandardABM(Microbe{D}, space, 1.0)
         v = random_velocity(model)
         @test norm(v) ≈ 1 && length(v) == D
     end
