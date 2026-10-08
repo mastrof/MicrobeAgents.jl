@@ -4,6 +4,8 @@
 [![Build Status](https://github.com/mastrof/MicrobeAgents.jl/workflows/CI/badge.svg)](https://github.com/mastrof/MicrobeAgents.jl/actions)
 [![codecov](https://codecov.io/gh/mastrof/MicrobeAgents.jl/branch/main/graphs/badge.svg)](https://codecov.io/gh/mastrof/MicrobeAgents.jl)
 [![Documentation, stable](https://img.shields.io/badge/docs-latest-blue.svg)](https://mastrof.github.io/MicrobeAgents.jl/dev/)
+[![JET](https://img.shields.io/badge/%F0%9F%9B%A9%EF%B8%8F_tested_with-JET.jl-233f9a)](https://github.com/aviatesk/JET.jl)
+[![Aqua QA](https://juliatesting.github.io/Aqua.jl/dev/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 MicrobeAgents.jl (previously Bactos.jl) is a Julia framework for agent-based
 simulations of microbial behavior (especially bacteria), built on

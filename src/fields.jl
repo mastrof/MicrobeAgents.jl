@@ -24,8 +24,9 @@ mutable struct FieldCache{D}
     gradient::Union{Nothing,SVector{D,Float64}}
     time_derivative::Union{Nothing,Float64}
     chemoattractant_diffusivity::Union{Nothing,Float64}
+    # inner constructor: avoids an implicit outer one with `D` unbound when `gradient === nothing`
+    FieldCache{D}() where {D} = new{D}(0, nothing, nothing, nothing, nothing)
 end
-FieldCache{D}() where {D} = FieldCache{D}(0, nothing, nothing, nothing, nothing)
 
 field_cache(model::ABM) = abmproperties(model).field_cache
 
