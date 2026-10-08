@@ -1,0 +1,24 @@
+name: Benchmarks
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'benchmark/**'
+      - 'Project.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: MilesCranmer/AirspeedVelocity.jl@action-v1
+        with:
+          julia-version: '1'
+          # compare the PR head against the base branch
+          # (add e.g. `,v0.6.0` to also compare against a release)
+          script: benchmark/benchmarks.jl
+          enable-plots: 'false'
