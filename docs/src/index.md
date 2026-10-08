@@ -25,16 +25,27 @@ If you would like to have support for your favorite model of chemotaxis, or need
 If you would like to take a more active part in the development, please consider contacting me directly at rfoffi@ethz.ch.
 
 ## Citation
-If you use this package in work that leads to a publication, please cite the GitHub repository:
-```
-@misc{Foffi2023,
-    author = {Foffi, R.},
+If you use this package in work that leads to a publication, please cite the
+[Zenodo record](https://doi.org/10.5281/zenodo.14786182) of the software
+(the DOI always resolves to the latest release):
+
+```@eval
+using MicrobeAgents, Dates, Markdown
+v = pkgversion(MicrobeAgents)
+fence = "`"^3
+Markdown.parse("""
+$(fence)
+@software{Foffi_MicrobeAgents,
+    author = {Foffi, Riccardo},
     title = {MicrobeAgents.jl},
-    year = {2023},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\url{https://github.com/mastrof/MicrobeAgents.jl}}
+    version = {v$(v)},
+    year = {$(Dates.year(Dates.today()))},
+    publisher = {Zenodo},
+    doi = {10.5281/zenodo.14786182},
+    url = {https://doi.org/10.5281/zenodo.14786182}
 }
+$(fence)
+""")
 ```
 
 ## Acknowledgements
