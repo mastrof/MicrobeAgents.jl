@@ -38,6 +38,11 @@ function reset_field_cache!(model::ABM, microbe::AbstractMicrobe)
     c.chemoattractant_diffusivity = nothing
     return nothing
 end
+"""
+    MicrobeAgents.invalidate_field_cache!(model)
+Discard cached field values for the current step. Call it after a behavior
+changes the position of the microbe, so later behaviors see fresh values.
+"""
 invalidate_field_cache!(model::ABM) = (field_cache(model).id = 0; nothing)
 
 @inline function _cached(compute::F, name::Symbol, microbe, model) where {F}

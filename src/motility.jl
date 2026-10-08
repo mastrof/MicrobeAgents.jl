@@ -225,7 +225,7 @@ update_motilestate!(motility::Motility, j::Int) = (motility.current_state = j)
 
 """
     update_speed!(microbe, model)
-Update the speed of `microbe` by randomly sampling from the
+Update the base speed `microbe.speed` of `microbe` by randomly sampling from the
 speed distribution of the current motile state.
 """
 function update_speed!(microbe::AbstractMicrobe, model::AgentBasedModel)

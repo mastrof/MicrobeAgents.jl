@@ -58,3 +58,9 @@ using Random
         end
     end
 end
+
+@testset "Removed :affect! property" begin
+    space = ContinuousSpace((10.0, 10.0))
+    @test_throws ArgumentError StandardABM(Microbe{2}, space, 1.0; properties = Dict(:affect! => identity))
+    @test_throws ArgumentError StandardABM(Microbe{2}, space, 1.0; properties = (affect! = identity,))
+end

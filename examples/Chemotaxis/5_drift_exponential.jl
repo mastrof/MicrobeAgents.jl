@@ -85,8 +85,8 @@ for Π in Πs
 end
 
 ## also store Π for grouping later
-precision(m) = m.behaviors.chemotaxis.chemotactic_precision
-adata = [position, velocity, precision]
+chemoprecision(m) = m.behaviors.chemotaxis.chemotactic_precision
+adata = [position, velocity, chemoprecision]
 nsteps = 2000
 adf, = run!(model, nsteps; adata)
 
@@ -98,7 +98,7 @@ Analysis.driftvelocity_direction!(adf, target_direction)
 ## and then average each group over time to obtain a mean drift
 ## the calculation is much easier to perform with the DataFrames package
 using DataFrames, StatsBase
-gdf = groupby(adf, :precision)
+gdf = groupby(adf, :chemoprecision)
 drift_velocities = zeros(1+nsteps, length(Πs))
 for (i,g) in enumerate(gdf)
     for h in groupby(g, :id)

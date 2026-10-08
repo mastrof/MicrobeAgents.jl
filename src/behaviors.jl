@@ -11,7 +11,8 @@ initialize!(b, microbe, model) = nothing
     affect!(behavior, microbe, model)
 Hook called at every step right after translation, to update internal state
 or apply arbitrary per-step logic. Default: no-op.
-A plain function `f` used as a behavior is called as `f(microbe, model)`.
+A plain `Function` `f` used as a behavior is called as `f(microbe, model)`;
+a callable struct needs its own `affect!` method.
 """
 affect!(b, microbe, model) = nothing
 affect!(f::Function, microbe, model) = (f(microbe, model); nothing)
@@ -39,6 +40,8 @@ speed_factor(b, microbe) = 1.0
     transition_weights!(w, behavior, microbe, model)
 Hook to modify `w`, a scratch copy of the transition weights out of the current
 motile state, right before the next state is sampled. Default: no-op.
+Modify `w` by indexing (`w[i] = x`), which keeps `sum(w)` consistent; do not
+edit `w.values` directly.
 """
 transition_weights!(w, b, microbe, model) = nothing
 
@@ -47,6 +50,12 @@ transition_weights!(w, b, microbe, model) = nothing
 Behavior built from functions, for stateless behaviors without defining a type.
 Each keyword is optional; signatures are those of the hooks without the
 behavior argument, e.g. `bias = (microbe, model) -> 2.0`.
+
+`add_agent!` copies behaviors for each agent: struct behaviors are `deepcopy`'d
+(including any data they reference), while plain functions and `Behavior`
+objects are shared, so mutable state captured by their closures is shared too.
+To share data between agents, store it in the model properties, or opt out of
+copying for a type with `MicrobeAgents.copybehavior(b::MyType) = b`.
 """
 struct Behavior{A,B,S,T}
     affect::A
@@ -87,8 +96,12 @@ _findfirst(::Type{T}, t::Tuple) where {T} =
 @inline _prod(f, ::Tuple{}) = 1.0
 @inline _prod(f, t::Tuple) = f(first(t)) * _prod(f, Base.tail(t))
 
-# each agent gets its own copy of stateful behaviors;
-# functions and `Behavior`s are stateless and shared
+"""
+    MicrobeAgents.copybehavior(behavior)
+Extension point: how a behavior is copied for each new agent.
+Default: `deepcopy` (functions and `Behavior`s are returned as is).
+Define `MicrobeAgents.copybehavior(b::MyType) = b` to share one instance.
+"""
 copybehavior(b) = deepcopy(b)
 copybehavior(f::Function) = f
 copybehavior(b::Behavior) = b

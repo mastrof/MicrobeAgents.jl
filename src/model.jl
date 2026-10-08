@@ -7,7 +7,7 @@ keyword argument `container = Vector` for better performance.
 See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 
 **Arguments**
-- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`. A list of available options can be obtained by running `subtypes(AbstractMicrobe)`.
+- `MicrobeType`: subtype of `AbstractMicrobe{D}`, with explicitly specified dimensionality `D`.
 - `space`: a `ContinuousSpace{D}` with _the same_ dimensionality `D` as MicrobeType which specifies the spatial properties of the simulation domain.
 - `timestep`: the integration timestep of the simulation.
 
@@ -20,9 +20,9 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 **Default `properties`**
 
 When a model is created, a default set of properties is included in the model
-(`MicrobeAgents.default_ABM_properties`):
+(`chemoattractant` and `field_cache`):
 ```
-DEFAULT_ABM_PROPERTIES = Dict(
+Dict(
     :chemoattractant => GenericChemoattractant{D}(),
     :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
 )
@@ -43,6 +43,7 @@ function Agents.StandardABM(
     agents_first = true,
     warn = true,
 ) where {D,A<:AbstractMicrobe{D}}
+    _check_properties(properties)
     properties = (;
         make_default_abm_properties(D)...,
         properties...,
@@ -54,6 +55,14 @@ function Agents.StandardABM(
     )
 end
 
+
+function _check_properties(properties)
+    has = properties isa AbstractDict ? haskey(properties, :affect!) :
+        hasproperty(properties, :affect!)
+    has && throw(ArgumentError(
+        "the `:affect!` model property was removed; per-step logic is now passed " *
+        "per agent as `add_agent!(model; ..., behaviors = (f,))` (see the Behaviors docs)"))
+end
 
 function Agents.add_agent!(
     pos,

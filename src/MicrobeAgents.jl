@@ -18,19 +18,20 @@ export SVector
 
 export AbstractMicrobe
 """
-    AbstractMicrobe{D} <: AbstractAgent where {D<:Integer}
+    AbstractMicrobe{D,N} <: AbstractAgent where {D<:Integer,N}
 All microbe types in MicrobeAgents.jl simulations must be instances
 of user-defined types that are subtypes of `AbstractMicrobe`.
-    YourMicrobeType{D} <: AbstractMicrobe{D}
+    YourMicrobeType{D,N} <: AbstractMicrobe{D,N}
 The parameter `D` defines the dimensionality of the space in which the
-microbe type lives (1, 2 and 3 are supported).
+microbe type lives (1, 2 and 3 are supported); `N` is the number of motile
+states of its motility.
 
 All microbe types *must* have at least the following fields:
 - `id::Int` id of the microbe (used internally by Agents.jl)
-- `pos::SVectpr{D,Float64}` position of the microbe
+- `pos::SVector{D,Float64}` position of the microbe
 - `vel::SVector{D,Float64}` velocity of the microbe
-- `speed::Real` speed of the microbe
-- `motility::AbstractMotility` motile pattern of the microbe
+- `speed::Real` base speed of the microbe (see `speed`)
+- `motility::Motility{N}` motile pattern of the microbe
 - `rotational_diffusivity::Real` coefficient of brownian rotational diffusion
 - `radius::Real` equivalent spherical radius of the microbe
 

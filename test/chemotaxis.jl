@@ -233,7 +233,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         @test bias(model[1].behaviors.chemotaxis, model[1], model) ==
               bias(model[2].behaviors.chemotaxis, model[2], model) ==
               bias(model[3].behaviors.chemotaxis, model[3], model) == 1
-        # since cT = 0.5 μM, speed should be 30% larger than specified
+        # since threshold = 0.05 μM, speed should be 30% larger than specified
         @test speed(model[1]) == 20*1.3
 
         chemo = GenericChemoattractant{2}(;

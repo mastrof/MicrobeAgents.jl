@@ -32,6 +32,16 @@ using MicrobeAgents, Test, Random
     run!(model2, 1)
     @test seen == [11.0] # post-move position, not the cached pre-move 10.0
 
+    # a behavior that moves the microbe invalidates the cache for later readers
+    seen2 = Float64[]
+    mover(m, model) = (m.pos = SVector(60.0, 50.0); MicrobeAgents.invalidate_field_cache!(model))
+    reader2(m, model) = push!(seen2, MicrobeAgents.concentration(m, model))
+    model3 = StandardABM(Microbe{2}, space, 1.0; properties = Dict(:chemoattractant => chemo))
+    add_agent!(SVector(10.0, 50.0), model3; motility, vel = SVector(1.0, 0.0),
+        behaviors = (reader2, mover, reader2))
+    run!(model3, 1)
+    @test seen2 == [11.0, 60.0]
+
     # type stability
     m = model[1]
     @test (@inferred MicrobeAgents.concentration(m, model)) isa Float64

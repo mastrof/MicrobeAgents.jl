@@ -13,7 +13,27 @@ end
 MicrobeAgents.affect!(t::Ticker, microbe, model) = (t.n += 1; nothing)
 MicrobeAgents.initialize!(t::Ticker, microbe, model) = (t.n = 100; nothing)
 
+struct Shared end
+MicrobeAgents.copybehavior(b::Shared) = b
+
 @testset "Behaviors" begin
+    @testset "copybehavior extension point" begin
+        model = StandardABM(Microbe{2}, ContinuousSpace((10.0, 10.0)), 1.0)
+        s = Shared()
+        add_agent!(model; motility = RunTumble([1.0], Inf, Isotropic(2)), behaviors = (s,))
+        add_agent!(model; motility = RunTumble([1.0], Inf, Isotropic(2)), behaviors = (s,))
+        @test model[1].behaviors[1] === s
+        @test model[2].behaviors[1] === s
+    end
+    @testset "show" begin
+        model = StandardABM(Microbe{2}, ContinuousSpace((10.0, 10.0)), 1.0)
+        motility = RunTumble([1.0], Inf, Isotropic(2))
+        add_agent!(model; motility)
+        add_agent!(model; motility, behaviors = (chemo = Behavior(), kin = Behavior()))
+        @test occursin("behaviors: none", sprint(show, MIME"text/plain"(), model[1]))
+        s = sprint(show, MIME"text/plain"(), model[2])
+        @test occursin("chemo", s) && occursin("kin", s)
+    end
     @testset "Default hooks are neutral" begin
         @test isnothing(initialize!(Dummy(), nothing, nothing))
         @test isnothing(affect!(Dummy(), nothing, nothing))

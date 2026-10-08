@@ -18,8 +18,12 @@ add_agent!(model;
 model[1].behaviors.chemotaxis.state # internal state of the chemotaxis behavior
 ```
 
-Each agent receives its own copy of the behaviors, so their internal state
-is never shared. Plain functions and `Behavior` objects are not copied.
+Each agent receives its own copy of the behaviors. Struct behaviors are
+`deepcopy`'d, including any data they reference (large arrays, obstacle lists,
+shared fields): to share such data, reference it from the model properties, or
+opt out of copying for a type with `MicrobeAgents.copybehavior(b::MyType) = b`.
+Plain functions and `Behavior` objects are shared across agents, so any mutable
+state captured by their closures is shared too.
 
 ## Hooks
 
@@ -46,7 +50,7 @@ Per-step logic without parameters or memory: a plain function, called as
 `f(microbe, model)` right after translation.
 
 ```julia
-bounce!(microbe, model) = position(microbe)[1] > 90 && (microbe.vel = -microbe.vel)
+bounce!(microbe, model) = position(microbe)[1] > 90 && microbe.vel[1] > 0 && (microbe.vel = -microbe.vel)
 add_agent!(model; motility, behaviors = (bounce!,))
 ```
 
@@ -81,6 +85,11 @@ for them. For other expensive quantities, define a sensor behavior placed
 before the behaviors that use it; it stores the value in its own field, and
 the others read it by name or through `findbehavior`.
 
+Cached values refer to the position at the start of `affect_step!`. A behavior
+that moves the microbe (e.g. a wall rule) should call
+`MicrobeAgents.invalidate_field_cache!(model)` afterwards, so later behaviors
+and `bias` hooks see fresh values.
+
 ```@docs
 behaviors
 findbehavior
@@ -98,3 +107,18 @@ Chemokinesis
 SpeedDependentTurnRate
 SpeedDependentFlick
 ```
+
+## Performance
+
+`StandardABM(Microbe{D}, ...)` has a non-concrete agent type (Agents.jl warns,
+and dispatch is dynamic). For a homogeneous population, declare the concrete
+type; `N` must match the number of states of the motility.
+
+```julia
+bs = (chemotaxis = BrownBerg(),)
+model = StandardABM(Microbe{2,2,typeof(bs)}, space, dt; properties)
+add_agent!(model; motility = RunTumble([30.0], 0.67, Isotropic(2)), behaviors = bs)
+```
+
+For mixed populations, keep `Microbe{D}` and pass `warn = false` to silence
+the warning.
