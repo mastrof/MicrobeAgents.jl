@@ -18,7 +18,7 @@ end
     # - LightSumTypes' generic `copy` over the motile states
     known(r) = let msg = sprint(JET.print_report, r)
         occursin(r"MicrobeAgents\.D` is not defined", msg) ||
-        occursin(r"no matching method found `copy\(::.*MicrobeAgents\.(Run|Turn)State\)`", msg)
+        occursin(r"no matching method found `copy\(::(\S*\.)?(Run|Turn)State\)`", msg)
     end
     reports = filter(!known, JET.get_reports(rep))
     isempty(reports) || foreach(r -> println(sprint(JET.print_report, r)), reports)
