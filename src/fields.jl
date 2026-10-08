@@ -69,9 +69,19 @@ Type for a generic chemoattractant field.
 Field, gradient and ramp default to 0 everywhere in the domain.
 Diffusivity defaults to 608 μm²/s everywhere in the domain. (Do not use 0 here, it may mess up some calculations)
 """
-@kwdef struct GenericChemoattractant{D} <: AbstractChemoattractant{D}
-    concentration_field::Function = (::AbstractMicrobe, ::ABM) -> zero(Float64) # μM
-    concentration_gradient::Function = (::AbstractMicrobe, ::ABM) -> zero(SVector{D,Float64}) # μM/μm
-    concentration_ramp::Function = (::AbstractMicrobe, ::ABM) -> zero(Float64) # μM/s
-    diffusivity::Function = (::AbstractMicrobe, ::ABM) -> Float64(608) # μm²/s
+struct GenericChemoattractant{D} <: AbstractChemoattractant{D}
+    concentration_field::Function
+    concentration_gradient::Function
+    concentration_ramp::Function
+    diffusivity::Function
+end
+function GenericChemoattractant{D}(;
+    concentration_field = (::AbstractMicrobe, ::ABM) -> zero(Float64), # μM
+    concentration_gradient = (::AbstractMicrobe, ::ABM) -> zero(SVector{D,Float64}), # μM/μm
+    concentration_ramp = (::AbstractMicrobe, ::ABM) -> zero(Float64), # μM/s
+    diffusivity = (::AbstractMicrobe, ::ABM) -> Float64(608), # μm²/s
+) where D
+    GenericChemoattractant{D}(
+        concentration_field, concentration_gradient, concentration_ramp, diffusivity
+    )
 end

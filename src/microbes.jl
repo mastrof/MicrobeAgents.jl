@@ -53,5 +53,5 @@ function Base.show(io::IO, ::MIME"text/plain", m::AbstractMicrobe{D,N}) where {D
     println(io, "$(typeof(m)) with $(N)-state motility pattern")
     println(io, "position (μm): $(r2dig.(position(m))); velocity (μm/s): $(r2dig.(velocity(m)))")
     s = setdiff(fieldnames(typeof(m)), [:id, :pos, :motility, :vel, :turn_rate])
-    print(io, "other properties: " * join(s, ", "))
+    print(io, "other properties: ", join(s, ", "))
 end
