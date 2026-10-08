@@ -29,11 +29,13 @@ All microbe types *must* have at least the following fields:
 - `id::Int` id of the microbe (used internally by Agents.jl)
 - `pos::SVectpr{D,Float64}` position of the microbe
 - `vel::SVector{D,Float64}` velocity of the microbe
+- `speed::Real` speed of the microbe
 - `motility::AbstractMotility` motile pattern of the microbe
-- `turn_rate::Real` average reorientation rate of the microbe
 - `rotational_diffusivity::Real` coefficient of brownian rotational diffusion
 - `radius::Real` equivalent spherical radius of the microbe
-- `state::Real` generic variable for a scalar internal state
+
+Optionally, define a method `behaviors(m)` returning a `Tuple` or `NamedTuple`
+of behaviors (default: `()`).
 """
 abstract type AbstractMicrobe{D,N} <: AbstractAgent where {D,N} end
 
@@ -55,11 +57,11 @@ Conversion factor (1/√(number of molecules) --> 1/√(moles)) used
 in the evaluation of chemotactic sensing noise.
 """
 global const CONV_NOISE::Float64 = 0.04075
-include("chemotaxis/brown-berg.jl")
-include("chemotaxis/brumley.jl")
-include("chemotaxis/celani.jl")
-include("chemotaxis/xie.jl")
-include("chemotaxis/son-menolascina.jl")
+# include("chemotaxis/brown-berg.jl") # re-enabled as behaviors in later tasks
+# include("chemotaxis/brumley.jl") # re-enabled as behaviors in later tasks
+# include("chemotaxis/celani.jl") # re-enabled as behaviors in later tasks
+# include("chemotaxis/xie.jl") # re-enabled as behaviors in later tasks
+# include("chemotaxis/son-menolascina.jl") # re-enabled as behaviors in later tasks
 
 # pathfinding
 using Agents.Pathfinding

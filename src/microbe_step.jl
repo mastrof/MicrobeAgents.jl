@@ -7,7 +7,7 @@ export switching_probability, can_turn
 Perform an integration step for `microbe`. In order:
 1. Update `microbe` position according to its current velocity
 2. Reorient `microbe` through rotational diffusion
-3. Update internal state of `microbe` through a customizable `affect!` function
+3. Call the `affect!` hook of each behavior of `microbe`
 4. Reorient `microbe` (if the motile state has a reorientation component)
 5. Update motile state of microbe (transitions occur as Poisson events)
 
@@ -69,10 +69,10 @@ end
 
 """
     affect_step!(microbe::AbstractMicrobe, model::ABM)
-Subroutine to update the internal state of the microbe.
+Subroutine calling `affect!` for each behavior of the microbe, in order.
 """
 function affect_step!(microbe::AbstractMicrobe, model::ABM)
-    model.affect!(microbe, model)
+    _foreach(b -> affect!(b, microbe, model), values(behaviors(microbe)))
 end
 
 """
@@ -107,16 +107,15 @@ Evaluate the probability of switching to another motile state.
 The probability is defined as β*dt/τ, where:
 - τ is the average duration of current motile state
 - dt is the integration timestep (`abmtimestep(model)`)
-- β is a physiological switching "bias" (`bias(microbe)`).
-  This is defined differently for each microbe type.
-  An unbiased state corresponds to β=1.
-  β>1 implies higher probability to change motile state.
+- β is the total `bias(microbe, model)` of the microbe behaviors (product of
+  their `bias` hooks); β=1 is unbiased, β>1 implies higher probability
+  to change motile state.
 """
 function switching_probability(microbe::AbstractMicrobe, model::ABM)
     dt = abmtimestep(model)
     M = motilestate(microbe)
     τ = duration(M)
-    β = biased(M) ? bias(microbe) : 1.0
+    β = biased(M) ? bias(microbe, model) : 1.0
     return β * dt / τ
 end
 

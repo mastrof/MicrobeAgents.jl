@@ -24,10 +24,9 @@ When a model is created, a default set of properties is included in the model
 ```
 DEFAULT_ABM_PROPERTIES = Dict(
     :chemoattractant => GenericChemoattractant{D}()
-    :affect! => chemotaxis!
 )
 ```
-By including these default properties, we make sure that all the chemotaxis models
+By including these default properties, we make sure that chemotactic behaviors
 will work even without extra user intervention.
 All these properties can be overwritten by simply passing an equivalent key
 to the `properties` dictionary when creating the model.
@@ -81,6 +80,9 @@ If not specified, `pos` will be assigned randomly in the model domain.
 
 Keywords can be used to specify default values to pass to the microbe constructor,
 otherwise default values from the constructor will be used.
+`behaviors` (a `Tuple` or `NamedTuple`) is copied for each agent (functions and
+`Behavior`s are shared), and `initialize!` is called on each behavior before
+the microbe is placed in the model.
 If unspecified, a random velocity vector and a random speed are generated.
 """
 function Agents.add_agent!(
@@ -97,14 +99,19 @@ function Agents.add_agent!(
     if !isempty(properties)
         microbe = A(id, pos, properties...)
     else
-        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kwproperties...)
+        kw = haskey(kwproperties, :behaviors) ?
+            merge(values(kwproperties), (behaviors = copybehaviors(kwproperties[:behaviors]),)) :
+            kwproperties
+        microbe = A(; id, pos, vel = zero(SVector{D}), speed = 0.0, kw...)
         microbe.vel = isnothing(vel) ? random_velocity(model) : vel
         microbe.speed = isnothing(speed) ? random_speed(microbe, model) : speed
     end
+    # initialize before placement: a throwing initialize! leaves the model untouched
+    initialize_behaviors!(microbe, model)
     Agents.add_agent_own_pos!(microbe, model) # not public API!
+    return microbe
 end
 
 make_default_abm_properties(D) = Dict(
-    :chemoattractant => GenericChemoattractant{D}(),
-    :affect! => chemotaxis!
+    :chemoattractant => GenericChemoattractant{D}()
 )

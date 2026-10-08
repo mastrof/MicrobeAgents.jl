@@ -14,7 +14,7 @@ using Random
 
     @testset "Distances" begin
         for D in 1:3
-            MicrobeTypes = [Microbe{D}, Celani{D}, BrownBerg{D}, Brumley{D}]
+            MicrobeTypes = [Microbe{D}]
             for T1 in MicrobeTypes, T2 in MicrobeTypes
                 space = ContinuousSpace(ntuple(_ -> 100, D); periodic=true)
                 model = StandardABM(Union{T1,T2}, space, 0.1)
