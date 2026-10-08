@@ -10,8 +10,8 @@ but custom behaviors can be implemented via user-defined functions.
 
 The typical workflow to run a simulation in MicrobeAgents.jl goes as follows:
 1. Define the size and properties of the space in which the microbes will move.
-2. Choose an appropriate microbe type to represent the desired behavior, or define a new one.
-3. Initialize an `AgentBasedModel` object with the desired space, microbe type, integration timestep, and any extra property needed for the simulation.
+2. Choose the behaviors (e.g. chemotaxis models) that the microbes will have, or define new ones.
+3. Initialize an `AgentBasedModel` object with the desired space, the `Microbe` type, integration timestep, and any extra property needed for the simulation.
 4. Populate the ABM with microbe instances.
 5. Choose the observables to collect during production and run the model.
 
@@ -45,13 +45,10 @@ Microbes are represented by subtypes of the `AbstractMicrobe` type, which is in 
 AbstractMicrobe
 ```
 
-MicrobeAgents provides different `AbstractMicrobe` subtypes representing different models of bacterial behavior from the scientific literature.
-The list of implemented models can be obtained with `subtypes(AbstractMicrobe)`.
+The concrete microbe type is `Microbe`. Models of chemotaxis from the scientific literature
+are implemented as behaviors attached to microbes (see below).
 
-A basic type, which is typically sufficient for simple motility simulations and does not include chemotaxis, is the `Microbe` type.
-```@docs
-Microbe
-```
+See [`Microbe`](@ref) in the [API](api.md).
 Microbe instances should only be created within an `AgentBasedModel`, the fundamental structure which embeds everything that has to do with the agent-based simulations you want to run.
 In MicrobeAgents.jl, models are created through the `StandardABM` function.
 ```@docs
@@ -88,16 +85,8 @@ add_agent!((53.2,), model; motility, rotational_diffusivity=0.5)
 add_agent!(model; motility, vel=(1.0,))
 ```
 
-All the other subtypes of `AbstractMicrobe` work in a similar way, although
-they will have distinct default values and extra fields.
-When possible, default values are typically assigned following the original implementation in the literature.
-
-```@docs
-BrownBerg
-Brumley
-Celani
-Xie
-```
+Chemotaxis and other behaviors are attached to microbes through the `behaviors` keyword of `add_agent!`,
+e.g. `add_agent!(model; motility, behaviors = (BrownBerg(),))`; see [Behaviors](behaviors.md).
 
 
 ## More about models
@@ -119,7 +108,7 @@ to evolve the microbes and the model, and are accessible through the
 By default, the `microbe_step!` function performs, in order:
 - update microbe position according to current velocity
 - randomize the microbe orientation through rotational diffusion (if present)
-- update internal state of the microbe (e.g. chemotaxis or other user-defined behavior)
+- call the `affect!` hook of each behavior (e.g. chemotaxis or other user-defined behavior)
 - perform reorientation events following Poissonian statistics
 The `model_step!` function instead defaults to a dummy function which does nothing.
 Any custom behavior can be implemented by simply modifying these two functions.
@@ -133,11 +122,8 @@ affect_step!
 reorient_step!
 ```
 
-All of them are exported and may be overwritten with user-specified
-behavior, or their order within `microbe_step!` changed
-(e.g. to perform internal state updates before movement),
-which is generally more convenient than fully rewriting
-`microbe_step!` in case modifications need to be applied.
+Custom behaviors are normally added as behaviors (see [Behaviors](behaviors.md));
+the subroutines are exported and can still be reordered or replaced in a custom `agent_step!`.
 
 
 Any type of external parameter that should be used during the simulation should be

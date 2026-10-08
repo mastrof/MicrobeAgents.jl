@@ -2,7 +2,7 @@
 
 #=
 We will peform simulations of chemotaxis in an exponential concentration
-ramp using the `Brumley` model of chemotaxis and measure their drift velocity
+ramp using the `Brumley` behavior of chemotaxis and measure their drift velocity
 along the gradient.
 The concentration field has the form
 ```math
@@ -67,7 +67,7 @@ properties = Dict(
     :C0 => C0,
     :λ => λ,
 )
-model = StandardABM(Brumley{3,4}, space, dt; properties, container=Vector)
+model = StandardABM(Microbe{3}, space, dt; properties, container=Vector)
 
 ## add n bacteria for each value of Π
 ## all of them initialized at x = 0
@@ -77,12 +77,16 @@ for Π in Πs
     for i in 1:n
         pos = SVector{3}(0.0, rand()*Ly, rand()*Lz)
         motility = RunReverseFlick([46.5], 0.45, [46.5], 0.45)
-        add_agent!(pos, model; chemotactic_precision=Π, motility)
+        add_agent!(pos, model; motility,
+            rotational_diffusivity=0.035, radius=0.5,
+            behaviors=(chemotaxis=Brumley(chemotactic_precision=Π),)
+        )
     end
 end
 
 ## also store Π for grouping later
-adata = [position, velocity, :chemotactic_precision]
+precision(m) = m.behaviors.chemotaxis.chemotactic_precision
+adata = [position, velocity, precision]
 nsteps = 2000
 adf, = run!(model, nsteps; adata)
 
@@ -94,7 +98,7 @@ Analysis.driftvelocity_direction!(adf, target_direction)
 ## and then average each group over time to obtain a mean drift
 ## the calculation is much easier to perform with the DataFrames package
 using DataFrames, StatsBase
-gdf = groupby(adf, :chemotactic_precision)
+gdf = groupby(adf, :precision)
 drift_velocities = zeros(1+nsteps, length(Πs))
 for (i,g) in enumerate(gdf)
     for h in groupby(g, :id)

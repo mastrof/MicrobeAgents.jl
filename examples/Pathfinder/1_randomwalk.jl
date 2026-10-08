@@ -49,7 +49,7 @@ wm = walkmap(bodies, extent, resolution, 0)
 
 ## Initialise pathfinder and add it to model properties
 pf = AStar(space; walkmap=wm)
-model = StandardABM(BrownBerg{2,2}, space, dt; container=Vector,
+model = StandardABM(Microbe{2}, space, dt; container=Vector,
     ## the key *must* be :pathfinder
     properties=Dict(:pathfinder => pf),
     ## use the pathfinder-aware stepping function
@@ -61,7 +61,7 @@ for _ in 1:nbacteria
     ## random_position_pathfinder samples random positions
     ## in the model domain only within the accessible area
     pos = random_position_pathfinder(model)
-    add_agent!(pos, model; motility)
+    add_agent!(pos, model; motility, rotational_diffusivity=0.035)
 end
 adata = [position]
 nsteps = 1000

@@ -6,7 +6,7 @@ motility and chemotaxis, built on the amazing [Agents.jl](https://github.com/Jul
 ## Features
 - Runs in 1, 2 and 3 spatial dimensions.
 - Provides base motility patterns (Run-Tumble, Run-Reverse, Run-Reverse-Flick, Run-Stop), all with customizable speed and turn angle distributions, and allows user definition of new arbitrary patterns.
-- Includes various models of bacterial chemotaxis (Brown & Berg, PNAS 1974; Celani & Vergassola, PNAS 2010; Xie et al, Biophys J 2014; Brumley et al, PNAS 2019).
+- Includes various models of bacterial chemotaxis (Brown & Berg, PNAS 1974; Celani & Vergassola, PNAS 2010; Xie et al, Biophys J 2014; Brumley et al, PNAS 2019; Son, Menolascina & Stocker, PNAS 2016).
 - Fast analysis routines for common quantities of interest (MSD, autocorrelation functions, drift velocity).
 
 ## Limitations (some may be temporary, others may be not)

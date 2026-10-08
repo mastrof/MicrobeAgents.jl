@@ -52,6 +52,7 @@ end
 pages = [
     "Home" => "index.md",
     "Introduction" => "introduction.md",
+    "Behaviors" => "behaviors.md",
     "Examples" => [
         [namify(section) => [joinpath.("examples", section, readdir(outdir[section]))...]
          for section in sections]...
