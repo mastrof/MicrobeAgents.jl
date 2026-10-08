@@ -20,23 +20,26 @@ abstract type AbstractChemoattractant{D} end
 # `id == 0` means no microbe is being stepped
 mutable struct FieldCache{D}
     id::Int
-    concentration::Union{Nothing,Float64}
-    gradient::Union{Nothing,SVector{D,Float64}}
-    time_derivative::Union{Nothing,Float64}
-    chemoattractant_diffusivity::Union{Nothing,Float64}
-    # inner constructor: avoids an implicit outer one with `D` unbound when `gradient === nothing`
-    FieldCache{D}() where {D} = new{D}(0, nothing, nothing, nothing, nothing)
+    concentration::Float64
+    gradient::SVector{D,Float64}
+    time_derivative::Float64
+    chemoattractant_diffusivity::Float64
 end
+# NaN marks a quantity as not yet computed (0 is a legitimate field value)
+_nan_vector(::Val{D}) where {D} = SVector{D,Float64}(ntuple(_ -> NaN, Val(D)))
+FieldCache{D}() where {D} = FieldCache{D}(0, NaN, _nan_vector(Val(D)), NaN, NaN)
+_isunset(x::Float64) = isnan(x)
+_isunset(x::SVector) = any(isnan, x)
 
 field_cache(model::ABM) = abmproperties(model).field_cache
 
-function reset_field_cache!(model::ABM, microbe::AbstractMicrobe)
+function reset_field_cache!(model::ABM, microbe::AbstractMicrobe{D}) where {D}
     c = field_cache(model)
     c.id = microbe.id
-    c.concentration = nothing
-    c.gradient = nothing
-    c.time_derivative = nothing
-    c.chemoattractant_diffusivity = nothing
+    c.concentration = NaN
+    c.gradient = _nan_vector(Val(D))
+    c.time_derivative = NaN
+    c.chemoattractant_diffusivity = NaN
     return nothing
 end
 """
@@ -50,7 +53,7 @@ invalidate_field_cache!(model::ABM) = (field_cache(model).id = 0; nothing)
     cache = field_cache(model)
     cache.id == microbe.id || return compute()
     v = getfield(cache, name)
-    v === nothing || return v
+    _isunset(v) || return v
     v = compute()
     setfield!(cache, name, v)
     return v
