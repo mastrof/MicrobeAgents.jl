@@ -7,23 +7,20 @@
 [![JET](https://img.shields.io/badge/%F0%9F%9B%A9%EF%B8%8F_tested_with-JET.jl-233f9a)](https://github.com/aviatesk/JET.jl)
 [![Aqua QA](https://juliatesting.github.io/Aqua.jl/dev/assets/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-MicrobeAgents.jl (previously Bactos.jl) is a Julia framework for agent-based
+MicrobeAgents.jl is a Julia framework for agent-based
 simulations of microbial behavior (especially bacteria), built on
 the amazing [Agents.jl](https://github.com/JuliaDynamics/Agents.jl).
-MicrobeAgents.jl extends and re-exports a minimal set of Agents.jl
-functions and structures to be used as a stand-alone package, but it is
-recommended to use it alongside Agents.jl for extra niceties.
 
-The package is still at an early stage of intense development.
 Contributions, requests and suggestions are more than welcome.
 
 ## Main features
-- Multiple swimming strategies (run-tumble, run-reverse, run-reverse-flick) with tunable parameters, and possibility to implement your own with minimal effort
-- Classical and modern models of chemotaxis (Berg-Purcell, Celani-Vergassola, Xie, Brumley)
+- Multiple swimming strategies (run-tumble, run-reverse, run-reverse-flick, run-stop) with tunable parameters, and possibility to define custom strategies
+- Classical and modern models of chemotaxis (BrownBerg, Celani, Xie, Brumley, SonMenolascina)
 - Support for arbitrary concentration fields, both numerical and analytical
+- Modular behavioral traits (chemotaxis, chemokinesis...), also freely composable with custom user-defined ones
 - Compatible with DifferentialEquations.jl for parallel integration of external fields and bacterial behavior
 - Motility in complex environments through Agents.Pathfinding
-- Analysis routines for standard quantities of interest (MSD, autocorrelation functions, drift velocity)
+- Analysis routines for standard quantities of interest (MSD, autocorrelation functions)
 
 ## Contribute
 If you want to point out a bug, request some features or simply ask for info,
