@@ -24,8 +24,9 @@ mutable struct FieldCache{D}
     gradient::Union{Nothing,SVector{D,Float64}}
     time_derivative::Union{Nothing,Float64}
     chemoattractant_diffusivity::Union{Nothing,Float64}
+    # inner constructor: avoids an implicit outer one with `D` unbound when `gradient === nothing`
+    FieldCache{D}() where {D} = new{D}(0, nothing, nothing, nothing, nothing)
 end
-FieldCache{D}() where {D} = FieldCache{D}(0, nothing, nothing, nothing, nothing)
 
 field_cache(model::ABM) = abmproperties(model).field_cache
 
@@ -116,9 +117,19 @@ Type for a generic chemoattractant field.
 Field, gradient and ramp default to 0 everywhere in the domain.
 Diffusivity defaults to 608 μm²/s everywhere in the domain. (Do not use 0 here, it may mess up some calculations)
 """
-@kwdef struct GenericChemoattractant{D} <: AbstractChemoattractant{D}
-    concentration_field::Function = (::AbstractMicrobe, ::ABM) -> zero(Float64) # μM
-    concentration_gradient::Function = (::AbstractMicrobe, ::ABM) -> zero(SVector{D,Float64}) # μM/μm
-    concentration_ramp::Function = (::AbstractMicrobe, ::ABM) -> zero(Float64) # μM/s
-    diffusivity::Function = (::AbstractMicrobe, ::ABM) -> Float64(608) # μm²/s
+struct GenericChemoattractant{D} <: AbstractChemoattractant{D}
+    concentration_field::Function
+    concentration_gradient::Function
+    concentration_ramp::Function
+    diffusivity::Function
+end
+function GenericChemoattractant{D}(;
+    concentration_field = (::AbstractMicrobe, ::ABM) -> zero(Float64), # μM
+    concentration_gradient = (::AbstractMicrobe, ::ABM) -> zero(SVector{D,Float64}), # μM/μm
+    concentration_ramp = (::AbstractMicrobe, ::ABM) -> zero(Float64), # μM/s
+    diffusivity = (::AbstractMicrobe, ::ABM) -> Float64(608), # μm²/s
+) where D
+    GenericChemoattractant{D}(
+        concentration_field, concentration_gradient, concentration_ramp, diffusivity
+    )
 end

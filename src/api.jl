@@ -1,5 +1,5 @@
 export position, direction, speed, velocity, motilepattern,
-    turnrate, rotational_diffusivity, radius,
+    rotational_diffusivity, radius,
     distance, distancevector
 export abmtimestep
 
