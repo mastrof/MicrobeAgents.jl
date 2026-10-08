@@ -176,8 +176,6 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         @test bias(m, model) == 1 + x.gain_backward * 0.5
     end
 
-    # SonMenolascina testset is restored in a later task
-
     @testset "Celani" begin
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
@@ -217,44 +215,65 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         @test bias(model[1], model) < bias(model[3], model)
     end
 
-    # @testset "SonMenolascina" begin
-    #     L = 100
-    #     space = ContinuousSpace((L, L); periodic=false)
-    #     dt = 0.1
-    #     chemo = GenericChemoattractant{2}(;
-    #         concentration_field = constant_background_concentration,
-    #     )
-    #     properties = Dict(:chemoattractant => chemo)
-    #     model = StandardABM(SonMenolascina{2,2}, space, dt; properties)
-    #     motility = RunTumble([20.0], Inf, Isotropic2D)
-    #     add_agent!(model; motility, gain=600, memory=1)
-    #     add_agent!(model; motility, gain=100, memory=1)
-    #     add_agent!(model; motility, gain=600, memory=2)
-    #     run!(model, 1)
-    #     # no gradient => everyone has same bias and state independent of parameters
-    #     @test bias(model[1]) == bias(model[2]) == bias(model[3]) == 1
-    #     # since cT = 0.5 μM, speed should be 30% larger than specified
-    #     @test speed(model[1]) == 20*1.3
+    @testset "SonMenolascina" begin
+        L = 100
+        space = ContinuousSpace((L, L); periodic=false)
+        dt = 0.1
+        chemo = GenericChemoattractant{2}(;
+            concentration_field = constant_background_concentration,
+        )
+        properties = Dict(:chemoattractant => chemo)
+        model = StandardABM(Microbe{2}, space, dt; properties)
+        motility = RunTumble([20.0], Inf, Isotropic(2))
+        add_agent!(model; motility, behaviors = SonMenolascina(gain=600, memory=1))
+        add_agent!(model; motility, behaviors = SonMenolascina(gain=100, memory=1))
+        add_agent!(model; motility, behaviors = SonMenolascina(gain=600, memory=2))
+        run!(model, 1)
+        # no gradient => everyone has same bias and state independent of parameters
+        @test bias(model[1].behaviors.chemotaxis, model[1], model) ==
+              bias(model[2].behaviors.chemotaxis, model[2], model) ==
+              bias(model[3].behaviors.chemotaxis, model[3], model) == 1
+        # since cT = 0.5 μM, speed should be 30% larger than specified
+        @test speed(model[1]) == 20*1.3
 
-    #     L = 100
-    #     space = ContinuousSpace((L, L); periodic=false)
-    #     dt = 0.1
-    #     chemo = GenericChemoattractant{2}(;
-    #         concentration_field = linear_x_concentration,
-    #         concentration_gradient = linear_x_gradient,
-    #     )
-    #     properties = Dict(:chemoattractant => chemo)
-    #     model = StandardABM(SonMenolascina{2,2}, space, dt; properties)
-    #     motility = RunTumble([20.0], Inf, Isotropic2D)
-    #     pos = spacesize(model) ./ 2 # initialize at the center of domain
-    #     vel = SVector(1.0, 0.0) # align on gradient direction
-    #     add_agent!(pos, model; vel, motility, gain=600, memory=1)
-    #     add_agent!(pos, model; vel, motility, gain=100, memory=1)
-    #     add_agent!(pos, model; vel, motility, gain=600, memory=2)
-    #     run!(model, 1)
-    #     # larger gain => stronger response => longer runs => smaller tumble bias
-    #     @test bias(model[1]) < bias(model[2])
-    #     # longer memory => less affected by measurement => larger tumble bias
-    #     @test bias(model[1]) < bias(model[3])
-    # end
+        chemo = GenericChemoattractant{2}(;
+            concentration_field = linear_x_concentration,
+            concentration_gradient = linear_x_gradient,
+        )
+        properties = Dict(:chemoattractant => chemo)
+        model = StandardABM(Microbe{2}, space, dt; properties)
+        pos = spacesize(model) ./ 2 # initialize at the center of domain
+        vel = SVector(1.0, 0.0) # align on gradient direction
+        add_agent!(pos, model; vel, motility, behaviors = SonMenolascina(gain=600, memory=1))
+        add_agent!(pos, model; vel, motility, behaviors = SonMenolascina(gain=100, memory=1))
+        add_agent!(pos, model; vel, motility, behaviors = SonMenolascina(gain=600, memory=2))
+        run!(model, 1)
+        b(i) = bias(model[i].behaviors.chemotaxis, model[i], model)
+        # larger gain => stronger response => longer runs => smaller tumble bias
+        @test b(1) < b(2)
+        # longer memory => less affected by measurement => larger tumble bias
+        @test b(1) < b(3)
+    end
+
+    @testset "Composable SonMenolascina pieces" begin
+        bs = SonMenolascina()
+        @test keys(bs) == (:chemokinesis, :chemotaxis, :turnrate, :flick)
+        extended = (; bs..., extra = (m, model) -> nothing)
+        @test length(extended) == 5
+        # flick hook only acts when leaving the backward run of a 4-state motility
+        space = ContinuousSpace((100.0, 100.0))
+        model = StandardABM(Microbe{2}, space, 0.1)
+        add_agent!(model; motility = RunReverseFlick([30.0], 1.0, [30.0], 1.0),
+            behaviors = (flick = SpeedDependentFlick(),))
+        m = model[1]
+        w = [0.0, 0.0, 0.0, 1.0]
+        m.motility.current_state = 3
+        transition_weights!(w, m.behaviors.flick, m, model)
+        p = 0.055 + 0.72 / (1 + exp(-0.25 * (30.0 - 36.0)))
+        @test w ≈ [0.0, 1 - p, 0.0, p]
+        w = [0.0, 0.0, 0.0, 1.0]
+        m.motility.current_state = 1
+        transition_weights!(w, m.behaviors.flick, m, model)
+        @test w == [0.0, 0.0, 0.0, 1.0]
+    end
 end

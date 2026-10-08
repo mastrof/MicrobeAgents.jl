@@ -63,4 +63,8 @@ end
     test_against_reference("Xie", run_scenario(ref_rrf,
         (chemotaxis = Xie(chemotactic_precision = 6.0),),
         (rotational_diffusivity = 0.26, radius = 0.5), [state_m, state_z]))
+    test_against_reference("SonMenolascina", run_scenario(
+        () -> RunReverseFlick([30.0], 0.5, [30.0], 0.5),
+        SonMenolascina(),
+        (rotational_diffusivity = 0.035, radius = 0.5), []))
 end
