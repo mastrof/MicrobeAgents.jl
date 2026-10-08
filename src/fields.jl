@@ -17,26 +17,30 @@ The interface is defined by five core functions:
 abstract type AbstractChemoattractant{D} end
 
 # per-step memoization of field quantities for the microbe being stepped;
-# `id == 0` means no microbe is being stepped
+# `id == 0` means no microbe is being stepped.
+# `valid` is a bitmask of the quantities computed so far, so a reset only
+# clears the mask and the stale values are never read.
 mutable struct FieldCache{D}
     id::Int
-    concentration::Union{Nothing,Float64}
-    gradient::Union{Nothing,SVector{D,Float64}}
-    time_derivative::Union{Nothing,Float64}
-    chemoattractant_diffusivity::Union{Nothing,Float64}
-    # inner constructor: avoids an implicit outer one with `D` unbound when `gradient === nothing`
-    FieldCache{D}() where {D} = new{D}(0, nothing, nothing, nothing, nothing)
+    valid::UInt8
+    concentration::Float64
+    gradient::SVector{D,Float64}
+    time_derivative::Float64
+    chemoattractant_diffusivity::Float64
 end
+FieldCache{D}() where {D} = FieldCache{D}(0, 0x00, 0.0, zero(SVector{D,Float64}), 0.0, 0.0)
+
+const _CONCENTRATION_BIT = 0x01
+const _GRADIENT_BIT = 0x02
+const _TIME_DERIVATIVE_BIT = 0x04
+const _DIFFUSIVITY_BIT = 0x08
 
 field_cache(model::ABM) = abmproperties(model).field_cache
 
 function reset_field_cache!(model::ABM, microbe::AbstractMicrobe)
     c = field_cache(model)
     c.id = microbe.id
-    c.concentration = nothing
-    c.gradient = nothing
-    c.time_derivative = nothing
-    c.chemoattractant_diffusivity = nothing
+    c.valid = 0x00
     return nothing
 end
 """
@@ -46,33 +50,33 @@ changes the position of the microbe, so later behaviors see fresh values.
 """
 invalidate_field_cache!(model::ABM) = (field_cache(model).id = 0; nothing)
 
-@inline function _cached(compute::F, name::Symbol, microbe, model) where {F}
+@inline function _cached(compute::F, name::Symbol, bit::UInt8, microbe, model) where {F}
     cache = field_cache(model)
     cache.id == microbe.id || return compute()
-    v = getfield(cache, name)
-    v === nothing || return v
+    cache.valid & bit == bit && return getfield(cache, name)
     v = compute()
     setfield!(cache, name, v)
+    cache.valid |= bit
     return v
 end
 
 function concentration(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:concentration, microbe, model) do
+    _cached(:concentration, _CONCENTRATION_BIT, microbe, model) do
         concentration(chemoattractant(model))(microbe, model)::Float64
     end
 end
 function gradient(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:gradient, microbe, model) do
+    _cached(:gradient, _GRADIENT_BIT, microbe, model) do
         gradient(chemoattractant(model))(microbe, model)::SVector{D,Float64}
     end
 end
 function time_derivative(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:time_derivative, microbe, model) do
+    _cached(:time_derivative, _TIME_DERIVATIVE_BIT, microbe, model) do
         time_derivative(chemoattractant(model))(microbe, model)::Float64
     end
 end
 function chemoattractant_diffusivity(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:chemoattractant_diffusivity, microbe, model) do
+    _cached(:chemoattractant_diffusivity, _DIFFUSIVITY_BIT, microbe, model) do
         chemoattractant_diffusivity(chemoattractant(model))(microbe, model)::Float64
     end
 end
