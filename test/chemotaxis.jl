@@ -156,48 +156,66 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         @test bias(model[1], model) == 1
         @test_throws ArgumentError add_agent!(model; motility,
             behaviors = (Brumley(chemotactic_precision = 6),))
+        m2 = add_agent!(model; motility, behaviors = (Celani(), Xie()))
+        run!(model, 5)
+        @test !isnan(bias(m2, model))
+        @test_throws ArgumentError add_agent!(model; motility,
+            behaviors = (Xie(chemotactic_precision = 1),))
     end
 
-    # Celani and SonMenolascina testsets are restored in later tasks
+    @testset "Xie forward/backward gains" begin
+        space = ContinuousSpace((100.0, 100.0))
+        model = StandardABM(Microbe{2}, space, 0.1)
+        motility = RunReverseFlick([0.0], Inf, [0.0], Inf)
+        add_agent!(model; motility, behaviors = (Xie(),))
+        m = model[1]
+        x = m.behaviors[1]
+        x.state = 0.5
+        @test bias(m, model) == 1 + x.gain_forward * 0.5
+        m.motility.current_state = 3
+        @test bias(m, model) == 1 + x.gain_backward * 0.5
+    end
 
-    # @testset "Celani" begin
-    #     L = 100
-    #     space = ContinuousSpace((L, L); periodic=false)
-    #     dt = 0.1
-    #     chemo = GenericChemoattractant{2}(;
-    #         concentration_field = constant_background_concentration,
-    #     )
-    #     properties = Dict(:chemoattractant => chemo)
-    #     model = StandardABM(Celani{2,2}, space, dt; properties)
-    #     motility = RunTumble([20.0], Inf, Isotropic2D)
-    #     add_agent!(model; motility, gain=5, memory=1)
-    #     add_agent!(model; motility, gain=1, memory=1)
-    #     add_agent!(model; motility, gain=5, memory=2)
-    #     run!(model, 1)
-    #     # no gradient => everyone has same bias and state independent of parameters
-    #     @test bias(model[1]) == bias(model[2]) == bias(model[3]) == 1
+    # SonMenolascina testset is restored in a later task
 
-    #     L = 100
-    #     space = ContinuousSpace((L, L); periodic=false)
-    #     dt = 0.1
-    #     chemo = GenericChemoattractant{2}(;
-    #         concentration_field = linear_x_concentration,
-    #         concentration_gradient = linear_x_gradient,
-    #     )
-    #     properties = Dict(:chemoattractant => chemo)
-    #     model = StandardABM(Celani{2,2}, space, dt; properties)
-    #     motility = RunTumble([20.0], Inf, Isotropic2D)
-    #     pos = spacesize(model) ./ 2 # initialize at the center of domain
-    #     vel = SVector(1.0, 0.0) # align on gradient direction
-    #     add_agent!(pos, model; vel, motility, gain=5, memory=1)
-    #     add_agent!(pos, model; vel, motility, gain=1, memory=1)
-    #     add_agent!(pos, model; vel, motility, gain=5, memory=2)
-    #     run!(model, 1)
-    #     # larger gain => stronger response => longer runs => smaller tumble bias
-    #     @test bias(model[1]) < bias(model[2])
-    #     # longer memory => less affected by measurement => larger tumble bias
-    #     @test bias(model[1]) < bias(model[3])
-    # end
+    @testset "Celani" begin
+        L = 100
+        space = ContinuousSpace((L, L); periodic=false)
+        dt = 0.1
+        chemo = GenericChemoattractant{2}(;
+            concentration_field = constant_background_concentration,
+        )
+        properties = Dict(:chemoattractant => chemo)
+        model = StandardABM(Microbe{2}, space, dt; properties)
+        motility = RunTumble([20.0], Inf, Isotropic(2))
+        add_agent!(model; motility, behaviors = (Celani(gain=5, memory=1),))
+        add_agent!(model; motility, behaviors = (Celani(gain=1, memory=1),))
+        add_agent!(model; motility, behaviors = (Celani(gain=5, memory=2),))
+        run!(model, 1)
+        # no gradient => everyone has same bias and state independent of parameters
+        @test bias(model[1], model) == bias(model[2], model) == bias(model[3], model) == 1
+
+        L = 100
+        space = ContinuousSpace((L, L); periodic=false)
+        dt = 0.1
+        chemo = GenericChemoattractant{2}(;
+            concentration_field = linear_x_concentration,
+            concentration_gradient = linear_x_gradient,
+        )
+        properties = Dict(:chemoattractant => chemo)
+        model = StandardABM(Microbe{2}, space, dt; properties)
+        motility = RunTumble([20.0], Inf, Isotropic(2))
+        pos = spacesize(model) ./ 2 # initialize at the center of domain
+        vel = SVector(1.0, 0.0) # align on gradient direction
+        add_agent!(pos, model; vel, motility, behaviors = (Celani(gain=5, memory=1),))
+        add_agent!(pos, model; vel, motility, behaviors = (Celani(gain=1, memory=1),))
+        add_agent!(pos, model; vel, motility, behaviors = (Celani(gain=5, memory=2),))
+        run!(model, 1)
+        # larger gain => stronger response => longer runs => smaller tumble bias
+        @test bias(model[1], model) < bias(model[2], model)
+        # longer memory => less affected by measurement => larger tumble bias
+        @test bias(model[1], model) < bias(model[3], model)
+    end
 
     # @testset "SonMenolascina" begin
     #     L = 100

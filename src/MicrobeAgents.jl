@@ -55,8 +55,8 @@ include("model.jl")
 include("chemotaxis/sensing.jl")
 include("chemotaxis/brown-berg.jl")
 include("chemotaxis/brumley.jl")
-# include("chemotaxis/celani.jl") # re-enabled in later tasks
-# include("chemotaxis/xie.jl")
+include("chemotaxis/celani.jl")
+include("chemotaxis/xie.jl")
 # include("chemotaxis/son-menolascina.jl")
 
 # pathfinding

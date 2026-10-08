@@ -42,4 +42,19 @@ using Random
             @test model[2].pos == pos
         end
     end
+
+    @testset "Celani initialization at steady state" begin
+        for D in 1:3
+            C = 2.0
+            concentration_field(microbe, model) = C
+            chemo = GenericChemoattractant{D}(; concentration_field)
+            s = ContinuousSpace(ones(SVector{D}))
+            model = StandardABM(Microbe{D}, s, 1.0; properties = Dict(:chemoattractant => chemo))
+            add_agent!(model; motility = RunTumble([30.0], 0.67, 0.1), behaviors = (Celani(),))
+            c = model[1].behaviors[1]
+            λ = 1 / c.memory
+            @test c.state == 0.0
+            @test c.markovian_variables == [C/λ, C/λ^2, 2C/λ^3]
+        end
+    end
 end

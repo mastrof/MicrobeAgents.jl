@@ -23,6 +23,8 @@ xpos(m) = position(m)[1]
 ypos(m) = position(m)[2]
 chemotaxis_bias(m) = bias(m.behaviors.chemotaxis, m, REF_MODEL[])
 chemotaxis_state(m) = m.behaviors.chemotaxis.state
+state_m(m) = m.behaviors.chemotaxis.state_m
+state_z(m) = m.behaviors.chemotaxis.state_z
 
 function run_scenario(motility, behaviors, kw, extras)
     space = ContinuousSpace((REF_L, REF_L); periodic = true)
@@ -55,4 +57,10 @@ end
     test_against_reference("Brumley", run_scenario(ref_rrf,
         (chemotaxis = Brumley(chemotactic_precision = 6.0),),
         (rotational_diffusivity = 0.035, radius = 0.5), []))
+    test_against_reference("Celani", run_scenario(ref_rt,
+        (chemotaxis = Celani(chemotactic_precision = 6.0),),
+        (rotational_diffusivity = 0.26, radius = 0.5), []))
+    test_against_reference("Xie", run_scenario(ref_rrf,
+        (chemotaxis = Xie(chemotactic_precision = 6.0),),
+        (rotational_diffusivity = 0.26, radius = 0.5), [state_m, state_z]))
 end
