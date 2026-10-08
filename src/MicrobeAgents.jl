@@ -43,6 +43,7 @@ include("spherical_distribution.jl")
 include("motility.jl")
 include("rotations.jl")
 include("fields.jl")
+include("behaviors.jl")
 
 include("microbes.jl")
 include("microbe_step.jl")

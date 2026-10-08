@@ -1,4 +1,4 @@
-export Microbe, chemotaxis!, bias
+export Microbe, chemotaxis!
 
 """
     Microbe{D,N} <: AbstractMicrobe{D,N}
