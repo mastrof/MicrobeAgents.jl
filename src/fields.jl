@@ -90,14 +90,24 @@ property `key`.
 """
 check_field(model::ABM, key::Symbol) = (_index(field_cache(model), key); nothing)
 
-# `compute(field)` evaluates the quantity from the field object `field`
+# `compute(field, microbe, model)` evaluates the quantity (a non-capturing function,
+# so that no closure is allocated when it is passed to a non-inlined method).
+# The default field is read from the concretely typed model property, so that
+# `compute` dispatches statically on the single-field path (slot 1 is always the default).
 @inline function _cached(compute::F, name::Symbol, bit::UInt8, microbe, model, key) where {F}
     cache = field_cache(model)
+    if key === :chemicalfield
+        return _cached_slot(compute, chemicalfield(model), cache, 1, name, bit, microbe, model)
+    end
     i = _index(cache, key)
-    cache.id == microbe.id || return compute(cache.fields[i])
-    slot = cache.slots[i]
+    return @inline _cached_slot(compute, cache.fields[i], cache, i, name, bit, microbe, model)
+end
+
+@inline function _cached_slot(compute::F, field, cache, i, name, bit, microbe, model) where {F}
+    cache.id == microbe.id || return compute(field, microbe, model)
+    slot = @inbounds cache.slots[i]
     slot.valid & bit == bit && return getfield(slot, name)
-    v = compute(cache.fields[i])
+    v = compute(field, microbe, model)
     setfield!(slot, name, v)
     slot.valid |= bit
     return v
@@ -109,7 +119,7 @@ Concentration at the position of `microbe` in the chemical field `key`
 (default `:chemicalfield`). Memoized per step.
 """
 function concentration(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
-    _cached(:concentration, _CONCENTRATION_BIT, microbe, model, key) do f
+    _cached(:concentration, _CONCENTRATION_BIT, microbe, model, key) do f, microbe, model
         concentration(f)(microbe, model)::Float64
     end
 end
@@ -118,7 +128,7 @@ end
 Concentration gradient for `microbe` in the chemical field `key` (default `:chemicalfield`).
 """
 function gradient(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
-    _cached(:gradient, _GRADIENT_BIT, microbe, model, key) do f
+    _cached(:gradient, _GRADIENT_BIT, microbe, model, key) do f, microbe, model
         gradient(f)(microbe, model)::SVector{D,Float64}
     end
 end
@@ -127,7 +137,7 @@ end
 Time derivative of the concentration for `microbe` in the chemical field `key` (default `:chemicalfield`).
 """
 function time_derivative(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
-    _cached(:time_derivative, _TIME_DERIVATIVE_BIT, microbe, model, key) do f
+    _cached(:time_derivative, _TIME_DERIVATIVE_BIT, microbe, model, key) do f, microbe, model
         time_derivative(f)(microbe, model)::Float64
     end
 end
@@ -136,7 +146,7 @@ end
 Diffusivity of the chemical `key` (default `:chemicalfield`) at the position of `microbe`.
 """
 function diffusivity(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
-    _cached(:diffusivity, _DIFFUSIVITY_BIT, microbe, model, key) do f
+    _cached(:diffusivity, _DIFFUSIVITY_BIT, microbe, model, key) do f, microbe, model
         diffusivity(f)(microbe, model)::Float64
     end
 end
