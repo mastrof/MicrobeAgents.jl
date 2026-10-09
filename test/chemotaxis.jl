@@ -163,13 +163,39 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         @test bias(model_a[1], model_a) == bias(model_b[1], model_b)
 
         # every field-reading behavior accepts `field`
-        for b in (Brumley(field = :repellent, chemotactic_precision = 0),
-                  Celani(field = :repellent), Xie(field = :repellent),
-                  Chemokinesis(field = :repellent), BrownBerg(field = :repellent))
-            mdl = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:repellent => B))
+        # call-count spies: each quantity read is counted per field
+        function spyfield()
+            cnt = Dict(q => Ref(0) for q in (:c, :g, :t, :d))
+            f = ChemicalField{2}(;
+                concentration_field = (m, mdl) -> (cnt[:c][] += 1; 1.0),
+                concentration_gradient = (m, mdl) -> (cnt[:g][] += 1; SVector(0.1, 0.0)),
+                concentration_ramp = (m, mdl) -> (cnt[:t][] += 1; 0.0),
+                diffusivity = (m, mdl) -> (cnt[:d][] += 1; 608.0),
+            )
+            return f, cnt
+        end
+        reset!(d) = foreach(r -> r[] = 0, values(d))
+        expected = (
+            (Brumley(field = :repellent, chemotactic_precision = 0), (:d, :c, :g, :t)),
+            (Celani(field = :repellent), (:d, :c)),
+            (Xie(field = :repellent), (:d, :c)),
+            (Chemokinesis(field = :repellent), (:c,)),
+            (BrownBerg(field = :repellent), (:c, :g, :t)),
+        )
+        for (b, reads) in expected
+            fd, nd = spyfield()
+            fr, nr = spyfield()
+            mdl = StandardABM(Microbe{2}, space, 0.1;
+                properties = Dict(:chemicalfield => fd, :repellent => fr))
             m = add_agent!(pos, mdl; kw..., behaviors = (b,))
             @test m.behaviors[1].field == :repellent
-            run!(mdl, 1) # affect! reads the named field without error
+            @test all(r[] == 0 for r in values(nd)) # initialize! leaves the default field alone
+            reset!(nd); reset!(nr)
+            run!(mdl, 2)
+            for q in reads
+                @test nr[q][] > 0
+            end
+            @test all(r[] == 0 for r in values(nd))
         end
         @test SonMenolascina(field = :repellent).chemotaxis.field == :repellent
         @test SonMenolascina(field = :repellent).chemokinesis.field == :repellent
