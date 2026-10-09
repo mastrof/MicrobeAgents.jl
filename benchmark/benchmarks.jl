@@ -28,6 +28,8 @@ const NEWAPI = isdefined(MicrobeAgents, :Behavior)
 # chemoattractant field type was renamed `GenericChemoattractant` -> `ChemicalField`
 const FieldType = isdefined(MicrobeAgents, :ChemicalField) ?
     MicrobeAgents.ChemicalField : MicrobeAgents.GenericChemoattractant
+# default field key was renamed `:chemoattractant` -> `:chemicalfield`
+const FIELD_KEY = isdefined(MicrobeAgents, :chemicalfield) ? :chemicalfield : :chemoattractant
 
 # model name => (number of motile states, constructor of fresh behaviors (v1+ only))
 const MODELS = Dict(
@@ -77,7 +79,7 @@ end
 
 function make_model(name, D, N; chemotaxis = false)
     space = ContinuousSpace(ntuple(_ -> BOXSIZE, D); periodic = true)
-    properties = chemotaxis ? Dict(:chemoattractant => linear_chemoattractant(D)) : Dict()
+    properties = chemotaxis ? Dict(FIELD_KEY => linear_chemoattractant(D)) : Dict()
     # concrete agent type, as recommended in the Behaviors docs
     model = StandardABM(
         agent_type(name, D), space, DT;
