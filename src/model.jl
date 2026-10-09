@@ -63,6 +63,12 @@ function _check_properties(properties)
     has && throw(ArgumentError(
         "the `:affect!` model property was removed; per-step logic is now passed " *
         "per agent as `add_agent!(model; ..., behaviors = (f,))` (see the Behaviors docs)"))
+    haskey_(k) = properties isa AbstractDict ? haskey(properties, k) : hasproperty(properties, k)
+    haskey_(:chemoattractant) && !haskey_(:chemicalfield) && @warn(
+        "the default chemical field key is now `:chemicalfield` (renamed from " *
+        "`:chemoattractant`); the property `:chemoattractant` is an extra field, and " *
+        "behaviors sense `:chemicalfield` unless given `field = :chemoattractant`")
+    return nothing
 end
 
 function Agents.add_agent!(

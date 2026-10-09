@@ -102,4 +102,12 @@ using MicrobeAgents, Test, Random
         @test (@inferred MicrobeAgents.concentration(m, model, :repellent)) isa Float64
         @test (@inferred gradient(m, model, :repellent)) isa SVector{2,Float64}
     end
+
+    @testset "invalid field properties" begin
+        space = ContinuousSpace((100.0, 100.0))
+        e1 = try StandardABM(Microbe{2}, space, 1.0; properties = Dict(:chemicalfield => nothing)) catch e e end
+        @test e1 isa ArgumentError && occursin("chemicalfield", e1.msg)
+        e2 = try StandardABM(Microbe{2}, space, 1.0; properties = Dict(:x => ChemicalField{3}())) catch e e end
+        @test e2 isa ArgumentError && occursin(":x", e2.msg)
+    end
 end

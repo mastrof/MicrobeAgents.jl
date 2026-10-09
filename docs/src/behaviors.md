@@ -99,6 +99,12 @@ signals additive in log-rate; for `Xie` and `Brumley` (`1 + β s`) the combinati
 a product. Naming a field the model does not have throws an `ArgumentError`
 when the microbe is added.
 
+Custom behaviors can read a named field through `concentration(microbe, model, key)`,
+`gradient(...)`, `time_derivative(...)` and `diffusivity(...)`, and should call
+`MicrobeAgents.check_field(model, key)` in `initialize!` so that a wrong name fails
+when the microbe is added. Note that the default key was renamed from
+`:chemoattractant` to `:chemicalfield`.
+
 ## Sharing measurements
 
 `concentration`, `gradient`, `time_derivative` and `diffusivity`

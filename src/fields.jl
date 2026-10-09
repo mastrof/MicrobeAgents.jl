@@ -7,12 +7,11 @@ Abstract type for chemical fields.
 Requires dimensionality (`D`) to be specified.
 Number type is always assumed to be `Float64`.
 
-The interface is defined by five core functions:
-- `chemicalfield`: returns the default chemical field object
+The interface is defined by four functions:
 - `concentration`: returns the function for the concentration field
 - `gradient`: returns the function for the concentration gradient
 - `time_derivative`: returns the function for the concentration ramp
-- `diffusivity`: returns the thermal diffusivity of the chemoattractant
+- `diffusivity`: returns the diffusivity of the chemical
 """
 abstract type AbstractChemicalField{D} end
 
@@ -40,6 +39,14 @@ end
 
 # collect every `AbstractChemicalField` property, default field first
 function FieldCache{D}(props) where {D}
+    default = getproperty(props, :chemicalfield)
+    default isa AbstractChemicalField{D} || throw(ArgumentError(
+        "property `:chemicalfield` must be an `AbstractChemicalField{$D}`, got $(typeof(default))"))
+    for k in keys(props)
+        v = getproperty(props, k)
+        v isa AbstractChemicalField && !(v isa AbstractChemicalField{D}) && throw(ArgumentError(
+            "chemical field `:$k` has the wrong dimension: expected `AbstractChemicalField{$D}`, got $(typeof(v))"))
+    end
     ks = [k for k in keys(props) if k !== :chemicalfield && getproperty(props, k) isa AbstractChemicalField]
     pushfirst!(ks, :chemicalfield)
     fields = AbstractChemicalField{D}[getproperty(props, k) for k in ks]

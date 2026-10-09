@@ -16,6 +16,17 @@ using Random
         @test MicrobeAgents.field_cache(model).keys == [:chemicalfield]
     end
 
+    @testset "Renamed default field key" begin
+        space = ContinuousSpace((10.0, 10.0))
+        F = ChemicalField{2}()
+        mk(props) = StandardABM(Microbe{2}, space, 1.0; properties = props, warn = false)
+        @test_logs (:warn, r"chemicalfield") mk(Dict(:chemoattractant => F))
+        @test_logs (:warn, r"chemicalfield") mk((; chemoattractant = F))
+        @test_logs min_level = Base.CoreLogging.Warn mk(Dict(:chemoattractant => F, :chemicalfield => F))
+        @test_logs min_level = Base.CoreLogging.Warn mk(Dict(:other => F))
+        @test_logs min_level = Base.CoreLogging.Warn mk(Dict())
+    end
+
     @testset "Base Microbe type" begin
         for D in 1:3
             timestep = 1

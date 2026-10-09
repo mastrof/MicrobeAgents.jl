@@ -13,7 +13,6 @@ We compare a population sensing only the attractant with one sensing both.
 =#
 using MicrobeAgents
 using Plots
-using Statistics
 using Random
 
 L = 6000.0 # μm
@@ -51,7 +50,7 @@ Agents are added alternately, so odd ids belong to the attractant-only populatio
 and even ids to the other one.
 We record the mean `x` of each population along the run.
 =#
-meanx(ids) = mean(position(model[i])[1] for i in ids)
+meanx(ids) = sum(position(model[i])[1] for i in ids) / length(ids)
 attr_ids = 1:2:200
 both_ids = 2:2:200
 
