@@ -1,7 +1,7 @@
 export Celani
 
 """
-    Celani(; gain=50, memory=1, chemotactic_precision=0)
+    Celani(; gain=50, memory=1, chemotactic_precision=0, field=:chemicalfield)
 Chemotaxis behavior using the response kernel from 'Celani and Vergassola (2010) PNAS',
 extracted from experiments on E. coli.
 Optional sensing noise follows the Berg-Purcell formula, scaled by
@@ -14,6 +14,7 @@ Parameters:
 - `gain = 50`
 - `memory = 1` s
 - `chemotactic_precision = 0`
+- `field = :chemicalfield`: key of the chemical field to sense
 Internal state: `state`, `markovian_variables`.
 """
 @kwdef mutable struct Celani
@@ -22,13 +23,15 @@ Internal state: `state`, `markovian_variables`.
     chemotactic_precision::Float64 = 0.0
     markovian_variables::Vector{Float64} = zeros(3)
     state::Float64 = 0.0
+    field::Symbol = :chemicalfield
 end
 
 function initialize!(b::Celani, microbe, model)
+    check_field(model, b.field)
     check_sensing_radius(b, b.chemotactic_precision, microbe)
     W = b.markovian_variables
     λ = 1 / b.memory
-    M = concentration(microbe, model)
+    M = concentration(microbe, model, b.field)
     W[1] = M / λ
     W[2] = W[1] / λ
     W[3] = 2W[2] / λ
@@ -37,8 +40,8 @@ end
 
 function affect!(b::Celani, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    Dc = diffusivity(microbe, model)
-    c = concentration(microbe, model)
+    Dc = diffusivity(microbe, model, b.field)
+    c = concentration(microbe, model, b.field)
     a = radius(microbe)
     Π = b.chemotactic_precision
     σ = iszero(Π) ? 0.0 : CONV_NOISE * Π * sqrt(3 * c / (5 * π * Dc * a * Δt)) # noise (Berg-Purcell)

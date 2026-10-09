@@ -110,6 +110,71 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         @test bias(model[2], model) ≈ 1
     end
 
+    @testset "Multiple fields" begin
+        L = 100
+        space = ContinuousSpace((L, L); periodic=false)
+        A = ChemicalField{2}(;
+            concentration_field = linear_x_concentration,
+            concentration_gradient = linear_x_gradient,
+        )
+        # opposing gradient: concentration decreases with x
+        B = ChemicalField{2}(;
+            concentration_field = (m, model) -> (L - position(m)[1]) / 10,
+            concentration_gradient = (m, model) -> SVector(-1/10, 0.0),
+        )
+        model = StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:repellent => B, :chemicalfield => A))
+        motility = RunTumble([20.0], Inf, Isotropic(2))
+        pos = spacesize(model) ./ 2
+        vel = SVector(1.0, 0.0)
+        kw = (; vel, motility)
+        attr = BrownBerg(gain = 600, receptor_binding_constant = 100)
+        rep = BrownBerg(field = :repellent, gain = -400, receptor_binding_constant = 30, memory = 2)
+        add_agent!(pos, model; kw..., behaviors = (attr,))        # 1: default field only
+        add_agent!(pos, model; kw..., behaviors = (rep,))         # 2: repellent only
+        add_agent!(pos, model; kw..., behaviors = (attr, rep))    # 3: both
+        add_agent!(pos, model; kw..., behaviors = (BrownBerg(field = :repellent, gain = 600, receptor_binding_constant = 100),)) # 4
+        run!(model, 1)
+        b1, b2, b3, b4 = (bias(model[i], model) for i in 1:4)
+        @test b1 < 1 && b2 < 1                      # both substances push the run longer
+        @test b3 ≈ b1 * b2                          # biases multiply
+        @test b4 != b1                              # the field keyword really selects the field
+        # independent internal state between the two behaviors of one microbe
+        @test model[3].behaviors[1] !== model[3].behaviors[2]
+        @test model[3].behaviors[1].state != model[3].behaviors[2].state
+        # copies are per agent
+        @test model[1].behaviors[1] !== model[3].behaviors[1]
+
+        # unknown field: clear error and no agent added
+        n = MicrobeAgents.Agents.nagents(model)
+        @test_throws ArgumentError add_agent!(model; motility,
+            behaviors = (BrownBerg(field = :nope),))
+        @test MicrobeAgents.Agents.nagents(model) == n
+
+        # omitting `field` uses the default field whatever the property order
+        model_a = StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:chemicalfield => A, :repellent => B))
+        model_b = StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:repellent => B, :chemicalfield => A))
+        for mdl in (model_a, model_b)
+            add_agent!(pos, mdl; kw..., behaviors = (BrownBerg(),))
+            run!(mdl, 1)
+        end
+        @test bias(model_a[1], model_a) == bias(model_b[1], model_b)
+
+        # every field-reading behavior accepts `field`
+        for b in (Brumley(field = :repellent, chemotactic_precision = 0),
+                  Celani(field = :repellent), Xie(field = :repellent),
+                  Chemokinesis(field = :repellent), BrownBerg(field = :repellent))
+            mdl = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:repellent => B))
+            m = add_agent!(pos, mdl; kw..., behaviors = (b,))
+            @test m.behaviors[1].field == :repellent
+            run!(mdl, 1) # affect! reads the named field without error
+        end
+        @test SonMenolascina(field = :repellent).chemotaxis.field == :repellent
+        @test SonMenolascina(field = :repellent).chemokinesis.field == :repellent
+    end
+
     @testset "Brumley" begin
         L = 100
         space = ContinuousSpace((L, L); periodic=false)

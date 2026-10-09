@@ -1,18 +1,21 @@
 export SonMenolascina, Chemokinesis, SpeedDependentTurnRate, SpeedDependentFlick
 
 """
-    Chemokinesis(; threshold=0.05, factor=1.3)
-Multiply the microbe speed by `factor` while the local concentration is
-at least `threshold` (μM).
+    Chemokinesis(; threshold=0.05, factor=1.3, field=:chemicalfield)
+Multiply the microbe speed by `factor` while the local concentration of the
+chemical field `field` is at least `threshold` (μM).
 """
 @kwdef mutable struct Chemokinesis
     threshold::Float64 = 0.05
     factor::Float64 = 1.3
     on::Bool = false
+    field::Symbol = :chemicalfield
 end
 
+initialize!(b::Chemokinesis, microbe, model) = check_field(model, b.field)
+
 function affect!(b::Chemokinesis, microbe::AbstractMicrobe, model)
-    b.on = concentration(microbe, model) >= b.threshold
+    b.on = concentration(microbe, model, b.field) >= b.threshold
     return nothing
 end
 speed_factor(b::Chemokinesis, microbe) = b.on ? b.factor : 1.0
@@ -64,21 +67,23 @@ end
 
 """
     SonMenolascina(; gain=660, receptor_binding_constant=100, memory=1,
-        eta=-0.55, ζ=-0.35, θ=1.0, vT=18.88, threshold=0.05, factor=1.3)
+        eta=-0.55, ζ=-0.35, θ=1.0, vT=18.88, threshold=0.05, factor=1.3,
+        field=:chemicalfield)
 Behaviors of the chemotaxis model from 'Son, Menolascina and Stocker (2016) PNAS':
 returns the `NamedTuple`
 `(chemokinesis = Chemokinesis(...), chemotaxis = BrownBerg(...),
 turnrate = SpeedDependentTurnRate(...), flick = SpeedDependentFlick())`,
 to be passed as `behaviors` (use with a `RunReverseFlick` motility).
+`field` is the key of the chemical field sensed by chemokinesis and chemotaxis.
 """
 function SonMenolascina(;
     gain = 660.0, receptor_binding_constant = 100.0, memory = 1.0,
     eta = -0.55, ζ = -0.35, θ = 1.0, vT = 18.88,
-    threshold = 0.05, factor = 1.3,
+    threshold = 0.05, factor = 1.3, field = :chemicalfield,
 )
     (
-        chemokinesis = Chemokinesis(; threshold, factor),
-        chemotaxis = BrownBerg(; gain, receptor_binding_constant, memory),
+        chemokinesis = Chemokinesis(; threshold, factor, field),
+        chemotaxis = BrownBerg(; gain, receptor_binding_constant, memory, field),
         turnrate = SpeedDependentTurnRate(; eta, ζ, θ, vT),
         flick = SpeedDependentFlick(),
     )

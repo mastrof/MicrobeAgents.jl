@@ -1,7 +1,8 @@
 export Brumley
 
 """
-    Brumley(; memory=1.3, gain_receptor=50, gain=50, chemotactic_precision=6)
+    Brumley(; memory=1.3, gain_receptor=50, gain=50, chemotactic_precision=6,
+        field=:chemicalfield)
 Chemotaxis behavior from 'Brumley et al. (2019) PNAS', with gaussian sensing
 noise in the gradient measurement. Requires a microbe `radius > 0` when
 `chemotactic_precision > 0`.
@@ -11,6 +12,7 @@ Parameters:
 - `gain_receptor = 50` μM⁻¹ → 'κ'
 - `gain = 50` → 'Γ'
 - `chemotactic_precision = 6` → 'Π'
+- `field = :chemicalfield`: key of the chemical field to sense
 Internal state: `state` → 'S'.
 """
 @kwdef mutable struct Brumley
@@ -19,23 +21,26 @@ Internal state: `state` → 'S'.
     gain::Float64 = 50.0
     chemotactic_precision::Float64 = 6.0
     state::Float64 = 0.0
+    field::Symbol = :chemicalfield
 end
 
-initialize!(b::Brumley, microbe, model) =
+function initialize!(b::Brumley, microbe, model)
+    check_field(model, b.field)
     check_sensing_radius(b, b.chemotactic_precision, microbe)
+end
 
 function affect!(b::Brumley, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    Dc = diffusivity(microbe, model)
+    Dc = diffusivity(microbe, model, b.field)
     τₘ = b.memory
     α = exp(-Δt / τₘ) # memory persistence factor
     a = radius(microbe)
     Π = b.chemotactic_precision
     κ = b.gain_receptor
     vel = velocity(microbe)
-    u = concentration(microbe, model)
-    ∇u = gradient(microbe, model)
-    ∂ₜu = time_derivative(microbe, model)
+    u = concentration(microbe, model, b.field)
+    ∇u = gradient(microbe, model, b.field)
+    ∂ₜu = time_derivative(microbe, model, b.field)
     # gradient measurement
     μ = dot(vel, ∇u) + ∂ₜu # mean
     σ = iszero(Π) ? 0.0 : CONV_NOISE * Π * sqrt(3 * u / (π * a * Dc * Δt^3)) # noise

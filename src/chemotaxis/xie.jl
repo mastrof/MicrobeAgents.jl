@@ -3,7 +3,7 @@ export Xie
 """
     Xie(; adaptation_time_m=1.29, adaptation_time_z=0.28,
         gain_forward=2.7, gain_backward=1.6, binding_affinity=0.39,
-        chemotactic_precision=0)
+        chemotactic_precision=0, field=:chemicalfield)
 Chemotaxis behavior adapted from 'Xie et al. (2019) Biophys J', based on the
 response function of V. alginolyticus. With a 4-state motility
 (`RunReverseFlick`), `gain_backward` applies in the backward run (state 3)
@@ -18,6 +18,7 @@ Parameters:
 - `gain_backward = 1.6` 1/s
 - `binding_affinity = 0.39` μM
 - `chemotactic_precision = 0`
+- `field = :chemicalfield`: key of the chemical field to sense
 Internal state: `state`, `state_m`, `state_z`.
 """
 @kwdef mutable struct Xie
@@ -30,15 +31,18 @@ Internal state: `state`, `state_m`, `state_z`.
     state::Float64 = 0.0
     state_m::Float64 = 0.0
     state_z::Float64 = 0.0
+    field::Symbol = :chemicalfield
 end
 
-initialize!(b::Xie, microbe, model) =
+function initialize!(b::Xie, microbe, model)
+    check_field(model, b.field)
     check_sensing_radius(b, b.chemotactic_precision, microbe)
+end
 
 function affect!(b::Xie, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    Dc = diffusivity(microbe, model)
-    c = concentration(microbe, model)
+    Dc = diffusivity(microbe, model, b.field)
+    c = concentration(microbe, model, b.field)
     K = b.binding_affinity
     a = radius(microbe)
     Π = b.chemotactic_precision
