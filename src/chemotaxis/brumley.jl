@@ -26,7 +26,7 @@ initialize!(b::Brumley, microbe, model) =
 
 function affect!(b::Brumley, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    Dc = chemoattractant_diffusivity(microbe, model)
+    Dc = diffusivity(microbe, model)
     τₘ = b.memory
     α = exp(-Δt / τₘ) # memory persistence factor
     a = radius(microbe)

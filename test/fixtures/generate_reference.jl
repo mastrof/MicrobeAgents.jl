@@ -46,7 +46,7 @@ const SCENARIOS = [
 function run_scenario(T, motility, kw, extras)
     space = ContinuousSpace((L, L); periodic = true)
     model = StandardABM(T, space, DT;
-        properties = Dict(:chemoattractant => CHEMO),
+        properties = Dict(:chemicalfield => CHEMO),
         rng = Xoshiro(1234), container = Vector,
     )
     for _ in 1:NAGENTS

@@ -20,10 +20,10 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 **Default `properties`**
 
 When a model is created, a default set of properties is included in the model
-(`chemoattractant` and `field_cache`):
+(`chemicalfield` and `field_cache`):
 ```
 Dict(
-    :chemoattractant => ChemicalField{D}(),
+    :chemicalfield => ChemicalField{D}(),
     :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
 )
 ```
@@ -123,6 +123,6 @@ function Agents.add_agent!(
 end
 
 make_default_abm_properties(D) = Dict(
-    :chemoattractant => ChemicalField{D}(),
+    :chemicalfield => ChemicalField{D}(),
     :field_cache => FieldCache{D}()
 )

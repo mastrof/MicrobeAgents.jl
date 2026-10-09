@@ -44,7 +44,7 @@ pathfinder = AStar(space; walkmap=wm)
 properties = Dict(
     :C₀ => C₀,
     :C₁ => C₁,
-    :chemoattractant => ChemicalField{2}(;
+    :chemicalfield => ChemicalField{2}(;
         concentration_field, concentration_gradient
     ),
     :pathfinder => pathfinder

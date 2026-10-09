@@ -29,7 +29,7 @@ state_z(m) = m.behaviors.chemotaxis.state_z
 function run_scenario(motility, behaviors, kw, extras)
     space = ContinuousSpace((REF_L, REF_L); periodic = true)
     model = StandardABM(Microbe{2}, space, REF_DT;
-        properties = Dict(:chemoattractant => REF_CHEMO),
+        properties = Dict(:chemicalfield => REF_CHEMO),
         rng = Xoshiro(1234), container = Vector,
     )
     for _ in 1:REF_NAGENTS

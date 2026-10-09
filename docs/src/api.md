@@ -26,11 +26,11 @@ random_velocity
 ```@docs
 AbstractChemicalField
 ChemicalField
-chemoattractant
+chemicalfield
 concentration
 gradient
 time_derivative
-chemoattractant_diffusivity
+diffusivity
 ```
 
 ## [Utils](@id Utils)

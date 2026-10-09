@@ -37,7 +37,7 @@ end
 
 function affect!(b::Celani, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    Dc = chemoattractant_diffusivity(microbe, model)
+    Dc = diffusivity(microbe, model)
     c = concentration(microbe, model)
     a = radius(microbe)
     Π = b.chemotactic_precision

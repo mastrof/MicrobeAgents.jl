@@ -37,7 +37,7 @@ initialize!(b::Xie, microbe, model) =
 
 function affect!(b::Xie, microbe::AbstractMicrobe, model)
     Δt = abmtimestep(model)
-    Dc = chemoattractant_diffusivity(microbe, model)
+    Dc = diffusivity(microbe, model)
     c = concentration(microbe, model)
     K = b.binding_affinity
     a = radius(microbe)

@@ -10,7 +10,7 @@ using Random
         @test model isa StandardABM
         @test Set(keys(abmproperties(model))) == Set((
             :timestep,
-            :chemoattractant,
+            :chemicalfield,
             :field_cache
         ))
     end
@@ -49,7 +49,7 @@ using Random
             concentration_field(microbe, model) = C
             chemo = ChemicalField{D}(; concentration_field)
             s = ContinuousSpace(ones(SVector{D}))
-            model = StandardABM(Microbe{D}, s, 1.0; properties = Dict(:chemoattractant => chemo))
+            model = StandardABM(Microbe{D}, s, 1.0; properties = Dict(:chemicalfield => chemo))
             add_agent!(model; motility = RunTumble([30.0], 0.67, 0.1), behaviors = (Celani(),))
             c = model[1].behaviors[1]
             λ = 1 / c.memory

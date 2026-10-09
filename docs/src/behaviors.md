@@ -79,7 +79,7 @@ MicrobeAgents.speed_factor(f::Fatigue, microbe) = exp(-f.level)
 
 ## Sharing measurements
 
-`concentration`, `gradient`, `time_derivative` and `chemoattractant_diffusivity`
+`concentration`, `gradient`, `time_derivative` and `diffusivity`
 are evaluated at most once per microbe per step, however many behaviors ask
 for them. For other expensive quantities, define a sensor behavior placed
 before the behaviors that use it; it stores the value in its own field, and

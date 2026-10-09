@@ -42,7 +42,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         add_agent!(model; motility, behaviors = (BrownBerg(gain=600, receptor_binding_constant=100, memory=1),))
@@ -60,7 +60,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         pos = spacesize(model) ./ 2 # initialize at the center of domain
@@ -85,7 +85,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
             concentration_field = time_impulse_concentration,
             concentration_ramp = time_impulse_derivative,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         pos = spacesize(model) ./ 2 # initialize at the center of domain
@@ -117,7 +117,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         add_agent!(model; motility, behaviors = (Brumley(gain=5, memory=1, chemotactic_precision=0),))
@@ -133,7 +133,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         pos = spacesize(model) ./ 2 # initialize at the center of domain
@@ -149,7 +149,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
     @testset "Noise-free sensing with zero radius" begin
         space = ContinuousSpace((100.0, 100.0))
         chemo = ChemicalField{2}(; concentration_field = constant_background_concentration)
-        model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:chemoattractant => chemo))
+        model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:chemicalfield => chemo))
         motility = RunTumble([20.0], Inf, Isotropic(2))
         add_agent!(model; motility, behaviors = (Brumley(chemotactic_precision = 0),))
         run!(model, 5)
@@ -183,7 +183,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         add_agent!(model; motility, behaviors = (Celani(gain=5, memory=1),))
@@ -200,7 +200,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         pos = spacesize(model) ./ 2 # initialize at the center of domain
@@ -222,7 +222,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         motility = RunTumble([20.0], Inf, Isotropic(2))
         add_agent!(model; motility, behaviors = SonMenolascina(gain=600, memory=1))
@@ -240,7 +240,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
-        properties = Dict(:chemoattractant => chemo)
+        properties = Dict(:chemicalfield => chemo)
         model = StandardABM(Microbe{2}, space, dt; properties)
         pos = spacesize(model) ./ 2 # initialize at the center of domain
         vel = SVector(1.0, 0.0) # align on gradient direction
