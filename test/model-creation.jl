@@ -13,6 +13,7 @@ using Random
             :chemicalfield,
             :field_cache
         ))
+        @test MicrobeAgents.field_cache(model).keys == [:chemicalfield]
     end
 
     @testset "Base Microbe type" begin

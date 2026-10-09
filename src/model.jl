@@ -20,13 +20,13 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 **Default `properties`**
 
 When a model is created, a default set of properties is included in the model
-(`chemicalfield` and `field_cache`):
+(`chemicalfield`):
 ```
-Dict(
-    :chemicalfield => ChemicalField{D}(),
-    :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
-)
+Dict(:chemicalfield => ChemicalField{D}())
 ```
+Any property whose value is an `AbstractChemicalField` is a chemical field,
+selected by behaviors through their `field` keyword; `:field_cache` is internal
+and always rebuilt.
 By including these default properties, we make sure that chemotactic behaviors
 will work even without extra user intervention.
 All these properties can be overwritten by simply passing an equivalent key
@@ -49,6 +49,7 @@ function Agents.StandardABM(
         properties...,
         timestep = timestep
     )
+    properties = merge(properties, (; field_cache = FieldCache{D}(properties)))
     StandardABM(T, space;
         agent_step!, model_step!, container,
         scheduler, properties, rng, agents_first, warn
@@ -123,6 +124,5 @@ function Agents.add_agent!(
 end
 
 make_default_abm_properties(D) = Dict(
-    :chemicalfield => ChemicalField{D}(),
-    :field_cache => FieldCache{D}()
+    :chemicalfield => ChemicalField{D}()
 )

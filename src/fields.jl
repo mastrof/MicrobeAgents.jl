@@ -3,7 +3,7 @@ export concentration, gradient, time_derivative, diffusivity
 
 """
     AbstractChemicalField{D}
-Abstract type for chemoattractants.
+Abstract type for chemical fields.
 Requires dimensionality (`D`) to be specified.
 Number type is always assumed to be `Float64`.
 
@@ -18,17 +18,33 @@ abstract type AbstractChemicalField{D} end
 
 # per-step memoization of field quantities for the microbe being stepped;
 # `id == 0` means no microbe is being stepped.
-# `valid` is a bitmask of the quantities computed so far, so a reset only
-# clears the mask and the stale values are never read.
-mutable struct FieldCache{D}
-    id::Int
+# Each field has a slot whose `valid` bitmask records the quantities computed so
+# far, so a reset only clears the masks and stale values are never read.
+mutable struct FieldSlot{D}
     valid::UInt8
     concentration::Float64
     gradient::SVector{D,Float64}
     time_derivative::Float64
     diffusivity::Float64
 end
-FieldCache{D}() where {D} = FieldCache{D}(0, 0x00, 0.0, zero(SVector{D,Float64}), 0.0, 0.0)
+FieldSlot{D}() where {D} = FieldSlot{D}(0x00, 0.0, zero(SVector{D,Float64}), 0.0, 0.0)
+
+# `keys[i]`, `fields[i]` and `slots[i]` describe the i-th field (`:chemicalfield` first);
+# fields are looked up by name with a short linear scan of `keys`
+mutable struct FieldCache{D}
+    id::Int
+    keys::Vector{Symbol}
+    fields::Vector{AbstractChemicalField{D}}
+    slots::Vector{FieldSlot{D}}
+end
+
+# collect every `AbstractChemicalField` property, default field first
+function FieldCache{D}(props) where {D}
+    ks = [k for k in keys(props) if k !== :chemicalfield && getproperty(props, k) isa AbstractChemicalField]
+    pushfirst!(ks, :chemicalfield)
+    fields = AbstractChemicalField{D}[getproperty(props, k) for k in ks]
+    FieldCache{D}(0, ks, fields, [FieldSlot{D}() for _ in ks])
+end
 
 const _CONCENTRATION_BIT = 0x01
 const _GRADIENT_BIT = 0x02
@@ -40,7 +56,9 @@ field_cache(model::ABM) = abmproperties(model).field_cache
 function reset_field_cache!(model::ABM, microbe::AbstractMicrobe)
     c = field_cache(model)
     c.id = microbe.id
-    c.valid = 0x00
+    for s in c.slots
+        s.valid = 0x00
+    end
     return nothing
 end
 """
@@ -50,36 +68,82 @@ changes the position of the microbe, so later behaviors see fresh values.
 """
 invalidate_field_cache!(model::ABM) = (field_cache(model).id = 0; nothing)
 
-@inline function _cached(compute::F, name::Symbol, bit::UInt8, microbe, model) where {F}
+@noinline function _unknown_field(cache::FieldCache, key::Symbol)
+    throw(ArgumentError(
+        "model has no chemical field `:$key`; available fields: " *
+        join((":$k" for k in cache.keys), ", ")))
+end
+
+# position of `key` in the (short) vector of field names
+@inline function _index(cache::FieldCache, key::Symbol)
+    ks = cache.keys
+    @inbounds for i in eachindex(ks)
+        ks[i] === key && return i
+    end
+    return _unknown_field(cache, key)
+end
+
+"""
+    MicrobeAgents.check_field(model, key::Symbol)
+Throw an `ArgumentError` unless `model` has a chemical field stored under the
+property `key`.
+"""
+check_field(model::ABM, key::Symbol) = (_index(field_cache(model), key); nothing)
+
+# `compute(field)` evaluates the quantity from the field object `field`
+@inline function _cached(compute::F, name::Symbol, bit::UInt8, microbe, model, key) where {F}
     cache = field_cache(model)
-    cache.id == microbe.id || return compute()
-    cache.valid & bit == bit && return getfield(cache, name)
-    v = compute()
-    setfield!(cache, name, v)
-    cache.valid |= bit
+    i = _index(cache, key)
+    cache.id == microbe.id || return compute(cache.fields[i])
+    slot = cache.slots[i]
+    slot.valid & bit == bit && return getfield(slot, name)
+    v = compute(cache.fields[i])
+    setfield!(slot, name, v)
+    slot.valid |= bit
     return v
 end
 
-function concentration(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:concentration, _CONCENTRATION_BIT, microbe, model) do
-        concentration(chemicalfield(model))(microbe, model)::Float64
+"""
+    concentration(microbe, model[, key])
+Concentration at the position of `microbe` in the chemical field `key`
+(default `:chemicalfield`). Memoized per step.
+"""
+function concentration(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
+    _cached(:concentration, _CONCENTRATION_BIT, microbe, model, key) do f
+        concentration(f)(microbe, model)::Float64
     end
 end
-function gradient(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:gradient, _GRADIENT_BIT, microbe, model) do
-        gradient(chemicalfield(model))(microbe, model)::SVector{D,Float64}
+"""
+    gradient(microbe, model[, key])
+Concentration gradient for `microbe` in the chemical field `key` (default `:chemicalfield`).
+"""
+function gradient(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
+    _cached(:gradient, _GRADIENT_BIT, microbe, model, key) do f
+        gradient(f)(microbe, model)::SVector{D,Float64}
     end
 end
-function time_derivative(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:time_derivative, _TIME_DERIVATIVE_BIT, microbe, model) do
-        time_derivative(chemicalfield(model))(microbe, model)::Float64
+"""
+    time_derivative(microbe, model[, key])
+Time derivative of the concentration for `microbe` in the chemical field `key` (default `:chemicalfield`).
+"""
+function time_derivative(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
+    _cached(:time_derivative, _TIME_DERIVATIVE_BIT, microbe, model, key) do f
+        time_derivative(f)(microbe, model)::Float64
     end
 end
-function diffusivity(microbe::AbstractMicrobe{D,N}, model::ABM) where {D,N}
-    _cached(:diffusivity, _DIFFUSIVITY_BIT, microbe, model) do
-        diffusivity(chemicalfield(model))(microbe, model)::Float64
+"""
+    diffusivity(microbe, model[, key])
+Diffusivity of the chemical `key` (default `:chemicalfield`) at the position of `microbe`.
+"""
+function diffusivity(microbe::AbstractMicrobe{D,N}, model::ABM, key::Symbol) where {D,N}
+    _cached(:diffusivity, _DIFFUSIVITY_BIT, microbe, model, key) do f
+        diffusivity(f)(microbe, model)::Float64
     end
 end
+concentration(microbe::AbstractMicrobe, model::ABM) = concentration(microbe, model, :chemicalfield)
+gradient(microbe::AbstractMicrobe, model::ABM) = gradient(microbe, model, :chemicalfield)
+time_derivative(microbe::AbstractMicrobe, model::ABM) = time_derivative(microbe, model, :chemicalfield)
+diffusivity(microbe::AbstractMicrobe, model::ABM) = diffusivity(microbe, model, :chemicalfield)
 
 """
     chemicalfield(model)
@@ -107,7 +171,7 @@ The returned function has signature `f(pos, model)` and returns a scalar.
 time_derivative(model::ABM) = time_derivative(chemicalfield(model))
 """
     diffusivity(model)
-Returns the thermal diffusivity of the chemoattractant compound.
+Returns the thermal diffusivity of the default chemical field.
 """
 diffusivity(model::ABM) = diffusivity(chemicalfield(model))
 concentration(c::AbstractChemicalField) = c.concentration_field
