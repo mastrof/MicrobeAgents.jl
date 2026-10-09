@@ -25,6 +25,9 @@ const SEED = 1234
 const RADIUS = 0.5 # finite radius, required by behaviors with sensing noise
 
 const NEWAPI = isdefined(MicrobeAgents, :Behavior)
+# chemoattractant field type was renamed `GenericChemoattractant` -> `ChemicalField`
+const FieldType = isdefined(MicrobeAgents, :ChemicalField) ?
+    MicrobeAgents.ChemicalField : MicrobeAgents.GenericChemoattractant
 
 # model name => (number of motile states, constructor of fresh behaviors (v1+ only))
 const MODELS = Dict(
@@ -65,7 +68,7 @@ function linear_chemoattractant(D)
     c(m, model) = 1.0 + 0.01 * m.pos[1]
     g(m, model) = SVector{D,Float64}(ntuple(i -> i == 1 ? 0.01 : 0.0, D))
     r(m, model) = 0.01 * m.vel[1] * m.speed
-    GenericChemoattractant{D}(
+    FieldType{D}(
         concentration_field = c,
         concentration_gradient = g,
         concentration_ramp = r,

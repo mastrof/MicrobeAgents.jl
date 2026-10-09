@@ -9,7 +9,7 @@ const REF_NAGENTS = 3
 ref_field(m, model) = 1.0 + 0.01 * position(m)[1] + 0.001 * abmtime(model) * REF_DT
 ref_grad(m::AbstractMicrobe{D}, model) where {D} = SVector{D}(i == 1 ? 0.01 : 0.0 for i in 1:D)
 ref_ramp(m, model) = 0.001
-const REF_CHEMO = GenericChemoattractant{2}(;
+const REF_CHEMO = ChemicalField{2}(;
     concentration_field = ref_field,
     concentration_gradient = ref_grad,
     concentration_ramp = ref_ramp,

@@ -3,7 +3,7 @@ using MicrobeAgents, Test, Random
 @testset "Field cache" begin
     calls = Ref(0)
     cfield(m, model) = (calls[] += 1; position(m)[1])
-    chemo = GenericChemoattractant{2}(; concentration_field = cfield)
+    chemo = ChemicalField{2}(; concentration_field = cfield)
     space = ContinuousSpace((100.0, 100.0))
     model = StandardABM(Microbe{2}, space, 1.0; properties = Dict(:chemoattractant => chemo))
     @test :field_cache in keys(abmproperties(model))

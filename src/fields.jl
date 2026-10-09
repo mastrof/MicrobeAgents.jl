@@ -1,8 +1,8 @@
-export AbstractChemoattractant, GenericChemoattractant, chemoattractant
+export AbstractChemicalField, ChemicalField, chemoattractant
 export concentration, gradient, time_derivative, chemoattractant_diffusivity
 
 """
-    AbstractChemoattractant{D}
+    AbstractChemicalField{D}
 Abstract type for chemoattractants.
 Requires dimensionality (`D`) to be specified.
 Number type is always assumed to be `Float64`.
@@ -14,7 +14,7 @@ The interface is defined by five core functions:
 - `time_derivative`: returns the function for the concentration ramp
 - `chemoattractant_diffusivity`: returns the thermal diffusivity of the chemoattractant
 """
-abstract type AbstractChemoattractant{D} end
+abstract type AbstractChemicalField{D} end
 
 # per-step memoization of field quantities for the microbe being stepped;
 # `id == 0` means no microbe is being stepped.
@@ -110,30 +110,30 @@ time_derivative(model::ABM) = time_derivative(chemoattractant(model))
 Returns the thermal diffusivity of the chemoattractant compound.
 """
 chemoattractant_diffusivity(model::ABM) = chemoattractant_diffusivity(chemoattractant(model))
-concentration(c::AbstractChemoattractant) = c.concentration_field
-gradient(c::AbstractChemoattractant) = c.concentration_gradient
-time_derivative(c::AbstractChemoattractant) = c.concentration_ramp
-chemoattractant_diffusivity(c::AbstractChemoattractant) = c.diffusivity
+concentration(c::AbstractChemicalField) = c.concentration_field
+gradient(c::AbstractChemicalField) = c.concentration_gradient
+time_derivative(c::AbstractChemicalField) = c.concentration_ramp
+chemoattractant_diffusivity(c::AbstractChemicalField) = c.diffusivity
 
 """
-    GenericChemoattractant{D} <: AbstractChemoattractant{D}
-Type for a generic chemoattractant field.
+    ChemicalField{D} <: AbstractChemicalField{D}
+Type for a generic chemical field.
 Field, gradient and ramp default to 0 everywhere in the domain.
 Diffusivity defaults to 608 μm²/s everywhere in the domain. (Do not use 0 here, it may mess up some calculations)
 """
-struct GenericChemoattractant{D} <: AbstractChemoattractant{D}
+struct ChemicalField{D} <: AbstractChemicalField{D}
     concentration_field::Function
     concentration_gradient::Function
     concentration_ramp::Function
     diffusivity::Function
 end
-function GenericChemoattractant{D}(;
+function ChemicalField{D}(;
     concentration_field = (::AbstractMicrobe, ::ABM) -> zero(Float64), # μM
     concentration_gradient = (::AbstractMicrobe, ::ABM) -> zero(SVector{D,Float64}), # μM/μm
     concentration_ramp = (::AbstractMicrobe, ::ABM) -> zero(Float64), # μM/s
     diffusivity = (::AbstractMicrobe, ::ABM) -> Float64(608), # μm²/s
 ) where D
-    GenericChemoattractant{D}(
+    ChemicalField{D}(
         concentration_field, concentration_gradient, concentration_ramp, diffusivity
     )
 end

@@ -24,8 +24,8 @@ random_velocity
 
 ## [Chemoattractants](@id Chemoattractants)
 ```@docs
-AbstractChemoattractant
-GenericChemoattractant
+AbstractChemicalField
+ChemicalField
 chemoattractant
 concentration
 gradient
