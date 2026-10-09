@@ -77,10 +77,32 @@ MicrobeAgents.affect!(f::Fatigue, microbe, model) = (f.level += f.rate * abmtime
 MicrobeAgents.speed_factor(f::Fatigue, microbe) = exp(-f.level)
 ```
 
+## Multiple chemical fields
+
+Any model property holding an `AbstractChemicalField` is a chemical field, and
+`:chemicalfield` is the default one. Chemotaxis behaviors sense the default field
+unless given a `field` keyword; use one behavior per field, each with its own
+parameters and internal state:
+
+```julia
+model = StandardABM(Microbe{2}, space, dt;
+    properties = Dict(:chemicalfield => attractant, :repellent => repellent))
+add_agent!(model; motility,
+    behaviors = (
+        BrownBerg(gain = 660),
+        BrownBerg(field = :repellent, gain = -400, receptor_binding_constant = 30),
+    ))
+```
+
+Biases multiply across behaviors. For `BrownBerg` (`exp(-g S)`) this makes the
+signals additive in log-rate; for `Xie` and `Brumley` (`1 + β s`) the combination is
+a product. Naming a field the model does not have throws an `ArgumentError`
+when the microbe is added.
+
 ## Sharing measurements
 
 `concentration`, `gradient`, `time_derivative` and `diffusivity`
-are evaluated at most once per microbe per step, however many behaviors ask
+are evaluated at most once per microbe per step *per field*, however many behaviors ask
 for them. For other expensive quantities, define a sensor behavior placed
 before the behaviors that use it; it stores the value in its own field, and
 the others read it by name or through `findbehavior`.
