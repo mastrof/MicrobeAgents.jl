@@ -47,7 +47,7 @@ using Random
         for D in 1:3
             C = 2.0
             concentration_field(microbe, model) = C
-            chemo = GenericChemoattractant{D}(; concentration_field)
+            chemo = ChemicalField{D}(; concentration_field)
             s = ContinuousSpace(ones(SVector{D}))
             model = StandardABM(Microbe{D}, s, 1.0; properties = Dict(:chemoattractant => chemo))
             add_agent!(model; motility = RunTumble([30.0], 0.67, 0.1), behaviors = (Celani(),))

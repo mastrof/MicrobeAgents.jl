@@ -60,7 +60,7 @@ dt = 0.1
 C0 = 10.0
 λ = Lx/2
 properties = Dict(
-    :chemoattractant => GenericChemoattractant{3}(;
+    :chemoattractant => ChemicalField{3}(;
         concentration_field,
         concentration_gradient
     ),

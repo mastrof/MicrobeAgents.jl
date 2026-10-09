@@ -53,7 +53,7 @@ dt = 0.1 # s
 t₁ = 10.0 # s
 t₂ = 30.0 # s
 properties = Dict(
-    :chemoattractant => GenericChemoattractant{3}(;
+    :chemoattractant => ChemicalField{3}(;
         concentration_field,
         concentration_ramp
     ),

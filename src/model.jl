@@ -23,7 +23,7 @@ When a model is created, a default set of properties is included in the model
 (`chemoattractant` and `field_cache`):
 ```
 Dict(
-    :chemoattractant => GenericChemoattractant{D}(),
+    :chemoattractant => ChemicalField{D}(),
     :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
 )
 ```
@@ -123,6 +123,6 @@ function Agents.add_agent!(
 end
 
 make_default_abm_properties(D) = Dict(
-    :chemoattractant => GenericChemoattractant{D}(),
+    :chemoattractant => ChemicalField{D}(),
     :field_cache => FieldCache{D}()
 )

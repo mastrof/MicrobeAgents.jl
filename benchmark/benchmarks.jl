@@ -65,7 +65,7 @@ function linear_chemoattractant(D)
     c(m, model) = 1.0 + 0.01 * m.pos[1]
     g(m, model) = SVector{D,Float64}(ntuple(i -> i == 1 ? 0.01 : 0.0, D))
     r(m, model) = 0.01 * m.vel[1] * m.speed
-    GenericChemoattractant{D}(
+    ChemicalField{D}(
         concentration_field = c,
         concentration_gradient = g,
         concentration_ramp = r,

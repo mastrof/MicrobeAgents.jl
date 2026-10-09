@@ -39,7 +39,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -56,7 +56,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
@@ -81,7 +81,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = time_impulse_concentration,
             concentration_ramp = time_impulse_derivative,
         )
@@ -114,7 +114,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -129,7 +129,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
@@ -148,7 +148,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
 
     @testset "Noise-free sensing with zero radius" begin
         space = ContinuousSpace((100.0, 100.0))
-        chemo = GenericChemoattractant{2}(; concentration_field = constant_background_concentration)
+        chemo = ChemicalField{2}(; concentration_field = constant_background_concentration)
         model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:chemoattractant => chemo))
         motility = RunTumble([20.0], Inf, Isotropic(2))
         add_agent!(model; motility, behaviors = (Brumley(chemotactic_precision = 0),))
@@ -180,7 +180,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -196,7 +196,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
@@ -219,7 +219,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         L = 100
         space = ContinuousSpace((L, L); periodic=false)
         dt = 0.1
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = constant_background_concentration,
         )
         properties = Dict(:chemoattractant => chemo)
@@ -236,7 +236,7 @@ tumblebias(m) = bias(m, TUMBLE_MODEL[])
         # since threshold = 0.05 μM, speed should be 30% larger than specified
         @test speed(model[1]) == 20*1.3
 
-        chemo = GenericChemoattractant{2}(;
+        chemo = ChemicalField{2}(;
             concentration_field = linear_x_concentration,
             concentration_gradient = linear_x_gradient,
         )
