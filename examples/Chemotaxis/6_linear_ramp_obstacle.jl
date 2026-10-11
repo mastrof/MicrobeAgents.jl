@@ -1,17 +1,12 @@
-```@meta
-EditURL = "../../../../examples/Pathfinder/2_chemotaxis.jl"
-```
+# # Linear concentration ramp with obstacle
 
-# Linear concentration ramp with obstacle
+#=
+We replicate the chemotaxis example with the linear ramp, with the addition
+of an obstacle: a vertical wall that hinders the drift along the gradient
+direction, with only a little hole for bacteria to pass through.
+The wall is made of two boxes, and bacteria slide along its surfaces.
+=#
 
-Since the pathfinder embeds with all the other funcitonalities
-of the library, we can now replicate the chemotaxis example
-with the linear ramp, with the addition of some obstacles:
-We will add a vertical wall that prevents horizontal drift
-along the gradient direction, with only a little hole for
-bacteria to pass through.
-
-````@example 2_chemotaxis
 using MicrobeAgents
 using Plots
 
@@ -38,27 +33,28 @@ periodic = false
 space = ContinuousSpace((Lx,Ly); periodic)
 Δt = 0.05 # timestep (s)
 
-# model setup
+## model setup
 C₀, C₁ = 0.0, 20.0 # μM
-wm = BitMatrix(ones(Lx, Ly))
-wm[1400:1600, 1:650] .= false
-wm[1400:1600, 850:1500] .= false
-pathfinder = AStar(space; walkmap=wm)
+wall = [
+    ObstacleBox((1400, 0), (1600, 650)),
+    ObstacleBox((1400, 850), (1600, Ly)),
+]
+obstacles = (
+    Obstacles(space, wall; contact=Slide()),
+    Walls(space; contact=Reflect()),
+)
 properties = Dict(
     :C₀ => C₀,
     :C₁ => C₁,
     :chemoattractant => ChemicalField{2}(;
         concentration_field, concentration_gradient
     ),
-    :pathfinder => pathfinder
+    :obstacles => obstacles,
 )
-model = StandardABM(Microbe{2}, space, Δt;
-    properties,
-    agent_step! = microbe_pathfinder_step!
-)
+model = StandardABM(Microbe{2}, space, Δt; properties, container=Vector)
 n = 20 # number of microbes
 for i in 1:n
-    # start all bacteria in left half of the domain
+    ## start all bacteria in left half of the domain
     x = rand(abmrng(model)) * 700
     y = rand(abmrng(model)) * Ly
     pos = SVector{2,Float64}(x,y)
@@ -86,9 +82,9 @@ c = concentration_field.(Iterators.product(xmesh,ymesh),Lx,C₀,C₁)
 heatmap(xmesh, ymesh, c', cbar=false, c=:Greens,
     ratio=1, axis=false, grid=false, xlims=(0,Lx), ylims=(0,Ly)
 )
-onetonan(x) = isone(x) ? NaN : float(x)
-contourf!(onetonan.(wm)', cbar=false, c=:black)
+foreach(b -> plot!(Shape(
+        [b.center[1] .+ b.halfwidth[1] .* (-1, 1, 1, -1)...],
+        [b.center[2] .+ b.halfwidth[2] .* (-1, -1, 1, 1)...]
+    ); c=:black, lab=false), wall)
 plot!(x, y, lab=false, lw=lw, lc=(1:n)', palette=palette(:acton,size(x,2)))
 scatter!(x[end,:], y[end,:], lab=false, m=:c, mc=1:n, msw=0.5, ms=8)
-````
-
