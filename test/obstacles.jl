@@ -159,4 +159,45 @@ fd_normal(p, x::SVector{D}) where {D} =
         @test_throws ArgumentError Obstacles(space, mixed)
         @test_throws ArgumentError Obstacles(space, [ObstacleSphere((1.0, 1.0), 1.0)]; margin = -1.0)
     end
+
+    @testset "Model integration" begin
+        space = ContinuousSpace((50.0, 50.0); periodic = false)
+        walls = Walls(space)
+        model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:obstacles => walls))
+        @test abmproperties(model).obstacles === (walls,) # single set wrapped
+        sets = (Obstacles(space, [ObstacleSphere((25.0, 25.0), 5.0)]), walls)
+        model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:obstacles => sets))
+        @test abmproperties(model).obstacles === sets
+        other = ContinuousSpace((60.0, 50.0); periodic = false)
+        @test_throws ArgumentError StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:obstacles => (Walls(other),)))
+        @test_throws ArgumentError StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:obstacles => (Walls(ContinuousSpace((50.0, 50.0); periodic = (true, false))),)))
+        @test_throws ArgumentError StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:obstacles => [walls]))
+
+        # nearest_surface: walls are ordered (x lower, x upper, y lower, y upper)
+        motility = RunTumble(run_speed = [10.0], run_duration = 1.0, angle = Isotropic(2))
+        m = add_agent!(SVector(8.0, 25.0), model; motility, radius = 0.5)
+        q = nearest_surface(m, model)
+        @test q.distance ≈ 7.5 && q.normal ≈ SVector(1.0, 0.0) && q.set == 2 && q.index == 1
+        m2 = add_agent!(SVector(25.0, 33.0), model; motility, radius = 0.5)
+        q = nearest_surface(m2, model)
+        @test q.distance ≈ 2.5 && q.normal ≈ SVector(0.0, 1.0) && q.set == 1 && q.index == 1
+        @test nearest_surface(m, model; cutoff = 5.0).distance == Inf
+        empty_model = StandardABM(Microbe{2}, space, 0.1)
+        m3 = add_agent!(SVector(10.0, 25.0), empty_model; motility)
+        @test nearest_surface(m3, empty_model) == (distance = Inf, normal = SVector(0.0, 0.0), set = 0, index = 0)
+
+        # random_free_position
+        model = StandardABM(Microbe{2}, space, 0.1; rng = Xoshiro(2), properties = Dict(:obstacles => sets))
+        for _ in 1:200
+            x = random_free_position(model; radius = 1.0)
+            @test sdf(sets[1].primitives[1], x) ≥ 1.0
+            @test all(w -> sdf(w, x) ≥ 1.0, walls.primitives)
+        end
+        full = (Obstacles(space, [ObstacleBox((-1.0, -1.0), (51.0, 51.0))]),)
+        model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:obstacles => full))
+        @test_throws ErrorException random_free_position(model; maxtries = 10)
+    end
 end

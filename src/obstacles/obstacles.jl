@@ -1,4 +1,4 @@
-export Obstacles, Walls
+export Obstacles, Walls, nearest_surface, random_free_position
 
 """
     Obstacles(space, primitives; contact = Halt(), margin = nothing, cellsize = nothing)
@@ -118,3 +118,48 @@ end
 end
 _nearest(sets::Tuple, x::SVector{D}, cutoff) where {D} =
     _nearest(sets, 1, x, cutoff, (Inf, zero(SVector{D,Float64}), 0, 0))
+
+obstacles(model::ABM) = abmproperties(model).obstacles
+
+"""
+    nearest_surface(microbe, model; cutoff = Inf) -> (; distance, normal, set, index)
+Closest obstacle surface to `microbe` within `cutoff`: `distance` from the microbe
+surface (center distance minus `radius(microbe)`), outward `normal`, index of the
+obstacle `set` in `model.obstacles` and of the primitive (`index`) in the set.
+`distance = Inf` (and indices `0`) if there is none.
+"""
+function nearest_surface(microbe::AbstractMicrobe{D}, model::ABM; cutoff::Real = Inf) where {D}
+    R = radius(microbe)
+    d, n, k, i = _nearest(obstacles(model), SVector{D,Float64}(position(microbe)), R + cutoff)
+    return (distance = d - R, normal = n, set = k, index = i)
+end
+
+"""
+    random_free_position(model; radius = 0.0, maxtries = 10_000)
+Random position in the domain at distance `≥ radius` from all obstacle surfaces
+(outside all obstacles). Throws an error after `maxtries` rejected samples.
+"""
+function random_free_position(model::ABM{<:ContinuousSpace{D}};
+    radius::Real = 0.0, maxtries::Int = 10_000
+) where {D}
+    for _ in 1:maxtries
+        x = SVector{D,Float64}(random_position(model))
+        d, = _nearest(obstacles(model), x, radius)
+        d ≥ radius && return x
+    end
+    error("no free position found after $maxtries attempts")
+end
+
+# validation of the `:obstacles` model property
+_check_obstacles(o::Obstacles, space) = _check_obstacles((o,), space)
+function _check_obstacles(obs::Tuple, space::ContinuousSpace{D}) where {D}
+    for o in obs
+        o isa Obstacles{D} || throw(ArgumentError(
+            "`obstacles` must be a Tuple of `Obstacles` with the dimensionality of the space"))
+        (o.extent == SVector{D,Float64}(spacesize(space)) && o.periodic == _periodicity(space)) ||
+            throw(ArgumentError("`Obstacles` were built for a different space (extent or periodicity)"))
+    end
+    return obs
+end
+_check_obstacles(o, space) = throw(ArgumentError(
+    "`obstacles` must be a Tuple of `Obstacles`, got $(typeof(o))"))

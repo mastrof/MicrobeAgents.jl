@@ -20,11 +20,12 @@ See `Agents.AgentBasedModel` for detailed information on the keyword arguments.
 **Default `properties`**
 
 When a model is created, a default set of properties is included in the model
-(`chemoattractant` and `field_cache`):
+(`chemoattractant`, `field_cache` and `obstacles`):
 ```
 Dict(
     :chemoattractant => ChemicalField{D}(),
-    :field_cache => FieldCache{D}() # internal, per-step cache of field quantities
+    :field_cache => FieldCache{D}(), # internal, per-step cache of field quantities
+    :obstacles => () # Tuple of `Obstacles` sets (a single set is also accepted)
 )
 ```
 By including these default properties, we make sure that chemotactic behaviors
@@ -49,6 +50,7 @@ function Agents.StandardABM(
         properties...,
         timestep = timestep
     )
+    properties = merge(properties, (obstacles = _check_obstacles(properties.obstacles, space),))
     StandardABM(T, space;
         agent_step!, model_step!, container,
         scheduler, properties, rng, agents_first, warn
@@ -124,5 +126,6 @@ end
 
 make_default_abm_properties(D) = Dict(
     :chemoattractant => ChemicalField{D}(),
-    :field_cache => FieldCache{D}()
+    :field_cache => FieldCache{D}(),
+    :obstacles => (),
 )
