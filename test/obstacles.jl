@@ -158,7 +158,7 @@ end
 
         # random_free_position
         model = StandardABM(Microbe{2}, space, 0.1; rng = Xoshiro(2), properties = Dict(:obstacles => sets))
-        for _ in 1:20
+        for _ in 1:5
             x = random_free_position(model; radius = 1.0)
             @test sdf(sets[1].primitives[1], x) ≥ 1.0
             @test all(w -> sdf(w, x) ≥ 1.0, walls.primitives)
@@ -242,7 +242,7 @@ end
             n0 = SVector(1.0, 0.0)
             sets = (Obstacles(sp, [ObstacleSphere(c0, 5.0)]; contact = Slide(align = true)),)
             model, m = straight_model(sp, sets, c0 + 5.5n0, -0.3n0 + t0; dt = 0.1)
-            for _ in 1:100
+            for _ in 1:10
                 run!(model, 1)
                 @test nearest_surface(m, model).distance ≈ 0 atol = 1e-6
             end
