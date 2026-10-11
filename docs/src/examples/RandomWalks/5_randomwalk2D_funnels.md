@@ -14,6 +14,7 @@ The result is a net accumulation of bacteria on the right side of the wall
 Each funnel is a pair of capsules joined at their left end, forming a `<` that
 opens toward the right. Bacteria slide along the surfaces and are reflected by
 the lateral walls of the chamber, while the vertical direction is periodic.
+Two identical walls of funnels divide the chamber in three regions of equal area.
 
 ````@example 5_randomwalk2D_funnels
 using MicrobeAgents
@@ -21,49 +22,58 @@ using Random
 using Plots
 
 dt = 0.1 # s
-L = 300.0 # μm
-space = ContinuousSpace((L, L); periodic = (false, true))
+Lx = 600.0 # μm
+Ly = 300.0 # μm
+space = ContinuousSpace((Lx, Ly); periodic = (false, true))
 ````
 
 ## funnel wall
 
 ````@example 5_randomwalk2D_funnels
 nf = 6 # number of funnels
-p = L / nf # funnel period
-len = 30.0 # arm length
+p = Ly / nf # funnel period
+len = 33.0 # arm length
 α = deg2rad(40) # arm angle with respect to the horizontal
-r = 1.0 # arm half-thickness
+r = 2.0 # arm half-thickness
 # the gap between the tips of adjacent funnels is p - 2len*sin(α) - 2r
 
 function funnel(vertex)
     tip(s) = vertex + len * SVector(cos(α), s * sin(α))
     [ObstacleCapsule(vertex, tip(+1), r), ObstacleCapsule(vertex, tip(-1), r)]
 end
-x0 = L / 2 - len * cos(α) / 2
-arms = reduce(vcat, [funnel(SVector(x0, (k + 1 // 2) * p)) for k in 0:(nf-1)])
+# two walls, at 1/3 and 2/3 of the chamber, delimiting three regions of equal area
+xwalls = (Lx / 3, 2Lx / 3)
+arms = reduce(vcat, [
+    funnel(SVector(xw - len * cos(α) / 2, (k + 1 // 2) * p))
+    for xw in xwalls for k in 0:(nf-1)
+])
 
 obstacles = (
-    Obstacles(space, arms; contact = Slide()),
+    Obstacles(space, arms; contact = Slide(; align=false)),
     Walls(space; contact = Reflect()),
 )
 model = StandardABM(Microbe{2}, space, dt; rng = Xoshiro(1), container = Vector,
     properties = Dict(:obstacles => obstacles))
 ````
 
-## bacteria, initially uniformly distributed on both sides
+## bacteria, initially uniformly distributed
 
 ````@example 5_randomwalk2D_funnels
 motility = RunTumble(run_speed = [20.0], run_duration = 1.0, angle = Isotropic(2))
-for _ in 1:300
+for _ in 1:1000
     pos = random_free_position(model; radius = 0.5)
     add_agent!(pos, model; motility, radius = 0.5, rotational_diffusivity = 0.035)
 end
 
-nsteps = 15_000
-adf, _ = run!(model, nsteps; adata = [position], when = 0:100:nsteps)
+nsteps = 35_000
+adf, _ = run!(model, nsteps; adata = [position], when=500)
 X = Analysis.adf_to_matrix(adf, :position)
 xs = first.(X) # rows: times, columns: bacteria
-right = vec(sum(xs .> L / 2; dims = 2)) ./ size(xs, 2)
+# fraction of bacteria in the left, central and right regions
+frac(region) = vec(sum(region.(xs); dims = 2)) ./ size(xs, 2)
+left = frac(x -> x < xwalls[1])
+center = frac(x -> xwalls[1] ≤ x < xwalls[2])
+right = frac(x -> x ≥ xwalls[2])
 ````
 
 ## results
@@ -76,15 +86,15 @@ function capsule(c)
     )
     Shape(first.(pts), last.(pts))
 end
-# fraction of bacteria on the right of the wall as a function of time
-t = (0:100:nsteps) .* dt
-p1 = plot(t, right, xlabel = "time (s)", ylabel = "fraction on the right",
-    ylims = (0, 1), leg = false, lw = 2)
-hline!(p1, [0.5], c = :gray, ls = :dash)
+# fraction of bacteria in each region as a function of time
+t = (0:500:nsteps) .* dt
+p1 = plot(t, [left center right], label = ["left" "center" "right"],
+    xlabel = "time (s)", ylabel = "fraction of bacteria", ylims = (0, 1), lw = 2, margin = 5Plots.mm)
+hline!(p1, [1 / 3], c = :gray, ls = :dash, label = false)
 # final configuration
-p2 = plot(xlims = (0, L), ylims = (0, L), ratio = 1, axis = false, grid = false, leg = false)
+p2 = plot(xlims = (0, Lx), ylims = (0, Ly), ratio = 1, axis = false, grid = false, leg = false)
 foreach(c -> plot!(p2, capsule(c), c = :gray, lw = 0), arms)
 scatter!(p2, xs[end, :], last.(X)[end, :], ms = 2, c = :green, msw = 0)
-plot(p1, p2, size = (900, 400))
+plot(p1, p2, size = (1100, 400), layout = grid(1, 2, widths = (0.35, 0.65)))
 ````
 
