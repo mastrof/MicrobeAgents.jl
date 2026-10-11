@@ -48,6 +48,9 @@ include("rotations.jl")
 include("fields.jl")
 include("behaviors.jl")
 
+# solid obstacles
+include("obstacles/primitives.jl")
+
 include("microbes.jl")
 include("microbe_step.jl")
 include("model.jl")
