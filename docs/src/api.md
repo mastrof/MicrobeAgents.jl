@@ -33,6 +33,28 @@ time_derivative
 chemoattractant_diffusivity
 ```
 
+## [Obstacles](@id Obstacles)
+```@docs
+Obstacles
+Walls
+AbstractObstacle
+ObstacleSphere
+ObstacleHalfSpace
+ObstacleBox
+ObstacleCapsule
+ObstacleSDF
+sdf
+MicrobeAgents.surface_normal
+SurfaceContact
+contact!
+Halt
+Slide
+Reflect
+Randomize
+nearest_surface
+random_free_position
+```
+
 ## [Utils](@id Utils)
 ```@docs
 Analysis.adf_to_matrix

@@ -140,3 +140,30 @@ for name in ("Microbe", "Celani", "SonMenolascina"), D in DIMENSIONS
         evals = 1,
     )
 end
+
+# Obstacles: random overlapping spheres with sliding contacts
+if isdefined(MicrobeAgents, :Obstacles)
+    function obstacle_model(D, N, nobstacles)
+        rng = Xoshiro(SEED)
+        space = ContinuousSpace(ntuple(_ -> BOXSIZE, D); periodic = true)
+        rmin, rmax = D == 2 ? (0.5, 1.5) : (1.5, 3.0)
+        spheres = [ObstacleSphere(rand(rng, SVector{D}) .* BOXSIZE, rmin + (rmax - rmin) * rand(rng))
+                   for _ in 1:nobstacles]
+        properties = Dict(:obstacles => (Obstacles(space, spheres; contact = Slide()),))
+        model = StandardABM(agent_type("Microbe", D), space, DT;
+            container = Vector, rng, properties)
+        for _ in 1:N
+            add_agent!(random_free_position(model; radius = RADIUS), model;
+                motility = make_motility("Microbe", D), radius = RADIUS)
+        end
+        model
+    end
+    SUITE["obstacles"] = BenchmarkGroup()
+    for D in (2, 3), nobstacles in (10, 1000)
+        SUITE["obstacles"]["$(D)D nobstacles=$nobstacles"] = @benchmarkable(
+            run!(model, 10),
+            setup = (model = obstacle_model($D, 100, $nobstacles)),
+            evals = 1,
+        )
+    end
+end
