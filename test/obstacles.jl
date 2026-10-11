@@ -265,6 +265,40 @@ fd_normal(p, x::SVector{D}) where {D} =
         @test m.pos ≈ SVector(30.5, 25.0)
         run!(model, 1) # then leaves along the tangent
         @test m.pos ≈ SVector(30.5, 35.0)
+
+        # Slide makes progress along curved and oblique surfaces (round-off in the
+        # normal component of the projected displacement must not count as contact)
+        rng = Xoshiro(11)
+        c0 = SVector(25.0, 25.0)
+        for _ in 1:100
+            θ = 2π * rand(rng)
+            n = SVector(cos(θ), sin(θ)); t = SVector(-sin(θ), cos(θ))
+            d = (t - 0.3n) / norm(t - 0.3n)
+            model, m = straight_model(space, (Obstacles(space, [ObstacleSphere(c0, 5.0)]; contact = Slide()),),
+                c0 + 5.5n, d; dt = 0.1)
+            x0 = m.pos
+            run!(model, 1)
+            @test norm(m.pos - x0) > 0.5
+        end
+        for _ in 1:100
+            n = randn(rng, SVector{2}); n /= norm(n)
+            t = SVector(-n[2], n[1])
+            d = (t - 0.3n) / norm(t - 0.3n)
+            p0 = SVector(25.0, 25.0)
+            model, m = straight_model(space, (Obstacles(space, [ObstacleHalfSpace(p0, -n)]; contact = Slide()),),
+                p0 - 0.5n, -d; dt = 0.1)
+            x0 = m.pos
+            run!(model, 1)
+            @test norm(m.pos - x0) > 0.5
+        end
+
+        # unindexed (unbounded) obstacles see periodic images
+        pspace100 = ContinuousSpace((100.0, 100.0); periodic = true)
+        unb = (Obstacles(pspace100, [ObstacleSDF(x -> norm(x - SVector(1.0, 50.0)) - 5, (1.0, 50.0))]),)
+        model, m = straight_model(pspace100, unb, (93.0, 50.0), (1.0, 0.0); dt = 0.1)
+        @test nearest_surface(m, model).distance ≈ 2.5 atol = 1e-6
+        run!(model, 6)
+        @test m.pos ≈ SVector(95.5, 50.0) atol = 1e-6
     end
 
     @testset "No penetration" begin

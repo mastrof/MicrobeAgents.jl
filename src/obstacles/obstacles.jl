@@ -61,8 +61,13 @@ end
 # surface within `cutoff` of `x`; `xe` is the point at which to evaluate `sdf`
 # (accounts for periodic images).
 function _reduce_candidates(op::F, acc, set::Obstacles{D,P,C,NoIndex}, x, cutoff) where {F,D,P,C}
-    for i in eachindex(set.primitives)
-        acc = op(acc, i, x)
+    # all primitives, at the periodic images of `x` (nearest images only)
+    images = CartesianIndices(ntuple(d -> set.periodic[d] ? (-1:1) : (0:0), Val(D)))
+    for w in images
+        xw = x - SVector{D,Float64}(Tuple(w)) .* set.extent
+        for i in eachindex(set.primitives)
+            acc = op(acc, i, xw)
+        end
     end
     return acc
 end
@@ -127,6 +132,8 @@ Closest obstacle surface to `microbe` within `cutoff`: `distance` from the micro
 surface (center distance minus `radius(microbe)`), outward `normal`, index of the
 obstacle `set` in `model.obstacles` and of the primitive (`index`) in the set.
 `distance = Inf` (and indices `0`) if there is none.
+In per-step behaviors pass a finite `cutoff`: with `cutoff = Inf` the query may
+visit every cell of the obstacle index.
 """
 function nearest_surface(microbe::AbstractMicrobe{D}, model::ABM; cutoff::Real = Inf) where {D}
     R = radius(microbe)

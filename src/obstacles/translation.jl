@@ -22,9 +22,11 @@ end
     n = surface_normal(p, xe)
     a = dot(ŝ, n)
     if g ≤ ε
-        # touching: blocks if approaching or overlapping; otherwise ignored,
-        # since moving away from a convex surface never hits it
-        if (a < 0 || g < -ε) && g < acc[4]
+        # touching: blocks if the step would move into the surface by more than ε
+        # (round-off after a `Slide` projection is not a contact) or if
+        # overlapping; otherwise ignored, since moving away from a convex
+        # surface never hits it. `cutoff - R` is the step length.
+        if (a * (cutoff - R) < -ε || g < -ε) && g < acc[4]
             return (acc[1], k, i, g, n)
         end
         return acc
