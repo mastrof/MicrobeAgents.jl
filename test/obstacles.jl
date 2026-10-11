@@ -95,4 +95,68 @@ fd_normal(p, x::SVector{D}) where {D} =
 
         @test contact!((mic, con, mod) -> 2 .* con.displacement, m, c, model) == 2 .* s
     end
+
+    # brute-force signed distance over all primitives and periodic images
+    function brute_sdf(prims, x::SVector{D}, extent, periodic) where {D}
+        best = Inf
+        images = Iterators.product(ntuple(d -> periodic[d] ? (-extent[d], 0.0, extent[d]) : (0.0,), D)...)
+        for p in prims, s in images
+            best = min(best, sdf(p, x - SVector{D}(s)))
+        end
+        best
+    end
+
+    @testset "Obstacle sets and nearest" begin
+        rng = Xoshiro(1)
+        for D in 1:3, periodic in (false, true), (cellsize, margin) in ((nothing, nothing), (2.0, 0.5), (7.0, 0.0))
+            L = 100.0
+            space = ContinuousSpace(ntuple(_ -> L, D); periodic)
+            prims = [ObstacleSphere(rand(rng, SVector{D}) * L, 2 + 3rand(rng)) for _ in 1:60]
+            set = Obstacles(space, prims; cellsize, margin)
+            @test set.index isa MA.CellIndex
+            for _ in 1:500
+                x = rand(rng, SVector{D}) * L
+                cutoff = rand(rng, (0.3, 3.0, 12.0, 40.0, Inf))
+                d, n, i = MA.nearest(set, x, cutoff)
+                b = brute_sdf(prims, x, set.extent, set.periodic)
+                if b ≤ cutoff
+                    @test d ≈ b # includes points inside solids (b < 0)
+                    @test 1 ≤ i ≤ length(prims)
+                else
+                    @test d == Inf && i == 0
+                end
+            end
+        end
+
+        # obstacle straddling a periodic boundary is seen from the other side
+        space = ContinuousSpace((50.0, 50.0); periodic = true)
+        set = Obstacles(space, [ObstacleSphere((49.0, 25.0), 3.0)])
+        d, n, i = MA.nearest(set, SVector(5.0, 25.0), 10.0)
+        @test d ≈ 3.0 && n ≈ SVector(1.0, 0.0) && i == 1
+
+        # walls
+        space = ContinuousSpace((50.0, 40.0); periodic = (true, false))
+        walls = Walls(space)
+        @test walls.index isa MA.NoIndex
+        @test length(walls.primitives) == 2
+        d, n, i = MA.nearest(walls, SVector(10.0, 3.0), Inf)
+        @test d ≈ 3.0 && n ≈ SVector(0.0, 1.0) && i == 1
+        d, n, i = MA.nearest(walls, SVector(10.0, 39.0), Inf)
+        @test d ≈ 1.0 && n ≈ SVector(0.0, -1.0) && i == 2
+        @test_throws ArgumentError Walls(ContinuousSpace((50.0, 50.0); periodic = true))
+        @test Walls(space; contact = Slide()).contact == Slide()
+
+        # tuple of sets
+        sets = (Obstacles(space, [ObstacleSphere((25.0, 20.0), 5.0)]), walls)
+        d, n, k, i = MA._nearest(sets, SVector(25.0, 2.0), Inf)
+        @test d ≈ 2.0 && k == 2 && i == 1
+        d, n, k, i = MA._nearest(sets, SVector(25.0, 12.0), Inf)
+        @test d ≈ 3.0 && k == 1 && i == 1
+
+        # invalid inputs
+        @test_throws ArgumentError Obstacles(space, ObstacleSphere{2}[])
+        mixed = AbstractObstacle{2}[ObstacleSphere((1.0, 1.0), 1.0), ObstacleBox((3.0, 3.0), (4.0, 4.0))]
+        @test_throws ArgumentError Obstacles(space, mixed)
+        @test_throws ArgumentError Obstacles(space, [ObstacleSphere((1.0, 1.0), 1.0)]; margin = -1.0)
+    end
 end
