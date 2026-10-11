@@ -70,9 +70,6 @@ add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)),
 add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)), radius=0.5,
     behaviors=(chemotaxis=Celani(gain=4, chemotactic_precision=50.0),),
 )
-add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)),
-    behaviors=(chemotaxis=TuShimizu(),)
-)
 
 nsteps = round(Int, T/dt)
 tumblebias(m) = bias(m, model)
@@ -86,7 +83,7 @@ plot()
 x = (0:dt:T) .- t₁
 plot!(
     x, S,
-    lw=1.5, lab=["BrownBerg" "Celani" "Celani + Noise" "TuShimizu"]
+    lw=1.5, lab=["BrownBerg" "Celani" "Celani + Noise"]
 )
 plot!(ylims=(-0.1,2.1), ylab="Response", xlab="time (s)")
 plot!(twinx(),
