@@ -60,4 +60,39 @@ fd_normal(p, x::SVector{D}) where {D} =
             end
         end
     end
+
+    @testset "Contact rules" begin
+        space = ContinuousSpace((50.0, 50.0))
+        model = StandardABM(Microbe{2}, space, 0.1; rng = Xoshiro(1))
+        motility = RunTumble(run_speed = [10.0], run_duration = 1.0, angle = Isotropic(2))
+        m = add_agent!(SVector(25.0, 25.0), model; motility, vel = SVector(-0.6, 0.8))
+        n = SVector(1.0, 0.0)
+        s = SVector(-3.0, 4.0)
+        c = SurfaceContact{2}(1, 1, SVector(24.5, 25.0), n, s)
+
+        @test contact!(Halt(), m, c, model) == SVector(0.0, 0.0)
+        @test direction(m) == SVector(-0.6, 0.8)
+
+        @test contact!(Slide(), m, c, model) ≈ SVector(0.0, 4.0)
+        @test direction(m) == SVector(-0.6, 0.8)
+        away = SurfaceContact{2}(1, 1, SVector(24.5, 25.0), n, SVector(3.0, 4.0))
+        @test contact!(Slide(), m, away, model) ≈ SVector(3.0, 4.0) # not into the surface
+        @test contact!(Slide(align = true), m, c, model) ≈ SVector(0.0, 4.0)
+        @test direction(m) ≈ SVector(0.0, 1.0)
+
+        m.vel = SVector(-0.6, 0.8)
+        @test contact!(Reflect(), m, c, model) ≈ SVector(3.0, 4.0)
+        @test direction(m) ≈ SVector(0.6, 0.8)
+
+        for _ in 1:100
+            m.vel = SVector(-0.6, 0.8)
+            u = contact!(Randomize(), m, c, model)
+            @test dot(direction(m), n) ≥ 0
+            @test norm(direction(m)) ≈ 1
+            @test norm(u) ≈ norm(s)
+            @test u ≈ norm(s) * direction(m)
+        end
+
+        @test contact!((mic, con, mod) -> 2 .* con.displacement, m, c, model) == 2 .* s
+    end
 end
