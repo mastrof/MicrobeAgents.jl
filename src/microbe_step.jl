@@ -57,7 +57,7 @@ function move_step!(microbe::AbstractMicrobe, model::ABM)
     rotational_diffusion!(microbe, model) # angular noise
 end
 
-_translate!(::Tuple{}, microbe, model, dt) = move_agent!(microbe, model, dt)
+_translate!(::Tuple{}, microbe, model, dt) = move_agent!(microbe, model, dt) # no obstacles -> standard step
 _translate!(sets::Tuple, microbe, model, dt) = constrained_move!(microbe, sets, model, dt)
 
 """
