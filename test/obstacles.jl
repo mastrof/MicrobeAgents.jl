@@ -292,6 +292,23 @@ fd_normal(p, x::SVector{D}) where {D} =
             @test norm(m.pos - x0) > 0.5
         end
 
+        # Slide(align = true) keeps following a curved surface until reoriented
+        for sense in (1.0, -1.0), (sp, c0) in ((space, SVector(25.0, 25.0)),
+                (ContinuousSpace((50.0, 50.0); periodic = true), SVector(1.0, 25.0)))
+            n0 = SVector(1.0, 0.0)
+            t0 = sense * SVector(0.0, 1.0)
+            model, m = straight_model(sp, (Obstacles(sp, [ObstacleSphere(c0, 5.0)]; contact = Slide(align = true)),),
+                c0 + 5.5n0, -0.3n0 + t0; dt = 0.1)
+            for _ in 1:300
+                run!(model, 1)
+                @test nearest_surface(m, model).distance ≈ 0 atol = 1e-6
+            end
+            out = nearest_surface(m, model).normal
+            m.vel = out # reoriented away from the surface: leaves
+            run!(model, 5)
+            @test nearest_surface(m, model).distance > 1.0
+        end
+
         # unindexed (unbounded) obstacles see periodic images
         pspace100 = ContinuousSpace((100.0, 100.0); periodic = true)
         unb = (Obstacles(pspace100, [ObstacleSDF(x -> norm(x - SVector(1.0, 50.0)) - 5, (1.0, 50.0))]),)
