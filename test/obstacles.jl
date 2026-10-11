@@ -1,6 +1,7 @@
 using MicrobeAgents, Test
 using LinearAlgebra: norm, dot
 using Random
+using MicrobeAgents.Agents: allagents
 
 const MA = MicrobeAgents
 
@@ -32,6 +33,9 @@ fd_normal(p, x::SVector{D}) where {D} =
         @test MA.surface_normal(b, SVector(3.0, 6.0)) ≈ SVector(1.0, 2.0) / sqrt(5)
         @test MA.boundingradius(b) ≈ sqrt(5)
         @test_throws ArgumentError ObstacleBox((2.0, 0.0), (0.0, 1.0))
+        # SVector arguments must not hit the implicit (center, halfwidth) constructor
+        @test sdf(ObstacleBox(SVector(1.0, 1.0), SVector(3.0, 5.0)), SVector(4.0, 3.0)) ≈ 1.0
+        @test ObstacleHalfSpace(SVector(0.0, 0.0), SVector(0.0, 2.0)).normal ≈ SVector(0.0, 1.0)
 
         c = ObstacleCapsule((0.0, 0.0), (4.0, 0.0), 1.0)
         @test sdf(c, SVector(2.0, 3.0)) ≈ 2.0
@@ -199,5 +203,113 @@ fd_normal(p, x::SVector{D}) where {D} =
         full = (Obstacles(space, [ObstacleBox((-1.0, -1.0), (51.0, 51.0))]),)
         model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:obstacles => full))
         @test_throws ErrorException random_free_position(model; maxtries = 10)
+    end
+
+    # one microbe moving straight (no rotational diffusion, never tumbles)
+    function straight_model(space, obstacles, pos, vel; speed = 10.0, radius = 0.5, dt = 1.0)
+        model = StandardABM(Microbe{length(pos)}, space, dt; rng = Xoshiro(1),
+            properties = Dict(:obstacles => obstacles))
+        motility = RunTumble(run_speed = [speed], run_duration = Inf, angle = Isotropic(length(pos)))
+        m = add_agent!(SVector{length(pos)}(pos), model; motility, vel = SVector{length(pos)}(vel), radius)
+        return model, m
+    end
+
+    @testset "Contacts in stepping" begin
+        space = ContinuousSpace((50.0, 50.0); periodic = false)
+        v = SVector(-1.0, 1.0) / sqrt(2)
+        model, m = straight_model(space, (Walls(space),), (2.0, 10.0), v)
+        run!(model, 1)
+        @test m.pos ≈ SVector(0.5, 11.5) # halted at the wall after moving 1.5 along x
+        @test direction(m) ≈ v
+        run!(model, 1)
+        @test m.pos ≈ SVector(0.5, 11.5) # stays while pointing into the wall
+
+        model, m = straight_model(space, (Walls(space; contact = Slide()),), (2.0, 10.0), v)
+        run!(model, 1)
+        @test m.pos ≈ SVector(0.5, 10.0 + 10 / sqrt(2))
+        @test direction(m) ≈ v
+
+        model, m = straight_model(space, (Walls(space; contact = Slide(align = true)),), (2.0, 10.0), v)
+        run!(model, 1)
+        @test m.pos ≈ SVector(0.5, 10.0 + 10 / sqrt(2))
+        @test direction(m) ≈ SVector(0.0, 1.0)
+
+        model, m = straight_model(space, (Walls(space; contact = Reflect()),), (2.0, 10.0), v)
+        run!(model, 1)
+        @test m.pos ≈ SVector(0.5 + (10 / sqrt(2) - 1.5), 10.0 + 10 / sqrt(2))
+        @test direction(m) ≈ SVector(1.0, 1.0) / sqrt(2)
+
+        model, m = straight_model(space, (Walls(space; contact = Randomize()),), (2.0, 10.0), v)
+        run!(model, 1)
+        @test direction(m)[1] ≥ 0
+        @test m.pos[1] ≥ 0.5
+
+        # obstacle across the periodic boundary, approached from the other side
+        pspace = ContinuousSpace((50.0, 50.0); periodic = true)
+        model, m = straight_model(pspace, (Obstacles(pspace, [ObstacleSphere((49.0, 25.0), 3.0)]),),
+            (5.0, 25.0), (-1.0, 0.0))
+        run!(model, 1)
+        @test m.pos ≈ SVector(2.5, 25.0)
+
+        # 1D walls
+        space1 = ContinuousSpace((20.0,); periodic = false)
+        model, m = straight_model(space1, (Walls(space1),), (5.0,), (-1.0,))
+        run!(model, 1)
+        @test m.pos ≈ SVector(0.5)
+
+        # a (moving) microbe placed overlapping an obstacle is pushed out on its
+        # first step (overlap counts as a contact: `Halt` stops it there)
+        model, m = straight_model(space, (Obstacles(space, [ObstacleSphere((25.0, 25.0), 5.0)]),),
+            (27.0, 25.0), (0.0, 1.0))
+        run!(model, 1)
+        @test m.pos ≈ SVector(30.5, 25.0)
+        run!(model, 1) # then leaves along the tangent
+        @test m.pos ≈ SVector(30.5, 35.0)
+    end
+
+    @testset "No penetration" begin
+        function worst_gap(D, rule; periodic, seed = 3, n = 20, steps = 200, R = 0.5)
+            rng = Xoshiro(seed)
+            L = 60.0
+            space = ContinuousSpace(ntuple(_ -> L, D); periodic)
+            spheres = Obstacles(space, [ObstacleSphere(rand(rng, SVector{D}) * L, 3 + 4rand(rng)) for _ in 1:15]; contact = rule)
+            caps = Obstacles(space, [ObstacleCapsule(rand(rng, SVector{D}) * L, rand(rng, SVector{D}) * L, 0.3) for _ in 1:3]; contact = rule)
+            boxes = Obstacles(space, [ObstacleBox(c, c .+ 4.0) for c in (rand(rng, SVector{D}) * (L - 4) for _ in 1:3)]; contact = rule)
+            sets = periodic ? (spheres, caps, boxes) : (spheres, caps, boxes, Walls(space; contact = rule))
+            model = StandardABM(Microbe{D,2}, space, 0.1; rng, properties = Dict(:obstacles => sets))
+            motility = RunTumble(run_speed = [30.0], run_duration = 1.0, angle = Isotropic(D))
+            for _ in 1:n
+                add_agent!(random_free_position(model; radius = R), model; motility, radius = R, rotational_diffusivity = 0.1)
+            end
+            worst = Inf
+            for _ in 1:steps
+                run!(model, 1)
+                for m in allagents(model)
+                    worst = min(worst, MA._nearest(sets, m.pos, Inf)[1] - R)
+                end
+            end
+            worst
+        end
+        for D in (2, 3), rule in (Halt(), Slide(), Slide(align = true), Reflect(), Randomize()), periodic in (false, true)
+            @test worst_gap(D, rule; periodic) > -1e-9
+        end
+
+        # non-convex SDF (union of two disks): overlaps removed at the end of each step
+        f(x) = min(norm(x - SVector(20.0, 30.0)) - 6, norm(x - SVector(28.0, 30.0)) - 6)
+        space = ContinuousSpace((60.0, 60.0); periodic = false)
+        sets = (Obstacles(space, [ObstacleSDF(f, (24.0, 30.0), 11.0)]; contact = Slide()), Walls(space))
+        model = StandardABM(Microbe{2,2}, space, 0.1; rng = Xoshiro(1), properties = Dict(:obstacles => sets))
+        motility = RunTumble(run_speed = [30.0], run_duration = 1.0, angle = Isotropic(2))
+        for _ in 1:50
+            add_agent!(random_free_position(model; radius = 0.5), model; motility, radius = 0.5, rotational_diffusivity = 0.1)
+        end
+        worst = Inf
+        for _ in 1:300
+            run!(model, 1)
+            for m in allagents(model)
+                worst = min(worst, MA._nearest(sets, m.pos, Inf)[1] - 0.5)
+            end
+        end
+        @test worst > -1e-9
     end
 end

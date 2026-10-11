@@ -53,6 +53,7 @@ include("obstacles/primitives.jl")
 include("obstacles/contact.jl")
 include("obstacles/index.jl")
 include("obstacles/obstacles.jl")
+include("obstacles/translation.jl")
 
 include("microbes.jl")
 include("microbe_step.jl")

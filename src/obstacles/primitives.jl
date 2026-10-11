@@ -71,6 +71,9 @@ the solid. Unbounded, hence never spatially indexed.
 struct ObstacleHalfSpace{D} <: AbstractObstacle{D}
     point::SVector{D,Float64}
     normal::SVector{D,Float64}
+    # inner constructor: no implicit `ObstacleHalfSpace(::SVector, ::SVector)`
+    # method bypassing the normalization below
+    ObstacleHalfSpace{D}(point, normal) where {D} = new{D}(point, normal)
 end
 function ObstacleHalfSpace(point, normal)
     D = length(point)
@@ -88,6 +91,9 @@ Solid axis-aligned box with opposite corners `lo` and `hi`.
 struct ObstacleBox{D} <: AbstractObstacle{D}
     center::SVector{D,Float64}
     halfwidth::SVector{D,Float64}
+    # inner constructor: no implicit `ObstacleBox(center, halfwidth)` method
+    # shadowing `ObstacleBox(lo, hi)` for `SVector` arguments
+    ObstacleBox{D}(center, halfwidth) where {D} = new{D}(center, halfwidth)
 end
 function ObstacleBox(lo, hi)
     D = length(lo)
