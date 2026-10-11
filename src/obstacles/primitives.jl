@@ -5,12 +5,14 @@ export sdf
     AbstractObstacle{D}
 Supertype of solid primitives in `D` dimensions, collected into `Obstacles`.
 
-Required method: `sdf(p, x)`. Optional, to enable spatial indexing:
-`MicrobeAgents.center(p)` and `MicrobeAgents.boundingradius(p)` (a ball enclosing
-the solid; default radius `Inf`, i.e. not indexed). Optional:
+Required method: `sdf(p, x)`.
+Optional, to enable spatial indexing:
+`MicrobeAgents.center(p)` and `MicrobeAgents.boundingradius(p)`
+(a ball enclosing the solid; default radius `Inf`, i.e. not indexed).
+Optional:
 `MicrobeAgents.surface_normal(p, x)` (default: finite differences of `sdf`) and
-`MicrobeAgents.isconvex(::Type{<:MyObstacle}) = true` for convex solids (exact
-collisions; non-convex solids are resolved approximately).
+`MicrobeAgents.isconvex(::Type{<:MyObstacle}) = true` for convex solids
+(exact collisions; non-convex solids are resolved approximately).
 """
 abstract type AbstractObstacle{D} end
 
@@ -26,7 +28,7 @@ Outward unit normal of the surface of `p` nearest to `x` (gradient of `sdf`).
 Default: central finite differences of `sdf`.
 """
 function surface_normal(p::AbstractObstacle{D}, x::SVector{D}) where {D}
-    h = cbrt(eps()) * max(1.0, maximum(abs, x))
+    h = cbrt(eps()) * max(1.0, maximum(abs, x)) # optimal finite difference step
     g = SVector{D,Float64}(ntuple(Val(D)) do i
         e = SVector{D,Float64}(ntuple(j -> j == i ? h : 0.0, Val(D)))
         (sdf(p, x + e) - sdf(p, x - e)) / 2h
@@ -65,8 +67,9 @@ isconvex(::Type{<:ObstacleSphere}) = true
 
 """
     ObstacleHalfSpace(point, normal)
-Solid half-space bounded by the plane through `point`; `normal` points away from
-the solid. Unbounded, hence never spatially indexed.
+Solid half-space bounded by the plane through `point`;
+`normal` points away from the solid.
+Unbounded, hence never spatially indexed.
 """
 struct ObstacleHalfSpace{D} <: AbstractObstacle{D}
     point::SVector{D,Float64}

@@ -20,8 +20,8 @@ end
 """
     contact!(rule, microbe, contact::SurfaceContact, model) -> SVector
 Apply the contact `rule` of an obstacle set when `microbe` touches its surface.
-Returns the displacement still to perform in the current step; the rule may also
-modify the microbe (direction, speed, motile state, ...).
+Returns the displacement still to perform in the current step;
+the rule may also modify the microbe (direction, speed, motile state, ...).
 A plain function used as rule is called as `rule(microbe, contact, model)`.
 """
 contact!(f::Function, microbe, c::SurfaceContact, model) = f(microbe, c, model)
