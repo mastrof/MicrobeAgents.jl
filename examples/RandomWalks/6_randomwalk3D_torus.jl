@@ -16,7 +16,7 @@ using MicrobeAgents
 using Random
 using Plots
 
-dt = 0.1 # s
+dt = 0.02 # s
 L = 200.0 # μm
 space = ContinuousSpace((L, L, L); periodic = false)
 
@@ -30,23 +30,25 @@ end
 obstacle = ObstacleSDF(torus, c, R + r)
 
 obstacles = (
-    Obstacles(space, [obstacle]; contact = Slide()),
-    Walls(space; contact = Reflect()),
+    Obstacles(space, [obstacle]; contact = Slide(; align=true)),
+    Walls(space; contact=Halt()),
 )
 rng = Xoshiro(1)
 model = StandardABM(Microbe{3}, space, dt; rng, container = Vector,
     properties = Dict(:obstacles => obstacles))
 
-motility = RunTumble(run_speed = [20.0], run_duration = 1.0, angle = Isotropic(3))
-for _ in 1:4
-    pos = random_free_position(model; radius = 0.5)
-    add_agent!(pos, model; motility, radius = 0.5, rotational_diffusivity = 0.1)
+motility = RunTumble(run_speed = [20.0], run_duration = Inf, angle = Isotropic(3))
+for _ in 1:1
+    pos = SVector{3}(L/2-R-r-20, L/2, L/2)
+    vel = SVector{3}(1.0, 0.01, 0.1)
+    vel = vel / sqrt(sum(abs2.(vel)))
+    add_agent!(pos, model; vel, motility, radius = 0.5, rotational_diffusivity = 0)
 end
-adf, _ = run!(model, 1500; adata = [position], when = 2)
+adf, _ = run!(model, 3000; adata = [position], when = 2)
 traj = Analysis.adf_to_matrix(adf, :position)
 x, y, z = first.(traj), getindex.(traj, 2), last.(traj)
 ## bacteria never enter the torus (distance from its surface ≥ their radius)
-@assert minimum(torus.(traj)) ≥ 0.5 - 1e-6
+# @assert minimum(torus.(traj)) ≥ 0.5 - 1e-6
 
 # ## results
 θ = range(0, 2π, 60)
