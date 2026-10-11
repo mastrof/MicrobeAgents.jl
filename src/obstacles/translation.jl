@@ -25,15 +25,13 @@ end
     n = surface_normal(p, xe)
     a = dot(ŝ, n)
     if g ≤ ε
-        # touching: blocks if the step would move into the surface by more than ε
-        # (round-off after a `Slide` projection is not a contact) or if
-        # overlapping (or, if `stick`, also when not clearly moving away);
-        # otherwise ignored, since moving away from a convex surface never
-        # hits it. `cutoff - R` is the step length.
-        if (a * (cutoff - R) < (stick ? ε : -ε) || g < -ε) && g < acc[4]
-            return (acc[1], k, i, g, n)
-        end
-        return acc
+        # touching or overlapping. Blocks if the step goes into the surface by more
+        # than ε (round-off after a `Slide` projection is not a contact), if
+        # overlapping, or, for `stick`, unless clearly moving away. Moving away from
+        # a convex surface never hits it. `cutoff - R` is the step length.
+        into = a * (cutoff - R) < (stick ? ε : -ε)
+        overlapping = g < -ε
+        return (into || overlapping) && g < acc[4] ? (acc[1], k, i, g, n) : acc
     end
     # safe step: linear bound for convex primitives (the distance along the ray
     # is convex), sphere tracing otherwise
@@ -41,11 +39,8 @@ end
     return step < acc[1] ? (step, acc[2], acc[3], acc[4], acc[5]) : acc
 end
 
-# apply the contact rule of set `k`
-@inline _contact!(::Tuple{}, k, microbe, c, model) = error("invalid obstacle set index")
-@inline _contact!(sets::Tuple, k, microbe, c, model) = k == 1 ?
-    contact!(first(sets).contact, microbe, c, model) :
-    _contact!(Base.tail(sets), k - 1, microbe, c, model)
+# contact rule of set `k` (type-stable tuple lookup)
+@inline _rule(sets::Tuple, k) = k == 1 ? first(sets).contact : _rule(Base.tail(sets), k - 1)
 
 # Keep a microbe held by an adhesive rule on the surface it slid along: bring it
 # back to contact distance and align its direction with the surface there,
@@ -64,8 +59,11 @@ function _readhere(sets, k, microbe, x, R, reach, model)
     return x
 end
 
-@inline _adheres(::Tuple{}, k) = false
-@inline _adheres(sets::Tuple, k) = k == 1 ? adheres(first(sets).contact) : _adheres(Base.tail(sets), k - 1)
+# motion near non-convex solids is not exact: push the microbe out of any overlap
+function _remove_overlap(sets, x, R, model)
+    d, n, = _nearest(sets, Agents.normalize_position(x, model), R)
+    return d < R ? x + (R - d) * n : x
+end
 
 _has_nonconvex(sets::Tuple) = any(set -> !isconvex(eltype(set.primitives)), sets)
 
@@ -92,8 +90,9 @@ function constrained_move!(microbe::AbstractMicrobe{D}, sets::Tuple, model, dt) 
         if k > 0
             g < 0 && (x -= g * n) # remove overlap
             c = SurfaceContact{D}(k, i, x - R * n, n, s)
-            s = SVector{D,Float64}(_contact!(sets, k, microbe, c, model))
-            _adheres(sets, k) && (held = k)
+            rule = _rule(sets, k)
+            s = SVector{D,Float64}(contact!(rule, microbe, c, model))
+            adheres(rule) && (held = k)
         elseif step ≥ L
             x += s
             break
@@ -103,10 +102,7 @@ function constrained_move!(microbe::AbstractMicrobe{D}, sets::Tuple, model, dt) 
         end
     end
     held > 0 && (x = _readhere(sets, held, microbe, x, R, reach, model))
-    if _has_nonconvex(sets) # motion near non-convex solids is not exact: remove overlaps
-        d, n, = _nearest(sets, Agents.normalize_position(x, model), R)
-        d < R && (x += (R - d) * n)
-    end
+    _has_nonconvex(sets) && (x = _remove_overlap(sets, x, R, model))
     move_agent!(microbe, Agents.normalize_position(x, model), model)
     return microbe
 end

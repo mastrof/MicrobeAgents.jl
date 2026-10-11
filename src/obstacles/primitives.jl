@@ -43,7 +43,7 @@ isconvex(p::AbstractObstacle) = isconvex(typeof(p))
 
 _svec(D, x) = SVector{D,Float64}(Tuple(x))
 # unit vector along the first axis, fallback for undefined normals
-_e1(::Val{D}) where {D} = SVector{D,Float64}(ntuple(i -> i == 1 ? 1.0 : 0.0, Val(D)))
+_unit(::Val{D}, d = 1) where {D} = SVector{D,Float64}(ntuple(i -> i == d ? 1.0 : 0.0, Val(D)))
 
 """
     ObstacleSphere(center, radius)
@@ -59,7 +59,7 @@ sdf(p::ObstacleSphere{D}, x::SVector{D}) where {D} = norm(x - p.center) - p.radi
 function surface_normal(p::ObstacleSphere{D}, x::SVector{D}) where {D}
     r = x - p.center
     l = norm(r)
-    iszero(l) ? _e1(Val(D)) : r / l
+    iszero(l) ? _unit(Val(D)) : r / l
 end
 center(p::ObstacleSphere) = p.center
 boundingradius(p::ObstacleSphere) = p.radius
@@ -147,7 +147,7 @@ sdf(p::ObstacleCapsule{D}, x::SVector{D}) where {D} = norm(_capsule_offset(p, x)
 function surface_normal(p::ObstacleCapsule{D}, x::SVector{D}) where {D}
     v = _capsule_offset(p, x)
     l = norm(v)
-    iszero(l) ? _e1(Val(D)) : v / l
+    iszero(l) ? _unit(Val(D)) : v / l
 end
 center(p::ObstacleCapsule) = (p.a + p.b) / 2
 boundingradius(p::ObstacleCapsule) = norm(p.b - p.a) / 2 + p.radius

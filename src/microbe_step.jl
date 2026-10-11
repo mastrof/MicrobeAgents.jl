@@ -53,7 +53,7 @@ Translation is constrained by the obstacles of the model (`model.obstacles`).
 function move_step!(microbe::AbstractMicrobe, model::ABM)
     invalidate_field_cache!(model)
     dt = abmtimestep(model)
-    _translate!(abmproperties(model).obstacles, microbe, model, dt)
+    _translate!(obstacles(model), microbe, model, dt)
     rotational_diffusion!(microbe, model) # angular noise
 end
 

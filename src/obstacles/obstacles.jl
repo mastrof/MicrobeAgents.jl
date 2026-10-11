@@ -50,7 +50,7 @@ function Walls(space::ContinuousSpace{D}; contact = Halt()) where {D}
     walls = ObstacleHalfSpace{D}[]
     for d in 1:D
         periodic[d] && continue
-        e = SVector{D,Float64}(ntuple(i -> i == d ? 1.0 : 0.0, Val(D)))
+        e = _unit(Val(D), d)
         push!(walls, ObstacleHalfSpace(zero(e), e))
         push!(walls, ObstacleHalfSpace(extent[d] * e, -e))
     end
@@ -101,11 +101,11 @@ function _reduce_candidates(op::F, acc, set::Obstacles{D,P,C,<:CellIndex}, x, cu
 end
 
 """
-    nearest(set::Obstacles, x, cutoff) -> (d, n, i)
+    nearest_in_set(set::Obstacles, x, cutoff) -> (d, n, i)
 Signed distance `d`, outward normal `n` and index `i` of the primitive of `set`
 with the closest surface within `cutoff` of `x`; `(Inf, 0, 0)` if none.
 """
-function nearest(set::Obstacles{D}, x::SVector{D}, cutoff::Real) where {D}
+function nearest_in_set(set::Obstacles{D}, x::SVector{D}, cutoff::Real) where {D}
     prims = set.primitives
     # closure locals must not shadow outer locals (would box them and allocate)
     op = (acc, j, xe) -> (dj = sdf(prims[j], xe); dj < acc[1] ? (dj, j, xe) : acc)
@@ -117,7 +117,7 @@ end
 # nearest over a tuple of sets: (d, n, set index, primitive index)
 @inline _nearest(::Tuple{}, k, x, cutoff, best) = best
 @inline function _nearest(sets::Tuple, k, x, cutoff, best)
-    d, n, i = nearest(first(sets), x, cutoff)
+    d, n, i = nearest_in_set(first(sets), x, cutoff)
     best = d < best[1] ? (d, n, k, i) : best
     _nearest(Base.tail(sets), k + 1, x, cutoff, best)
 end
