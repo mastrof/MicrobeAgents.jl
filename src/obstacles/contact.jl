@@ -38,7 +38,8 @@ contact!(::Halt, microbe, c::SurfaceContact, model) = zero(c.displacement)
     Slide(; align = false)
 Contact rule: the microbe moves along the surface (normal component of the
 displacement removed). With `align = true` the microbe stays on the surface
-and keeps its direction tangent to it, following curved surfaces, until
+and keeps its direction tangent to it, following curved surfaces along
+geodesics (straight lines on the surface), until
 it is reoriented away from the surface.
 """
 Base.@kwdef struct Slide

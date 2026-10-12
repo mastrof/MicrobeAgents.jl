@@ -80,20 +80,33 @@ end
 @inline _rule(sets::Tuple, k) = k == 1 ? first(sets).contact : _rule(Base.tail(sets), k - 1)
 
 # Keep a microbe held by an adhesive rule on the surface it slid along: bring it
-# back to contact distance and align its direction with the surface there,
-# keeping the sense of travel.
-function _readhere(sets, k, microbe, x, R, reach, model)
+# back to contact distance and transport its direction, tangent to the surface at
+# the last contact (normal `n0`), to the tangent plane there.
+function _readhere(sets, k, microbe, x, n0, R, reach, model)
     for _ in 1:2
         d, n, kn = _nearest(sets, Agents.normalize_position(x, model), R + reach)
         kn == k || return x
         x += (R - d) * n
     end
     _, n, = _nearest(sets, Agents.normalize_position(x, model), R + reach)
-    v = direction(microbe)
+    microbe.vel = _transport(direction(microbe), n0, n)
+    return x
+end
+
+# Direction `v` rotated by the minimal rotation carrying unit normal `n0` onto `n`,
+# then made tangent to the surface with normal `n`. The rotation preserves the
+# norm: projecting and renormalizing instead inflates the components of `v` off the
+# osculating plane, so geodesics drift on surfaces that are not umbilic (cylinders, tori).
+# Normals turning by more than 90° in one step (sharp features) only get the projection.
+function _transport(v, n0, n)
+    a = dot(n0, n)
+    if a > 0
+        w = n0 + n
+        v = v - dot(v, w) / (1 + a) * w + 2dot(v, n0) * n
+    end
     t = v - dot(v, n) * n
     l = norm(t)
-    l > 0 && (microbe.vel = t / l)
-    return x
+    return l > 0 ? t / l : v
 end
 
 # sliding along concave parts of non-convex solids, or running out of trace
@@ -122,6 +135,7 @@ function constrained_move!(microbe::AbstractMicrobe{D}, sets::Tuple, model, dt) 
     s = SVector{D,Float64}(velocity(microbe) .* dt)
     zv = zero(SVector{D,Float64})
     held = 0 # set whose adhesive rule applied during this step
+    nheld = zv # normal at its last contact
     reach = norm(s)
     for iter in 1:MAXITER_TRACE
         L = norm(s)
@@ -134,7 +148,7 @@ function constrained_move!(microbe::AbstractMicrobe{D}, sets::Tuple, model, dt) 
             c = SurfaceContact{D}(k, i, x - R * n, n, s)
             rule = _rule(sets, k)
             s = SVector{D,Float64}(contact!(rule, microbe, c, model))
-            adheres(rule) && (held = k)
+            adheres(rule) && (held = k; nheld = n)
         elseif step ≥ L
             x += s
             break
@@ -143,7 +157,7 @@ function constrained_move!(microbe::AbstractMicrobe{D}, sets::Tuple, model, dt) 
             s -= step * ŝ
         end
     end
-    held > 0 && (x = _readhere(sets, held, microbe, x, R, reach, model))
+    held > 0 && (x = _readhere(sets, held, microbe, x, nheld, R, reach, model))
     _has_nonconvex(sets) && (x = _remove_overlap(sets, x, R, model))
     move_agent!(microbe, Agents.normalize_position(x, model), model)
     return microbe
