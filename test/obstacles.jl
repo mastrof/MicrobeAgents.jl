@@ -228,6 +228,30 @@ end
             @test nearest_surface(m, model).distance > 1.0
         end
 
+        # Slide(align = true) follows geodesics: on surfaces of revolution the
+        # Clairaut invariant ρ sinψ (distance from the axis × toroidal direction) is conserved
+        space3 = ContinuousSpace((200.0, 200.0, 200.0); periodic = false)
+        c3 = SVector(100.0, 100.0, 100.0)
+        torus = ObstacleSDF(x -> (p = x - c3; hypot(hypot(p[1], p[2]) - 50, p[3]) - 20), c3, 70.0)
+        sets = (Obstacles(space3, [torus]; contact = Slide(align = true)),)
+        v = SVector(0.0, 0.01, 1.0) / norm(SVector(0.0, 0.01, 1.0)) # nearly along a meridian
+        model, m = straight_model(space3, sets, c3 + SVector(70.5, 0.0, 0.0), v; speed = 20.0, dt = 0.1)
+        clairaut(m) = (p = m.pos - c3; p[1] * direction(m)[2] - p[2] * direction(m)[1])
+        c0 = clairaut(m)
+        @test all(1:500) do _
+            run!(model, 1)
+            isapprox(clairaut(m), c0; rtol = 0.02)
+        end
+        # helix around a cylinder: constant pitch
+        rod = ObstacleCapsule((20.0, 100.0, 100.0), (180.0, 100.0, 100.0), 5.0)
+        sets = (Obstacles(space3, [rod]; contact = Slide(align = true)),)
+        v = SVector(0.3, sqrt(1 - 0.3^2), 0.0)
+        model, m = straight_model(space3, sets, (40.0, 100.0, 105.5), v; speed = 20.0, dt = 0.1)
+        @test all(1:100) do _
+            run!(model, 1)
+            isapprox(direction(m)[1], 0.3; atol = 1e-3)
+        end
+
         # unindexed (unbounded) obstacles see periodic images
         pspace100 = ContinuousSpace((100.0, 100.0); periodic = true)
         unb = (Obstacles(pspace100, [ObstacleSDF(x -> norm(x - SVector(1.0, 50.0)) - 5, (1.0, 50.0))]),)
