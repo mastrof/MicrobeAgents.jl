@@ -159,8 +159,10 @@ Solid defined by an arbitrary signed distance function `f(x::SVector{D}) -> Real
 (negative inside; it must not overestimate the distance to the surface).
 `center` and `boundingradius` define a ball enclosing the solid, used for spatial
 indexing (`Inf`: not indexed). Set `convex = true` only if the solid is convex:
-collisions with convex solids are exact, while non-convex solids are only kept
-out of at the end of each step (prefer unions of convex primitives).
+collisions with convex solids are exact, while non-convex solids are found by ray
+marching, which may miss features thinner than 1% of the larger of the microbe radius
+and the step length, and leaves shallow overlaps (removed at the end of the step)
+when sliding along concave parts (prefer unions of convex primitives).
 Normals are computed by finite differences.
 """
 struct ObstacleSDF{D,F,C} <: AbstractObstacle{D}

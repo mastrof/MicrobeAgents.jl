@@ -1,6 +1,6 @@
 # Translation of a microbe constrained by obstacle surfaces.
 
-const MAXITER_TRACE = 8
+const MAXITER_TRACE = 16
 
 # Scan the candidates of all sets around `x` for a step along unit `ŝ`.
 # Returns `(step, k, i, g, n)`: `step` is a safe advance along `ŝ`;
@@ -22,21 +22,58 @@ end
     d = sdf(p, xe)
     d > cutoff && return acc
     g = d - R
-    n = surface_normal(p, xe)
-    a = dot(ŝ, n)
-    if g ≤ ε
+    L = cutoff - R # step length
+    convex = isconvex(p)
+    τ = convex ? ε : NONCONVEX_TOL * ε # contact tolerance (sdf round-off, finite-difference normals)
+    if g ≤ τ
         # touching or overlapping. Blocks if the step goes into the surface by more
-        # than ε (round-off after a `Slide` projection is not a contact), if
-        # overlapping, or, for `stick`, unless clearly moving away. Moving away from
-        # a convex surface never hits it. `cutoff - R` is the step length.
-        into = a * (cutoff - R) < (stick ? ε : -ε)
-        overlapping = g < -ε
-        return (into || overlapping) && g < acc[4] ? (acc[1], k, i, g, n) : acc
+        # than τ (round-off after a `Slide` projection is not a contact), if
+        # overlapping, or, for `stick`, unless clearly moving away.
+        n = surface_normal(p, xe)
+        into = dot(ŝ, n) * L < (stick ? τ : -τ)
+        overlapping = g < -τ
+        (into || overlapping) && return g < acc[4] ? (acc[1], k, i, g, n) : acc
+        # moving away from a convex surface never hits it; a non-convex one may be
+        # met again further along (concave parts): march tolerating a shallow overlap
+        convex && return acc
+        δ = _minstep(R, L)
+        step = _march(p, xe, ŝ, R, L, -δ, τ, δ)
+    elseif convex
+        # linear bound (the distance along the ray is convex)
+        a = dot(ŝ, surface_normal(p, xe))
+        step = a < 0 ? g / -a : Inf
+    else
+        step = _march(p, xe, ŝ, R, L, 0.0, τ, _minstep(R, L))
     end
-    # safe step: linear bound for convex primitives (the distance along the ray
-    # is convex), sphere tracing otherwise
-    step = isconvex(p) ? (a < 0 ? g / -a : Inf) : g
     return step < acc[1] ? (step, acc[2], acc[3], acc[4], acc[5]) : acc
+end
+
+const NONCONVEX_TOL = 1e3
+# minimum ray-marching step: non-convex features thinner than this may be missed
+_minstep(R, L) = 1e-2 * max(R, L)
+
+# Distance along unit `ŝ` (up to `L`) from `x` at which the gap `sdf(p) - R` first
+# enters the band `[h, h + τ]` (`Inf` if it stays above `h + τ`): sphere tracing with
+# minimum step `δ`, then bisection if a step overshoots the band.
+function _march(p, x, ŝ, R, L, h, τ, δ)
+    lo, glo = 0.0, sdf(p, x) - R - h
+    while lo < L
+        t = min(lo + max(glo, δ), L)
+        gt = sdf(p, x + t * ŝ) - R - h
+        if gt ≤ τ
+            gt ≥ 0 && return t
+            hi = t
+            for _ in 1:64
+                m = (lo + hi) / 2
+                gm = sdf(p, x + m * ŝ) - R - h
+                0 ≤ gm ≤ τ && return m
+                gm > τ ? (lo = m) : (hi = m)
+            end
+            return lo
+        end
+        lo, glo = t, gt
+    end
+    return Inf
 end
 
 # contact rule of set `k` (type-stable tuple lookup)
@@ -59,10 +96,15 @@ function _readhere(sets, k, microbe, x, R, reach, model)
     return x
 end
 
-# motion near non-convex solids is not exact: push the microbe out of any overlap
+# sliding along concave parts of non-convex solids, or running out of trace
+# iterations, may leave a shallow overlap: push the microbe out of it
 function _remove_overlap(sets, x, R, model)
-    d, n, = _nearest(sets, Agents.normalize_position(x, model), R)
-    return d < R ? x + (R - d) * n : x
+    for _ in 1:2
+        d, n, = _nearest(sets, Agents.normalize_position(x, model), R)
+        d < R || return x
+        x += (R - d) * n
+    end
+    return x
 end
 
 _has_nonconvex(sets::Tuple) = any(set -> !isconvex(eltype(set.primitives)), sets)

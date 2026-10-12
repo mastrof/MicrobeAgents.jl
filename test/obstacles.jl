@@ -289,4 +289,35 @@ end
         end
         @test worst > -1e-9
     end
+
+    @testset "Non-convex tracing" begin
+        # grazing incidence on a flat wall: a non-convex SDF must match the half-space
+        space = ContinuousSpace((200.0, 100.0); periodic = false)
+        plane = ObstacleHalfSpace((0.0, 50.0), (0.0, 1.0))
+        wall = ObstacleSDF(x -> x[2] - 50, (100.0, 25.0))
+        for θ in (2, 5, 10, 30)
+            v = (cosd(θ), -sind(θ))
+            pos = (10.0, 51.5)
+            m1 = straight_model(space, (Obstacles(space, [plane]; contact = Reflect()),), pos, v; speed = 30.0, dt = 0.1)
+            m2 = straight_model(space, (Obstacles(space, [wall]; contact = Reflect()),), pos, v; speed = 30.0, dt = 0.1)
+            for _ in 1:40
+                run!(m1[1], 1)
+                run!(m2[1], 1)
+                @test m2[2].pos ≈ m1[2].pos atol = 1e-4
+            end
+        end
+
+        # sliding inside a thin ring must not tunnel through it
+        space = ContinuousSpace((100.0, 100.0); periodic = false)
+        c = SVector(50.0, 50.0)
+        ring = ObstacleSDF(x -> abs(norm(x - c) - 10) - 0.1, c, 10.1)
+        for rule in (Slide(), Slide(align = true), Halt(), Reflect())
+            model, m = straight_model(space, (Obstacles(space, [ring]; contact = rule),),
+                c + SVector(0.0, 9.4), (1.0, 0.0); speed = 60.0, dt = 0.1)
+            for _ in 1:50
+                run!(model, 1)
+                @test norm(m.pos - c) < 9.9 - 0.5 + 1e-6
+            end
+        end
+    end
 end
