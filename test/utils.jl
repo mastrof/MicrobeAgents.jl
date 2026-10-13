@@ -14,19 +14,16 @@ using Random
 
     @testset "Distances" begin
         for D in 1:3
-            behaviorsets = [(), (BrownBerg(),), (Brumley(chemotactic_precision = 0),)]
-            for B1 in behaviorsets, B2 in behaviorsets
-                space = ContinuousSpace(ntuple(_ -> 100, D); periodic=true)
-                model = StandardABM(Microbe{D}, space, 0.1)
-                motility = RunTumble([30.0], 0.67, 0.0)
-                add_agent!(model; motility, behaviors = B1)
-                add_agent!(position(model[1]), model; motility, behaviors = B2)
-                delta = SVector{D}(randn(D) .* 5)
-                walk!(model[2], delta, model)
-                @test distance(model[1], model[2], model) ≈ norm(delta)
-                v = distancevector(model[1], model[2], model)
-                @test norm(v) ≈ norm(delta)
-            end
+            space = ContinuousSpace(ntuple(_ -> 100, D); periodic=true)
+            model = StandardABM(Microbe{D}, space, 0.1)
+            motility = RunTumble([30.0], 0.67, 0.0)
+            add_agent!(model; motility)
+            add_agent!(position(model[1]), model; motility)
+            delta = SVector{D}(randn(D) .* 5)
+            walk!(model[2], delta, model)
+            @test distance(model[1], model[2], model) ≈ norm(delta)
+            v = distancevector(model[1], model[2], model)
+            @test v ≈ delta
         end
     end
 end

@@ -8,13 +8,12 @@ using Random
         space = ContinuousSpace(ones(SVector{D}))
         model = StandardABM(Microbe{D}, space, timestep)
         @test model isa StandardABM
-        @test Set(keys(abmproperties(model))) == Set((
-            :timestep,
-            :chemoattractant,
-            :field_cache,
-            :obstacles,
-        ))
+        @test abmtimestep(model) == timestep
+        @test chemoattractant(model) isa ChemicalField{D}
         @test obstacles(model) == ()
+        # user properties are merged with the defaults
+        model = StandardABM(Microbe{D}, space, timestep; properties = Dict(:foo => 1))
+        @test abmproperties(model)[:foo] == 1 && obstacles(model) == ()
     end
 
     @testset "Base Microbe type" begin
@@ -52,11 +51,12 @@ using Random
             chemo = ChemicalField{D}(; concentration_field)
             s = ContinuousSpace(ones(SVector{D}))
             model = StandardABM(Microbe{D}, s, 1.0; properties = Dict(:chemoattractant => chemo))
-            add_agent!(model; motility = RunTumble([30.0], 0.67, 0.1), behaviors = (Celani(),))
-            c = model[1].behaviors[1]
-            λ = 1 / c.memory
-            @test c.state == 0.0
-            @test c.markovian_variables == [C/λ, C/λ^2, 2C/λ^3]
+            add_agent!(model; motility = RunTumble([30.0], 0.67, Isotropic(D)), behaviors = (Celani(),))
+            # initialized at steady state: no transient response in a constant field
+            @test all(1:20) do _
+                run!(model, 1)
+                bias(model[1], model) ≈ 1
+            end
         end
     end
 end

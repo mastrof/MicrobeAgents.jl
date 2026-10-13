@@ -74,4 +74,9 @@ include("pathfinder.jl")
 # submodules
 include("submodules/Analysis/Analysis.jl")
 
+# documented extension points for behavior authors (`public` requires Julia ≥ 1.11)
+@static if VERSION >= v"1.11"
+    eval(Meta.parse("public copybehavior, invalidate_field_cache!"))
+end
+
 end
