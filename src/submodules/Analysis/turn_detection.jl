@@ -15,7 +15,7 @@ function run_durations(adf::AbstractDataFrame; turns_key::Symbol=:has_turned)
     run_durations(groupby(adf, :id); turns_key)
 end
 function run_durations(gdf::GroupedDataFrame; turns_key::Symbol=:has_turned)
-    [diff([0; findall(getproperty(g, turns_key))]) for g in gdf]
+    [diff([1; findall(getproperty(g, turns_key))]) for g in gdf] # frames are 1-indexed
 end
 
 

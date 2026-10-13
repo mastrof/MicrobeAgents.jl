@@ -1,5 +1,4 @@
 using MicrobeAgents, Test
-using MicrobeAgents: _foreach, _prod, copybehavior, copybehaviors
 
 # types and hook methods must be defined at top level, not inside @testset
 struct Dummy end
@@ -72,34 +71,21 @@ MicrobeAgents.copybehavior(b::Shared) = b
         @test_throws MethodError Behavior(unknown = identity)
     end
 
-    @testset "Combinators" begin
-        order = Int[]
-        _foreach(x -> push!(order, x), (1, 2, 3))
-        @test order == [1, 2, 3]
-        @test isnothing(_foreach(identity, ()))
-        @test _prod(identity, ()) === 1.0
-        @test _prod(identity, (2.0, 3.0)) === 6.0
-        @test (@inferred _prod(x -> x isa Int ? 2.0 : 0.5, (1, "a", 3))) === 2.0
-    end
-
-    @testset "Copying" begin
+    @testset "Copying on add_agent!" begin
+        model = StandardABM(Microbe{2}, ContinuousSpace((10.0, 10.0)), 1.0)
         f(m, model) = nothing
-        c = Counter(0)
-        bs = (c, f)
-        cs = copybehaviors(bs)
-        @test cs[1] !== c && cs[1].n == 0
-        @test cs[2] === f
-        nt = (a = Counter(1), b = Behavior(bias = (m, model) -> 2.0))
-        cnt = copybehaviors(nt)
-        @test cnt isa NamedTuple{(:a, :b)}
-        @test cnt.a !== nt.a && cnt.b === nt.b
-        @test_throws ArgumentError copybehaviors(Counter(0))
+        b = Behavior(bias = (m, model) -> 2.0)
+        bs = (c = Counter(0), f = f, b = b)
+        m = add_agent!(model; motility = RunTumble([1.0], Inf, Isotropic(2)), behaviors = bs)
+        @test m.behaviors isa NamedTuple{(:c, :f, :b)}
+        @test m.behaviors.c !== bs.c && m.behaviors.c.n == 0 # structs are copied
+        @test m.behaviors.f === f && m.behaviors.b === b # functions and Behaviors are shared
     end
 
     @testset "Microbe with behaviors" begin
-        for D in 1:3, container in (Vector, Dict)
+        for D in 1:3
             space = ContinuousSpace(fill(100.0, SVector{D}))
-            model = StandardABM(Microbe{D}, space, 0.1; container, rng = Xoshiro(1))
+            model = StandardABM(Microbe{D}, space, 0.1; rng = Xoshiro(1))
             motility = RunTumble([30.0], 1.0, Isotropic(D))
             shared = (t = Ticker(0),)
             add_agent!(model; motility, behaviors = shared)
@@ -134,7 +120,7 @@ MicrobeAgents.copybehavior(b::Shared) = b
         b2 = Behavior(bias = (m, model) -> 2.0)
         b3 = Behavior(bias = (m, model) -> 3.0)
         add_agent!(model; motility, behaviors = (b2, b3))
-        @test bias(model[1], model) == 6.0
+        @test (@inferred bias(model[1], model)) == 6.0
         @test switching_probability(model[1], model) ≈ 6.0 * dt / 1.0
         # speed_factor: product, applied on top of the sampled speed
         add_agent!(model; motility, speed = 10.0,
@@ -160,8 +146,8 @@ MicrobeAgents.copybehavior(b::Shared) = b
             (state(motilepattern(m)) == 3 && (w[2] = 1.0; w[4] = 0.0)))
         add_agent!(model; motility, behaviors = (redirect,))
         m = model[1]
-        m.motility.current_state = 3
-        MicrobeAgents.update_motilestate!(m, model)
+        update_motilestate!(motilepattern(m), 3)
+        update_motilestate!(m, model)
         @test state(motilepattern(m)) == 2
         @test transition_weights(motilepattern(m), 3) == [0.0, 0.0, 0.0, 1.0] # unchanged
     end

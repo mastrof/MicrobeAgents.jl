@@ -21,7 +21,8 @@ end
 Reorient `microbe` due to brownian rotational diffusion.
 The amplitude of the reorientation is sampled from a
 Normal distribution with null mean and standard deviation
-σ = √(2*Dr*dt) where Dr is the rotational diffusivity.
+σ = √(2*Dr*dt) where Dr is the rotational diffusivity
+(in 3D, independently along the two directions normal to the motion).
 In 1-dimensional models, this functions does nothing.
 """
 rotational_diffusion!(microbe::AbstractMicrobe{1}, model) = nothing
@@ -36,7 +37,8 @@ function rotational_diffusion!(microbe::AbstractMicrobe{3}, model)
     dt = model.timestep
     D_rot = rotational_diffusivity(microbe)
     σ = sqrt(2*D_rot*dt)
-    θ = rand(abmrng(model), Normal(0,σ))
+    # norm of a 2D Gaussian angular step in the plane normal to the motion
+    θ = rand(abmrng(model), Rayleigh(σ; check_args=false)) # σ = 0 is allowed
     φ = rand(abmrng(model), Uniform(-π, +π))
     microbe.vel = rotate(direction(microbe), θ, φ)
     nothing
