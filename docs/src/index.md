@@ -7,20 +7,17 @@ motility and chemotaxis, built on the amazing [Agents.jl](https://github.com/Jul
 - Runs in 1, 2 and 3 spatial dimensions.
 - Provides base motility patterns (Run-Tumble, Run-Reverse, Run-Reverse-Flick, Run-Stop), all with customizable speed and turn angle distributions, and allows user definition of new arbitrary patterns.
 - Includes various models of bacterial chemotaxis (Brown & Berg, PNAS 1974; Celani & Vergassola, PNAS 2010; Xie et al, Biophys J 2014; Brumley et al, PNAS 2019; Son, Menolascina & Stocker, PNAS 2016).
+- Modular and customizable interface for microbial behaviors
+- Different options to represent physically structured environments
 - Fast analysis routines for common quantities of interest (MSD, autocorrelation functions, drift velocity).
 
 ## Limitations (some may be temporary, others may be not)
 - Only continuous space models are supported
 - Integration timestep also sets the sensory integration timescale in chemotactic models.
-
-## What this package is not good for
-Although, in principle, you can add arbitrary layers of complexity on top the provided interface, there are a few things for which this package is not a recommended choice and dedicated tools should be used instead:
-- Hydrodynamic interactions.
-- Atomistic representation of biochemical pathways.
+- The library adopts fundamentally a stochastic kinetic approach. Full integration of dynamic (i.e., force- and torque-based) equations of motion is not currently in scope.
 
 ## Contribute
-The package is still in an early stage of intense development.
-If you would like to have support for your favorite model of chemotaxis, or need some specific features to be implemented, please open an issue. I'll try to satisfy as many requests as possible.
+If you would like to have support for your favorite model of chemotaxis, or need some specific features to be implemented, please open an issue.
 
 If you would like to take a more active part in the development, please consider contacting me directly at rfoffi@ethz.ch.
 
