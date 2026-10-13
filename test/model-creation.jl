@@ -14,7 +14,7 @@ using Random
             :field_cache,
             :obstacles,
         ))
-        @test abmproperties(model).obstacles == ()
+        @test obstacles(model) == ()
     end
 
     @testset "Base Microbe type" begin

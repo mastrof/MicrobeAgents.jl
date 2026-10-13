@@ -36,12 +36,12 @@ end
 rng = Xoshiro(1)
 disks = disk_packing(rng, L, 0.4, 10.0, 20.0)
 
-obstacles = (
+obstacle_sets = (
     Obstacles(space, disks; contact = Slide()),
     Walls(space; contact = Reflect()),
 )
 model = StandardABM(Microbe{2}, space, dt; rng, container = Vector,
-    properties = Dict(:obstacles => obstacles))
+    properties = Dict(:obstacles => obstacle_sets))
 
 motility = RunTumble(run_speed = [20.0], run_duration = 1.0, angle = Isotropic(2))
 for _ in 1:10

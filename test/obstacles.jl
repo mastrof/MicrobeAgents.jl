@@ -4,18 +4,18 @@ using Random
 using MicrobeAgents.Agents: allagents
 
 # one microbe moving straight (no rotational diffusion, never tumbles)
-function straight_model(space, obstacles, pos, vel; speed = 10.0, radius = 0.5, dt = 1.0)
+function straight_model(space, sets, pos, vel; speed = 10.0, radius = 0.5, dt = 1.0)
     D = length(pos)
     model = StandardABM(Microbe{D}, space, dt; rng = Xoshiro(1),
-        properties = Dict(:obstacles => obstacles))
+        properties = Dict(:obstacles => sets))
     motility = RunTumble(run_speed = [speed], run_duration = Inf, angle = Isotropic(D))
     m = add_agent!(SVector{D}(pos), model; motility, vel = SVector{D}(vel), radius)
     return model, m
 end
 
 # closest surface from a point (microbe of zero radius)
-function query(space, obstacles, x; cutoff = Inf)
-    model, m = straight_model(space, obstacles, x, ntuple(i -> i == 1 ? 1.0 : 0.0, length(x)); radius = 0.0)
+function query(space, sets, x; cutoff = Inf)
+    model, m = straight_model(space, sets, x, ntuple(i -> i == 1 ? 1.0 : 0.0, length(x)); radius = 0.0)
     return nearest_surface(m, model; cutoff)
 end
 
@@ -125,10 +125,10 @@ end
         space = ContinuousSpace((50.0, 50.0); periodic = false)
         walls = Walls(space)
         model = StandardABM(Microbe{2}, space, 0.1; properties = Dict(:obstacles => walls))
-        @test abmproperties(model).obstacles === (walls,) # single set wrapped
+        @test obstacles(model) === (walls,) # single set wrapped
         sets = (Obstacles(space, [ObstacleSphere((25.0, 25.0), 5.0)]), walls)
-        @test abmproperties(StandardABM(Microbe{2}, space, 0.1;
-            properties = Dict(:obstacles => sets))).obstacles === sets
+        @test obstacles(StandardABM(Microbe{2}, space, 0.1;
+            properties = Dict(:obstacles => sets))) === sets
         other = ContinuousSpace((60.0, 50.0); periodic = false)
         @test_throws ArgumentError StandardABM(Microbe{2}, space, 0.1;
             properties = Dict(:obstacles => (Walls(other),)))
@@ -143,6 +143,18 @@ end
         empty_model = StandardABM(Microbe{2}, space, 0.1)
         m = add_agent!(SVector(10.0, 25.0), empty_model; motility)
         @test nearest_surface(m, empty_model).distance == Inf
+
+        # point queries: microbe query offset by the radius
+        @test nearest_surface(SVector(8.0, 25.0), model) == (distance = 8.0, normal = SVector(1.0, 0.0), set = 2, index = 1)
+        @test nearest_surface((15.0, 25.0), model; cutoff = 6.0).distance ≈ 5.0
+        @test nearest_surface((15.0, 25.0), model; cutoff = 4.0).distance == Inf
+        @test nearest_surface((10.0, 25.0), empty_model).distance == Inf
+
+        # sets are indexed and iterated as their primitives
+        disks = [ObstacleSphere((10.0, 10.0), 2.0), ObstacleSphere((30.0, 30.0), 3.0)]
+        set = Obstacles(space, disks)
+        @test length(set) == 2 && set[2] === disks[2] && collect(set) == disks
+        @test eltype(set) === ObstacleSphere{2} && eachindex(set) == 1:2
 
         # random_free_position
         model = StandardABM(Microbe{2}, space, 0.1; rng = Xoshiro(2), properties = Dict(:obstacles => sets))
@@ -179,6 +191,14 @@ end
         run!(model, 1)
         @test m.pos ≈ SVector(0.5 + (10 / sqrt(2) - 1.5), 10.0 + 10 / sqrt(2))
         @test direction(m) ≈ SVector(1.0, 1.0) / sqrt(2)
+
+        # function rule retrieving the touched primitive
+        touched = Ref{Any}(nothing)
+        rule = (mic, c, mod) -> (touched[] = obstacles(mod)[c.set][c.index]; zero(c.displacement))
+        walls = Walls(space; contact = rule)
+        model, m = straight_model(space, (walls,), (2.0, 10.0), v)
+        run!(model, 1)
+        @test touched[] === walls[1] && m.pos ≈ SVector(0.5, 11.5)
 
         # obstacle across the periodic boundary, approached from the other side
         pspace = ContinuousSpace((50.0, 50.0); periodic = true)

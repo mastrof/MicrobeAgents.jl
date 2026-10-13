@@ -42,13 +42,13 @@ arms = reduce(vcat, [
     for xw in xwalls for k in 0:(nf-1)
 ])
 
-obstacles = (
+obstacle_sets = (
     Obstacles(space, arms; contact=Slide(; align=true)),
     Walls(space; contact=Reflect()),
 )
 model = StandardABM(Microbe{2}, space, dt;
     container=Vector,
-    properties = Dict(:obstacles => obstacles),
+    properties = Dict(:obstacles => obstacle_sets),
 )
 
 # ## bacteria, initially uniformly distributed

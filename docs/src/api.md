@@ -51,6 +51,7 @@ Halt
 Slide
 Reflect
 Randomize
+obstacles
 nearest_surface
 random_free_position
 ```

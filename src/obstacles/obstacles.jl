@@ -1,4 +1,4 @@
-export Obstacles, Walls, nearest_surface, random_free_position
+export Obstacles, Walls, obstacles, nearest_surface, random_free_position
 
 """
     Obstacles(space, primitives; contact = Halt(), margin = nothing, cellsize = nothing)
@@ -6,6 +6,10 @@ Static set of solid `primitives` (a vector of one concrete `AbstractObstacle` ty
 in `space`, whose surfaces interact with microbes through the `contact` rule
 (`Halt()`, `Slide()`, `Reflect()`, `Randomize()` or a function, see `contact!`).
 Pass a `Tuple` of sets as the `:obstacles` model property.
+A set is indexed and iterated as its primitives: `obstacles(model)[c.set][c.index]`
+is the primitive involved in a contact `c` (or returned by `nearest_surface`).
+Obstacles are ignored by `pathfinder_step!`: pathfinding and obstacles
+are not meant to be used together.
 
 Bounded primitives are indexed in a static cell list. `cellsize` (default: twice
 the largest bounding radius) and `margin` (default: half the cell size) only
@@ -37,6 +41,12 @@ function Obstacles(space::ContinuousSpace{D}, primitives::AbstractVector{<:Abstr
         CellIndex(prims, extent, periodic, margin, cellsize) : NoIndex()
     Obstacles{D,P,typeof(contact),typeof(index)}(prims, contact, index, extent, periodic)
 end
+
+Base.getindex(set::Obstacles, i) = getindex(set.primitives, i)
+Base.length(set::Obstacles) = length(set.primitives)
+Base.eachindex(set::Obstacles) = eachindex(set.primitives)
+Base.iterate(set::Obstacles, state...) = iterate(set.primitives, state...)
+Base.eltype(::Type{<:Obstacles{D,P}}) where {D,P} = P
 
 """
     Walls(space; contact = Halt())
@@ -124,21 +134,32 @@ end
 _nearest(sets::Tuple, x::SVector{D}, cutoff) where {D} =
     _nearest(sets, 1, x, cutoff, (Inf, zero(SVector{D,Float64}), 0, 0))
 
+"""
+    obstacles(model)
+Returns the `Tuple` of `Obstacles` sets of `model`.
+"""
 obstacles(model::ABM) = abmproperties(model).obstacles
 
 """
     nearest_surface(microbe, model; cutoff = Inf) -> (; distance, normal, set, index)
-Closest obstacle surface to `microbe` within `cutoff`: `distance` from the microbe
-surface (center distance minus `radius(microbe)`), outward `normal`, index of the
-obstacle `set` in `model.obstacles` and of the primitive (`index`) in the set.
+    nearest_surface(x, model; cutoff = Inf)
+Closest obstacle surface to `microbe` (or to point `x`) within `cutoff`: `distance`
+from the microbe surface (center distance minus `radius(microbe)`), outward `normal`,
+index of the obstacle `set` in `obstacles(model)` and of the primitive (`index`) in the set.
 `distance = Inf` (and indices `0`) if there is none.
 In per-step behaviors pass a finite `cutoff`: with `cutoff = Inf` the query may
 visit every cell of the obstacle index.
 """
-function nearest_surface(microbe::AbstractMicrobe{D}, model::ABM; cutoff::Real = Inf) where {D}
+function nearest_surface(microbe::AbstractMicrobe, model::ABM; cutoff::Real = Inf)
     R = radius(microbe)
-    d, n, k, i = _nearest(obstacles(model), SVector{D,Float64}(position(microbe)), R + cutoff)
-    return (distance = d - R, normal = n, set = k, index = i)
+    q = nearest_surface(position(microbe), model; cutoff = R + cutoff)
+    return (; q..., distance = q.distance - R)
+end
+function nearest_surface(x::Union{SVector{D},NTuple{D,Real}}, model::ABM{<:ContinuousSpace{D}};
+    cutoff::Real = Inf
+) where {D}
+    d, n, k, i = _nearest(obstacles(model), SVector{D,Float64}(Tuple(x)), cutoff)
+    return (distance = d, normal = n, set = k, index = i)
 end
 
 """

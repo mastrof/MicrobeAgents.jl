@@ -87,14 +87,14 @@ walls = [
     for x0 in xwalls
 ]
 
-obstacles = (
+obstacle_sets = (
     Obstacles(space, walls; contact=Slide(; align=true)),
     Walls(space; contact=Reflect()),
 )
 model = StandardABM(Microbe{3}, space, dt;
     rng=Xoshiro(1),
     container=Vector,
-    properties=Dict(:obstacles => obstacles),
+    properties=Dict(:obstacles => obstacle_sets),
 )
 ````
 

@@ -39,7 +39,7 @@ wall = [
     ObstacleBox((1400, 0), (1600, 650)),
     ObstacleBox((1400, 850), (1600, Ly)),
 ]
-obstacles = (
+obstacle_sets = (
     Obstacles(space, wall; contact=Slide()),
     Walls(space; contact=Reflect()),
 )
@@ -49,7 +49,7 @@ properties = Dict(
     :chemoattractant => ChemicalField{2}(;
         concentration_field, concentration_gradient
     ),
-    :obstacles => obstacles,
+    :obstacles => obstacle_sets,
 )
 model = StandardABM(Microbe{2}, space, Δt; properties, container=Vector)
 n = 20 # number of microbes

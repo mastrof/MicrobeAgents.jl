@@ -4,7 +4,8 @@ export pathfinder_step!
 """
     pathfinder_step!(microbe::AbstractMicrobe, model::ABM, dt::Real)
 Perform an integration step for `microbe` motion with pathfinding
-(`model.pathfinder`).
+(`model.pathfinder`). Obstacles (`obstacles(model)`) are ignored:
+pathfinding and obstacles are not meant to be used together.
 """
 function pathfinder_step!(microbe::AbstractMicrobe, model::ABM, dt::Real)
     U = speed(microbe)

@@ -3,7 +3,7 @@ export SurfaceContact, contact!, Halt, Slide, Reflect, Randomize
 """
     SurfaceContact{D}
 Contact event passed to `contact!`. Fields:
-- `set::Int`: index of the obstacle set in `model.obstacles`
+- `set::Int`: index of the obstacle set in `obstacles(model)`
 - `index::Int`: index of the primitive within the set
 - `point::SVector{D,Float64}`: contact point on the surface
 - `normal::SVector{D,Float64}`: outward unit normal of the surface
