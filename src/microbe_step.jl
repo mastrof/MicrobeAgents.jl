@@ -25,6 +25,7 @@ end
     microbe_pathfinder_step!(microbe, model)
 Identical to `microbe_step!` but motion is constrained by the pathfinder
 (`model.pathfinder`) which defines inaccessible regions of space.
+Obstacles (`obstacles(model)`) are ignored.
 """
 function microbe_pathfinder_step!(microbe::AbstractMicrobe, model::ABM)
     move_step_pathfinder!(microbe, model)
@@ -48,19 +49,23 @@ end
     move_step!(microbe::AbstractMicrobe, model::ABM)
 Subroutine to perform one step of translation followed by
 reorientation due to rotational diffusion.
+Translation is constrained by the obstacles of the model (`obstacles(model)`).
 """
 function move_step!(microbe::AbstractMicrobe, model::ABM)
     invalidate_field_cache!(model)
     dt = abmtimestep(model)
-    move_agent!(microbe, model, dt) # translation
+    _translate!(obstacles(model), microbe, model, dt)
     rotational_diffusion!(microbe, model) # angular noise
 end
+
+_translate!(::Tuple{}, microbe, model, dt) = move_agent!(microbe, model, dt) # no obstacles -> standard step
+_translate!(sets::Tuple, microbe, model, dt) = constrained_move!(microbe, sets, model, dt)
 
 """
     move_step_pathfinder!(microbe::AbstractMicrobe, model::ABM)
 Subroutine to perform one step of translation constrained
-by `model.pathfinder`, followed by reorientation due to
-rotational diffusion.
+by `model.pathfinder` (obstacles are ignored), followed by
+reorientation due to rotational diffusion.
 """
 function move_step_pathfinder!(microbe::AbstractMicrobe, model::ABM)
     invalidate_field_cache!(model)

@@ -9,6 +9,7 @@ using Test
     include("motility.jl")
     include("model-creation.jl")
     include("model-stepping.jl")
+    include("obstacles.jl")
     include("chemotaxis.jl")
     include("analysis.jl")
     include("quality.jl")

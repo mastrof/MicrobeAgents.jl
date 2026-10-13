@@ -11,8 +11,10 @@ using Random
         @test Set(keys(abmproperties(model))) == Set((
             :timestep,
             :chemoattractant,
-            :field_cache
+            :field_cache,
+            :obstacles,
         ))
+        @test obstacles(model) == ()
     end
 
     @testset "Base Microbe type" begin
