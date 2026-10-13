@@ -23,7 +23,7 @@ Lx = 600.0 # μm
 Ly = 300.0 # μm
 space = ContinuousSpace((Lx, Ly); periodic=false)
 
-# ## funnel wall
+## funnel wall
 nf = 6 # number of funnels
 p = Ly / nf # funnel period
 len = 33.0 # arm length
@@ -51,7 +51,7 @@ model = StandardABM(Microbe{2}, space, dt;
     properties = Dict(:obstacles => obstacle_sets),
 )
 
-# ## bacteria, initially uniformly distributed
+## bacteria initially uniformly distributed
 motility = RunTumble(run_speed=[20.0], run_duration=1.0, angle=Isotropic(2))
 for _ in 1:1000
     pos = random_free_position(model; radius=0.5)

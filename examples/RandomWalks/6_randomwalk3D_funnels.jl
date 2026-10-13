@@ -41,7 +41,7 @@ Lx = 450.0 # μm
 L = 150.0 # μm
 space = ContinuousSpace((Lx, L, L); periodic=false)
 
-# ## funnel walls
+## funnel walls
 nf = 3 # number of funnels along y and z
 p = L / nf # funnel period
 xwalls = (Lx / 3, 2Lx / 3) # positions of the plates
@@ -49,7 +49,6 @@ R = 20.0 # radius of the funnel mouth
 a = 5.0 # radius of the funnel exit
 h = 25.0 # funnel length
 r = 1.5 # half-thickness of plate and cones
-## the clear radius of the exits is a - r
 
 ## distance from point q to the segment AB
 function segment_distance(q, A, B)
@@ -73,8 +72,7 @@ function funnel_wall(x0, p, nf, R, a, h, r)
         return d - r
     end
 end
-## each wall is enclosed by a ball with center (x0 + h/2, L/2, L/2) and this radius;
-## walls are not convex, so we leave `convex = false`
+## each wall is enclosed by a ball with center (x0 + h/2, L/2, L/2) and this radius
 rb = norm(SVector(h/2 + r, L/2, L/2))
 walls = [
     ObstacleSDF(funnel_wall(x0, p, nf, R, a, h, r), SVector(x0 + h/2, L/2, L/2), rb)
@@ -91,7 +89,7 @@ model = StandardABM(Microbe{3}, space, dt;
     properties=Dict(:obstacles => obstacle_sets),
 )
 
-# ## bacteria, initially uniformly distributed in the leftmost region
+## bacteria initially uniformly distributed in the leftmost region
 motility = RunTumble(run_speed=[20.0], run_duration=2.0, angle=Isotropic(3))
 radius = 0.5
 ## the leftmost region ends at the left face of the first plate
@@ -112,7 +110,7 @@ region(x) = 1 + count(≤(x[1]), xwalls)
 frac(k) = vec(sum(x -> region(x) == k, X; dims=2)) ./ size(X, 2)
 left, center, right = frac(1), frac(2), frac(3)
 
-# ## results
+## results
 ## fraction of bacteria in each region as a function of time
 t = (0:when:nsteps) .* dt
 p1 = plot(t, [left center right];
