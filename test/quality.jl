@@ -10,8 +10,9 @@ using Aqua, JET
 end
 
 @testset "JET" begin
+    # (JET ≥ 0.12 dropped `target_defined_modules`; list the submodules for JET < 0.11)
     rep = JET.report_package(MicrobeAgents;
-        target_defined_modules = true, toplevel_logger = nothing
+        target_modules = (MicrobeAgents, MicrobeAgents.Analysis), toplevel_logger = nothing
     )
     # known false positives from macro-generated code:
     # - `@agent`+`@kwdef` constructors without `D` (defaults referring to `D`)
