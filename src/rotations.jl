@@ -37,8 +37,8 @@ function rotational_diffusion!(microbe::AbstractMicrobe{3}, model)
     dt = model.timestep
     D_rot = rotational_diffusivity(microbe)
     σ = sqrt(2*D_rot*dt)
-    # two independent angular components: the polar angle is Rayleigh-distributed
-    θ = hypot(rand(abmrng(model), Normal(0,σ)), rand(abmrng(model), Normal(0,σ)))
+    # norm of a 2D Gaussian angular step in the plane normal to the motion
+    θ = rand(abmrng(model), Rayleigh(σ; check_args=false)) # σ = 0 is allowed
     φ = rand(abmrng(model), Uniform(-π, +π))
     microbe.vel = rotate(direction(microbe), θ, φ)
     nothing
