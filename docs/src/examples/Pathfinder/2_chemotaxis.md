@@ -4,8 +4,31 @@ EditURL = "../../../../examples/Pathfinder/2_chemotaxis.jl"
 
 # Linear concentration ramp with obstacle
 
-Since the pathfinder embeds with all the other funcitonalities
-of the library, we can now replicate the chemotaxis example
+MicrobeAgents can interface with the Agents.Pathfinding module
+which allows you to perform simulations in spatially
+structured environments.
+
+The accessible space is represented as a "walkmap", a boolean
+array where `true` represents areas that are accessible to the
+bacteria, and `false` identifies inaccessible areas.
+When the pathfinder is included in the model properties,
+and a pathfinder-aware stepping function is used
+(MicrobeAgents provides `microbe_pathfinder_step!` that is
+fully equivalent to `microbe_step!` with added pathfinding),
+the bacteria will perform their motion as usual but
+will halt when hitting the obstacles.
+
+The pathfinder is suitable when the geometry is naturally
+discrete or can be well represented on a grid, for instance
+porous media generated as a walkmap from random packings.
+
+**Important**: the pathfinder does not support continuous
+geometries, only discrete representations of them.
+If smooth geometric features are crucial to your application,
+this approach is not suitable (see the `Obstacles` interface).
+
+Here, the pathfinder embeds with all the other functionalities
+of the library, so we can replicate the chemotaxis example
 with the linear ramp, with the addition of some obstacles:
 We will add a vertical wall that prevents horizontal drift
 along the gradient direction, with only a little hole for
