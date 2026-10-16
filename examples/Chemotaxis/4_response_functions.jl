@@ -42,8 +42,8 @@ function concentration_ramp(t, C₀, C₁, t₁, t₂, dt)
 end
 
 space = ContinuousSpace(ntuple(_ -> 500.0, 3)) # μm
-C₀ = 1.0 # μM
-C₁ = 2.0-C₀ # μM
+C₀ = 0.2 # μM
+C₁ = 1.0-C₀ # μM
 T = 50.0 # s
 dt = 0.1 # s
 t₁ = 10.0 # s
@@ -70,6 +70,9 @@ add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)),
 add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)), radius=0.5,
     behaviors=(chemotaxis=Celani(gain=4, chemotactic_precision=50.0),),
 )
+add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)), radius=0.5,
+    behaviors=(chemotaxis=Brumley(gain=5, gain_receptor=1, chemotactic_precision=2),)
+)
 
 nsteps = round(Int, T/dt)
 tumblebias(m) = bias(m, model)
@@ -78,17 +81,17 @@ adf, = run!(model, nsteps; adata)
 
 S = Analysis.adf_to_matrix(adf, :tumblebias)
 
-_pink = palette(:default)[4]
+c = palette(:default)[5]
 plot()
 x = (0:dt:T) .- t₁
 plot!(
     x, S,
-    lw=1.5, lab=["BrownBerg" "Celani" "Celani + Noise"]
+    lw=1.5, lab=["BrownBerg" "Celani" "Celani + Noise" "Brumley"]
 )
 plot!(ylims=(-0.1,2.1), ylab="Response", xlab="time (s)")
 plot!(twinx(),
     x, t -> concentration_field(t.+t₁,C₀,C₁,t₁,t₂),
-    ls=:dash, lw=1.5, lc=_pink, lab=false,
-    tickfontcolor=_pink,
-    ylab="C (μM)", guidefontcolor=_pink
+    ls=:dash, lw=1.5, lc=c, lab=false,
+    tickfontcolor=c,
+    ylab="C (μM)", guidefontcolor=c
 )
