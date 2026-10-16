@@ -29,8 +29,8 @@ function concentration_ramp(t, C₀, C₁, t₁, t₂, dt)
 end
 
 space = ContinuousSpace(ntuple(_ -&gt; 500.0, 3)) # μm
-C₀ = 1.0 # μM
-C₁ = 2.0-C₀ # μM
+C₀ = 0.2 # μM
+C₁ = 1.0-C₀ # μM
 T = 50.0 # s
 dt = 0.1 # s
 t₁ = 10.0 # s
@@ -57,6 +57,9 @@ add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)),
 add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)), radius=0.5,
     behaviors=(chemotaxis=Celani(gain=4, chemotactic_precision=50.0),),
 )
+add_agent!(model; motility=RunTumble([0], 1.0, Isotropic(3)), radius=0.5,
+    behaviors=(chemotaxis=Brumley(gain=5, gain_receptor=1, chemotactic_precision=2),)
+)
 
 nsteps = round(Int, T/dt)
 tumblebias(m) = bias(m, model)
@@ -65,17 +68,17 @@ adf, = run!(model, nsteps; adata)
 
 S = Analysis.adf_to_matrix(adf, :tumblebias)
 
-_pink = palette(:default)[4]
+c = palette(:default)[5]
 plot()
 x = (0:dt:T) .- t₁
 plot!(
     x, S,
-    lw=1.5, lab=[&quot;BrownBerg&quot; &quot;Celani&quot; &quot;Celani + Noise&quot;]
+    lw=1.5, lab=[&quot;BrownBerg&quot; &quot;Celani&quot; &quot;Celani + Noise&quot; &quot;Brumley&quot;]
 )
 plot!(ylims=(-0.1,2.1), ylab=&quot;Response&quot;, xlab=&quot;time (s)&quot;)
 plot!(twinx(),
     x, t -&gt; concentration_field(t.+t₁,C₀,C₁,t₁,t₂),
-    ls=:dash, lw=1.5, lc=_pink, lab=false,
-    tickfontcolor=_pink,
-    ylab=&quot;C (μM)&quot;, guidefontcolor=_pink
-)</code></pre><img src="cbb0474f.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../3_xie_response-function/">« Response function (Xie)</a><a class="docs-footer-nextpage" href="../5_drift_exponential/">Chemotactic drift in exponential ramp with noisy sensing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Tuesday 13 October 2026 15:18">Tuesday 13 October 2026</span>. Using Julia version 1.13.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+    ls=:dash, lw=1.5, lc=c, lab=false,
+    tickfontcolor=c,
+    ylab=&quot;C (μM)&quot;, guidefontcolor=c
+)</code></pre><img src="4d45561f.svg" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../3_xie_response-function/">« Response function (Xie)</a><a class="docs-footer-nextpage" href="../5_drift_exponential/">Chemotactic drift in exponential ramp with noisy sensing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.19.0 on <span class="colophon-date" title="Friday 16 October 2026 16:16">Friday 16 October 2026</span>. Using Julia version 1.13.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
