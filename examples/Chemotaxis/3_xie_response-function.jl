@@ -68,9 +68,9 @@ To keep the microbes in these motile states for the entire experiment duration,
 we suppress their tumbles, and (just for total consistency with experiments)
 we also set their speed to 0.
 =#
-add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0),
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], Inf),
     behaviors=(chemotaxis=Xie(),))
-add_agent!(model; motility=RunReverseFlick([0], Inf, [0], 0.0),
+add_agent!(model; motility=RunReverseFlick([0], Inf, [0], Inf),
     behaviors=(chemotaxis=Xie(),))
 model[2].motility.current_state = 3 # manually set to backward run state
 
@@ -97,7 +97,7 @@ We first look at the response function in the forward and backward
 motile state: when the concentration increases we have a sharp negative
 response (the tumble bias decreases), then the bacterium adapts to the new
 concentration level, and when it drops back to the basal level we observe
-a sharp positive response (the tumble bisa increases) before adapting
+a sharp positive response (the tumble bias increases) before adapting
 again to the new concentration level.
 =#
 _green = palette(:default)[3]
